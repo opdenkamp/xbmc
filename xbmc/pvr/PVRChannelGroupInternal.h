@@ -59,12 +59,12 @@ protected:
    * @param channels The channels to use to update this list.
    * @return True if everything went well, false otherwise.
    */
-  bool Update(CPVRChannelGroup *channels);
+  virtual bool Update(CPVRChannelGroup *channels);
 
   /*!
    * @brief Refresh the channel list from the clients.
    */
-  bool Update();
+  virtual bool Update();
 
   /*!
    * @brief Remove invalid channels and updates the channel numbers.
