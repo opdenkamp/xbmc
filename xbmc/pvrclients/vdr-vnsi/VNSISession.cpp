@@ -266,8 +266,7 @@ cResponsePacket* cVNSISession::ReadMessage(int timeout)
 
   cResponsePacket* vresp = NULL;
 
-  bool readSuccess = readData((uint8_t*)&channelID, sizeof(uint32_t), timeout*5) > 0;  // 10s timeout 
-atm
+  bool readSuccess = readData((uint8_t*)&channelID, sizeof(uint32_t), timeout*5) > 0;  // 10s timeout atm
   if (!readSuccess)
     return NULL;
 
