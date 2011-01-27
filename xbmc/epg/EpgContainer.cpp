@@ -19,10 +19,10 @@
  *
  */
 
-#include "GUISettings.h"
-#include "GUIDialogPVRUpdateProgressBar.h"
-#include "GUIDialogProgress.h"
-#include "GUIWindowManager.h"
+#include "settings/GUISettings.h"
+#include "pvr/dialogs/GUIDialogPVRUpdateProgressBar.h"
+#include "dialogs/GUIDialogProgress.h"
+#include "guilib/GUIWindowManager.h"
 #include "log.h"
 #include "TimeUtils.h"
 
@@ -78,10 +78,10 @@ void CEpgContainer::Clear(bool bClearDb /* = false */)
 
 void CEpgContainer::Start(void)
 {
-  g_guiSettings.AddObserver(this);
-
   /* make sure the EPG is loaded before starting the thread */
   Load(true /* show progress */);
+
+  g_guiSettings.AddObserver(this);
 
   Create();
   SetName("XBMC EPG thread");
@@ -284,7 +284,8 @@ bool CEpgContainer::Load(bool bShowProgress /* = false */)
   if (bShowProgress)
     scanner->Close();
 
-  m_bDatabaseLoaded = bReturn;
+  /* only try to load the database once */
+  m_bDatabaseLoaded = true;
 
   return bReturn;
 }
