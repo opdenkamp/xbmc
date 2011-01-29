@@ -350,7 +350,7 @@ bool cHTSPSession::ParseEvent(htsmsg_t* msg, uint32_t id, SEvent &event)
   event.stop  = stop;
   event.title = title;
 
-  if((desc = htsmsg_get_str(msg, "description")))
+  if((desc = htsmsg_get_str(msg, "ext_text")))
     event.descs = desc;
   if(htsmsg_get_u32(msg, "nextEventId", &next))
     event.next = 0;
