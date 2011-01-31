@@ -37,6 +37,12 @@ CPVREpg::CPVREpg(CPVRChannel *channel) :
   m_Channel  = channel;
 }
 
+CPVREpg::CPVREpg(int id) :
+  CEpg(id)
+{
+  m_Channel = (CPVRChannel*)0;
+}
+
 bool CPVREpg::HasValidEntries(void) const
 {
   return m_Channel->ChannelID() > 0 && CEpg::HasValidEntries();

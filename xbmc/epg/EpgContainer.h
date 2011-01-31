@@ -123,6 +123,8 @@ protected:
    */
   virtual void Process(void);
 
+  virtual CEpg* CreateEpg(int epgId);
+
 public:
   /*!
    * @brief Create a new EPG table container.

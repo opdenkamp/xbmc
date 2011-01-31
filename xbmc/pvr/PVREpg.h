@@ -63,6 +63,12 @@ public:
   CPVREpg(CPVRChannel *channel);
 
   /*!
+   * @brief Create a new EPG instance for a channel.
+   * @param id The channel to create the EPG for.
+   */
+  CPVREpg(int id);
+
+  /*!
    * @brief Check whether this EPG contains valid entries.
    * @return True if it has valid entries, false if not.
    */

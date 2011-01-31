@@ -46,6 +46,26 @@ void CPVREpgContainer::Start()
   CEpgContainer::Start();
 }
 
+CEpg* CPVREpgContainer::CreateEpg(int epgId)
+{
+  return new CPVREpg(epgId);
+}
+
+CEpg *CPVREpgContainer::GetByChannelName(CStdString channelName)
+{
+  CEpg *epg = NULL;
+
+  for (unsigned int iEpgPtr = 0; iEpgPtr < size(); iEpgPtr++)
+  {
+    if (at(iEpgPtr)->Name() == channelName)
+    {
+      epg = at(iEpgPtr);
+      break;
+    }
+  }
+  return epg;
+}
+
 bool CPVREpgContainer::CreateChannelEpgs(void)
 {
   for (int radio = 0; radio <= 1; radio++)
@@ -53,7 +73,14 @@ bool CPVREpgContainer::CreateChannelEpgs(void)
     const CPVRChannelGroup *channels = g_PVRChannelGroups.GetGroupAll(radio == 1);
     for (unsigned int iChannelPtr = 0; iChannelPtr < channels->size(); iChannelPtr++)
     {
-      channels->at(iChannelPtr)->GetEPG();
+      CEpg *epg = GetByChannelName(channels->at(iChannelPtr)->ChannelName());
+      if (!epg)
+        channels->at(iChannelPtr)->GetEPG();
+      else
+      {
+    	channels->at(iChannelPtr)->SetEpg((CPVREpg*)epg);
+    	epg->SetChannel(channels->at(iChannelPtr));
+      }
     }
   }
 

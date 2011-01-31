@@ -360,6 +360,8 @@ public:
    */
   const CStdString &Path(void) const { return m_strFileNameAndPath; }
 
+  void SetEpg(CPVREpg *epg) {m_EPG = epg;};
+
 private:
   /*!
    * @brief Update the path after the channel number or radio flag has changed.

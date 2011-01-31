@@ -256,4 +256,6 @@ public:
    * @return True if the table was persisted, false otherwise.
    */
   bool Persist(bool bPersistTags = false);
+
+  void SetChannel(CPVRChannel *channel) {m_Channel = channel;};
 };

@@ -48,6 +48,11 @@ CEpgContainer::~CEpgContainer(void)
   Clear();
 }
 
+CEpg* CEpgContainer::CreateEpg(int epgId)
+{
+  return new CEpg(epgId);
+}
+
 void CEpgContainer::Clear(bool bClearDb /* = false */)
 {
   /* make sure the update thread is stopped */
@@ -90,6 +95,8 @@ void CEpgContainer::Clear(bool bClearDb /* = false */)
 
 void CEpgContainer::Start(void)
 {
+  LoadSettings();
+
   /* make sure the EPG is loaded before starting the thread */
   Load(true /* show progress */);
 
@@ -134,8 +141,6 @@ void CEpgContainer::Process(void)
   /* get the last EPG update time from the database */
   m_database.GetLastEpgScanTime().GetAsTime(m_iLastEpgUpdate);
   m_database.Close();
-
-  LoadSettings();
 
   while (!m_bStop)
   {
@@ -188,7 +193,7 @@ bool CEpgContainer::UpdateEntry(const CEpg &entry, bool bUpdateDatabase /* = fal
 
   if (!epg)
   {
-    epg = new CEpg(entry.EpgID());
+    epg = CreateEpg(entry.EpgID());
     push_back(epg);
   }
 
@@ -296,7 +301,9 @@ bool CEpgContainer::Load(bool bShowProgress /* = false */)
     scanner->Close();
 
   /* one or more tables couldn't be loaded. force an update */
-  if (bUpdate)
+  LoadSettings();
+  m_bStop = false;
+  if (bUpdate || m_bIgnoreDbForClient)
     UpdateEPG(bShowProgress);
 
   /* only try to load the database once */

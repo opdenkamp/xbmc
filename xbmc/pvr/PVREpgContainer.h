@@ -56,6 +56,12 @@ private:
    */
   bool AutoCreateTablesHook(void);
 
+  CEpg *GetByChannelName(CStdString channelName);
+
+protected:
+
+  virtual CEpg* CreateEpg(int epgId);
+
 public:
   /*!
    * @brief Start the EPG update thread.
