@@ -65,11 +65,6 @@ private:
 
 public:
   /*!
-   * @brief Start the EPG update thread.
-   */
-  void Start();
-
-  /*!
    * @brief Clear all EPG entries.
    * @param bClearDb Clear the database too if true.
    */
