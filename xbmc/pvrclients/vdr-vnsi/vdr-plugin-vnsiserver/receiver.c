@@ -317,7 +317,7 @@ int cLivePatFilter::GetPid(SI::PMT::Stream& stream, eStreamType *type, char *lan
         }
         if (!found)
         {
-          LOGCONSOLE("NOT adding PID %d (type 0x%x) RegDesc not found -> UNKOWN\n", stream.getPid(), stream.getStreamType());
+          LOGCONSOLE("NOT adding PID %d (type 0x%x) RegDesc not found -> UNKNOWN\n", stream.getPid(), stream.getStreamType());
         }
       }
       LOGCONSOLE("cStreamdevPatFilter PMT scanner: NOT adding PID %d (%s) %s\n", stream.getPid(), psStreamTypes[stream.getStreamType()<0x1c?stream.getStreamType():0], "UNKNOWN");
