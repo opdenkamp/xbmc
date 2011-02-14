@@ -190,7 +190,8 @@ bool CDatabase::ResultQuery(const CStdString &strQuery)
 
     CStdString strPreparedQuery = PrepareSQL(strQuery.c_str());
 
-    bReturn = m_pDS->query(strPreparedQuery.c_str());
+    if (m_pDS->query(strPreparedQuery.c_str()) && m_pDS->num_rows() > 0)
+      bReturn = true;
   }
   catch (...)
   {
