@@ -395,6 +395,8 @@ bool CEpg::Update(time_t start, time_t end, int iUpdateTime, bool bStoreInDb /* 
       database->Close();
     }
   }
+  else if (!m_lastScanTime.IsValid())
+    m_lastScanTime = CDateTime(0);
 
   /* check if we have to update */
   time_t iNow = 0;
@@ -431,6 +433,7 @@ bool CEpg::Update(time_t start, time_t end, int iUpdateTime, bool bStoreInDb /* 
         }
       }
 
+      m_lastScanTime = CDateTime::GetCurrentDateTime();
       m_bUpdateRunning = false;
     }
   }
