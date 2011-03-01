@@ -376,6 +376,14 @@ bool CEpg::Update(time_t start, time_t end, int iUpdateTime, bool bStoreInDb /* 
 
   if (bUpdate)
   {
+    /* use time of last epg for update */
+    if (size() > 0)
+    {
+      time_t iLastEpg;
+      at(size()-1)->Start().GetAsTime(iLastEpg);
+      start = start > iLastEpg ? start : iLastEpg;
+    }
+
     m_bInhibitSorting = true;
     bGrabSuccess = UpdateFromScraper(start, end);
     m_bInhibitSorting = false;
