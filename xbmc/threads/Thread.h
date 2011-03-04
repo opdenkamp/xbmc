@@ -36,6 +36,8 @@
 #endif
 #include "Event.h"
 
+class CSemaphore;
+
 class IRunnable
 {
 public:
@@ -89,6 +91,7 @@ protected:
 
   volatile bool m_bStop;
   HANDLE m_ThreadHandle;
+  CSemaphore *m_pSem;
 
 private:
   ThreadIdentifier ThreadId() const;

@@ -31,6 +31,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <limits.h>
+#include <sys/resource.h>
 
 // a variable which is defined __thread will be defined in thread local storage
 // which means it will be different for each thread that accesses it.
@@ -74,6 +75,7 @@ HANDLE WINAPI CreateThread(
     h = NULL;
   }
   pthread_attr_destroy(&attr);
+  h->m_hLwp = NULL;
 
   if (h && lpThreadId)
     // WARNING: This can truncate thread IDs on x86_64.
@@ -212,12 +214,41 @@ BOOL WINAPI GetThreadTimes (
 
 BOOL WINAPI SetThreadPriority(HANDLE hThread, int nPriority)
 {
-  return true;
+  bool bReturn = false;
+#ifndef __APPLE__
+  if (hThread->m_hLwp)
+  {
+    int appNice = getpriority(PRIO_PROCESS, getpid());
+    if (nPriority)
+      appNice += nPriority > 0 ? -1 : 1;
+    if (setpriority(PRIO_PROCESS, hThread->m_hLwp, appNice) == 0)
+      bReturn = true;
+    else
+      CLog::Log(LOGERROR, "SetThreadPriority: error %s", strerror(errno));
+  }
+  else
+  {
+    hThread->m_iPriority = nPriority;
+    bReturn = true;
+  }
+#else
+  bReturn = true;
+#endif
+  return bReturn;
 }
 
 int GetThreadPriority(HANDLE hThread)
 {
-  return 0;
+  int iReturn = 0;
+#ifndef __APPLE__
+  if (hThread->m_hLwp)
+  {
+     int appNice = getpriority(PRIO_PROCESS, getpid());
+     int prio = getpriority(PRIO_PROCESS, hThread->m_hLwp);
+     iReturn = appNice - prio;
+  }
+#endif
+  return iReturn;
 }
 
 // thread local storage -
