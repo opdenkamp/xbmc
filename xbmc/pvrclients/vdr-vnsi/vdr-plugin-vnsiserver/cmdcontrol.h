@@ -105,6 +105,7 @@ private:
   cCondWait           m_Wait;
   cCharSetConv        m_toUTF8;
   cMutex              m_mutex;
+  uint32_t            m_protocolVersion;
 };
 
 

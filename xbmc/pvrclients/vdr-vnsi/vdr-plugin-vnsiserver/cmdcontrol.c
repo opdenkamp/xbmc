@@ -264,18 +264,18 @@ bool cCmdControl::process_Login() /* OPCODE 1 */
 {
   if (m_req->getDataLength() <= 4) return false;
 
-  uint32_t protocolVersion  = m_req->extract_U32();
-                              m_req->extract_U8();
-  const char *clientName    = m_req->extract_String();
+  m_protocolVersion      = m_req->extract_U32();
+                           m_req->extract_U8();
+  const char *clientName = m_req->extract_String();
 
-  if (protocolVersion != VNSIProtocolVersion)
+  if (m_protocolVersion > VNSIProtocolVersion)
   {
-    esyslog("VNSI-Error: Client '%s' have a not allowed protocol version '%u', terminating client", clientName, protocolVersion);
+    esyslog("VNSI-Error: Client '%s' have a not allowed protocol version '%u', terminating client", clientName, m_protocolVersion);
     delete[] clientName;
     return false;
   }
 
-  isyslog("VNSI: Welcome client '%s' with protocol version '%u'", clientName, protocolVersion);
+  isyslog("VNSI: Welcome client '%s' with protocol version '%u'", clientName, m_protocolVersion);
 
   // Send the login reply
   time_t timeNow        = time(NULL);
@@ -596,9 +596,14 @@ bool cCmdControl::processCHANNELS_GetChannels() /* OPCODE 63 */
       if (radio != isRadio)
         continue;
 
+      // skip invalid channels
+      if (channel->Sid() == 0)
+        continue;
+
       m_resp->add_U32(channel->Number());
       m_resp->add_String(m_toUTF8.Convert(channel->Name()));
       m_resp->add_U32(channel->Sid());
+      m_resp->add_U32(channel->Number());
       m_resp->add_U32(groupIndex);
       m_resp->add_U32(channel->Ca());
 #if APIVERSNUM >= 10701
@@ -606,6 +611,8 @@ bool cCmdControl::processCHANNELS_GetChannels() /* OPCODE 63 */
 #else
       m_resp->add_U32(2);
 #endif
+
+      isyslog("channel: %i uid:%i", channel->Number(), channel->Sid());
     }
   }
 
@@ -647,6 +654,9 @@ bool cCmdControl::processTIMER_Get() /* OPCODE 81 */
       m_resp->add_U32(timer->Priority());
       m_resp->add_U32(timer->Lifetime());
       m_resp->add_U32(timer->Channel()->Number());
+      if(m_protocolVersion >= 2) {
+        m_resp->add_U32(timer->Channel()->Sid());
+      }
       m_resp->add_U32(timer->StartTime());
       m_resp->add_U32(timer->StopTime());
       m_resp->add_U32(timer->Day());
@@ -684,6 +694,9 @@ bool cCmdControl::processTIMER_GetList() /* OPCODE 82 */
     m_resp->add_U32(timer->Priority());
     m_resp->add_U32(timer->Lifetime());
     m_resp->add_U32(timer->Channel()->Number());
+    if(m_protocolVersion >= 2) {
+      m_resp->add_U32(timer->Channel()->Sid());
+    }
     m_resp->add_U32(timer->StartTime());
     m_resp->add_U32(timer->StopTime());
     m_resp->add_U32(timer->Day());
