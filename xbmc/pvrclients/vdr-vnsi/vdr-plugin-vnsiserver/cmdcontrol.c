@@ -1308,7 +1308,7 @@ bool cCmdControl::processEPG_GetForChannel() /* OPCODE 120 */
   uint32_t startTime      = m_req->extract_U32();
   uint32_t duration       = m_req->extract_U32();
 
-  LOGCONSOLE("get schedule called for channel %lu", channelNumber);
+  isyslog("get schedule called for channel %u", channelNumber);
 
   cChannel* channel = Channels.GetByNumber(channelNumber);
   if (!channel)
