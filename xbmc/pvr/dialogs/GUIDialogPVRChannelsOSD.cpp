@@ -113,7 +113,11 @@ void CGUIDialogPVRChannelsOSD::Update()
   CPVRManager::Get()->GetCurrentChannel(&channel);
   CPVRManager::Get()->GetPlayingGroup(channel.IsRadio())->GetMembers(m_vecItems);
   m_viewControl.SetItems(*m_vecItems);
-  m_viewControl.SetSelectedItem(channel.ChannelNumber() - 1);
+  const CPVRChannelGroup *group = CPVRManager::Get()->GetPlayingGroup(channel.IsRadio());
+  if (group)
+    m_viewControl.SetSelectedItem(group->GetIndexByNumber(channel.ChannelNumber()));
+  else
+    m_viewControl.SetSelectedItem(0);
   g_graphicsContext.Unlock();
 }
 

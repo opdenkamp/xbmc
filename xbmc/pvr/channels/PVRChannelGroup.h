@@ -300,6 +300,8 @@ public:
    * @return The channel number in this group or 0 if the channel isn't a member of this group.
    */
   virtual unsigned int GetChannelNumber(const CPVRChannel &channel) const;
+  virtual unsigned int GetIndexByNumber(unsigned int channelNumber) const;
+  virtual unsigned int GetMaxChannelNumber(void) const;
 
   /*!
    * @brief Get the next channel in this group.

@@ -108,6 +108,11 @@ int CPVRClients::GetClients(map<long, CStdString> *clients)
   return clients->size() - iInitialSize;
 }
 
+int CPVRClients::GetNumActiveClient(void)
+{
+  return m_clientMap.size();
+}
+
 bool CPVRClients::AllClientsLoaded(void) const
 {
   CSingleLock lock(m_critSection);

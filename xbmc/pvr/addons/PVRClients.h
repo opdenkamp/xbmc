@@ -1,4 +1,5 @@
 #pragma once
+
 /*
  *      Copyright (C) 2005-2011 Team XBMC
  *      http://www.xbmc.org
@@ -162,6 +163,7 @@ public:
   int GetChannels(CPVRChannelGroupInternal *group, PVR_ERROR *error);
 
   int GetClients(std::map<long, CStdString> *clients);
+  int GetNumActiveClient(void);
 
   /*!
    * @brief Check whether a client has any PVR specific menu entries.
