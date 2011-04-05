@@ -1,5 +1,4 @@
 #pragma once
-
 /*
  *      Copyright (C) 2005-2011 Team XBMC
  *      http://www.xbmc.org
