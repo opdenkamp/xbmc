@@ -483,4 +483,6 @@ public:
   bool SetEPGScraper(const CStdString &strScraper, bool bSaveInDb = false);
 
   //@}
+
+  bool CacheIcon(void);
 };

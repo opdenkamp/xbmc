@@ -685,7 +685,7 @@ bool CPVRChannelGroup::Persist(void)
   if (database && database->Open())
   {
     CLog::Log(LOGDEBUG, "CPVRChannelGroup - %s - persisting channel group '%s' with %d channels",
-        __FUNCTION__, GroupName().c_str(), size());
+        __FUNCTION__, GroupName().c_str(), (int) size());
     database->Persist(this);
     database->Close();
 
@@ -748,4 +748,12 @@ bool CPVRChannelGroup::HasNewChannels(void) const
 bool CPVRChannelGroup::HasChanges(void) const
 {
   return m_bChanged || HasNewChannels() || HasChangedChannels();
+}
+
+void CPVRChannelGroup::CacheIcons(void)
+{
+  for (unsigned int iChannelPtr = 0; iChannelPtr < size(); iChannelPtr++)
+  {
+    at(iChannelPtr).channel->CacheIcon();
+  }
 }

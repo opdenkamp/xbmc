@@ -31,7 +31,8 @@ class CPVREpgInfoTag;
 class CGUIDialogPVRTimerSettings;
 
 class CPVRTimers : public std::vector<CPVRTimerInfoTag *>,
-                   private Observer
+                   public Observer,
+                   public Observable
 {
 private:
   CCriticalSection m_critSection;
@@ -41,6 +42,8 @@ private:
    * @return The amount of timers that were added.
    */
   int LoadFromClients(void);
+
+  void Sort(void);
 
 public:
   CPVRTimers(void) {}

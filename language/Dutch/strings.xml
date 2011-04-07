@@ -1620,7 +1620,8 @@
   <string id="19219">Ongegroepeerde kanalen</string>
   <string id="19220">Kanalen in</string>
   <string id="19221">Synchroniseer groepen met backends</string>
-  <string id="19222">Verwenden Backend Kanal Nummerierung (funktioniert nur mit 1 aktiv PVR Addons)</string>
+
+  <string id="19250">Verwenden Backend Kanal Nummerierung (funktioniert nur mit 1 aktiv PVR Addons)</string>
 
   <string id="19499">Anders/Onbekend</string>
   <string id="19500">Film/Drama</string>
