@@ -105,7 +105,7 @@ bool cHTSPSession::Connect(const std::string& hostname, int port)
 
   XBMC->Log(LOG_DEBUG, "%s - connecting to '%s', port '%d'\n", __FUNCTION__, hostname.c_str(), port);
 
-  m_fd = htsp_tcp_connect(hostname.c_str()
+  m_fd = tcp_connect(	hostname.c_str()
                         , port
                         , errbuf, errlen, 3000);
   if(m_fd == INVALID_SOCKET)
@@ -189,7 +189,7 @@ htsmsg_t* cHTSPSession::ReadMessage(int timeout)
     return m;
   }
 
-  x = htsp_tcp_read_timeout(m_fd, &l, 4, timeout);
+  x = tcp_read_timeout(m_fd, &l, 4, timeout);
   if(x == ETIMEDOUT)
     return htsmsg_create_map();
 
@@ -205,7 +205,7 @@ htsmsg_t* cHTSPSession::ReadMessage(int timeout)
 
   buf = malloc(l);
 
-  x = htsp_tcp_read(m_fd, buf, l);
+  x = tcp_read(m_fd, buf, l);
   if(x)
   {
     XBMC->Log(LOG_ERROR, "%s - Failed to read packet (%d)\n", __FUNCTION__, x);

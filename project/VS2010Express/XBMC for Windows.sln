@@ -2,7 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XBMC", "XBMC.vcxproj", "{3A68081D-E8F9-4523-9436-530DE9E5530A}"
 	ProjectSection(ProjectDependencies) = postProject
-		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B} = {78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}
+		{00700E12-A63B-4E54-B962-4011A90584BD} = {00700E12-A63B-4E54-B962-4011A90584BD}
+ 		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B} = {78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5} = {0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libPlatinum", "libPlatinum.vcxproj", "{B2975495-FBE4-4F94-AAC5-B21A9842BF50}"
@@ -15,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libass_dll", "..\..\lib\lib
 	ProjectSection(ProjectDependencies) = postProject
 		{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B} = {78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libOsDependent", "..\..\lib\libOsDependent\project\libOsDependent_2010.vcxproj", "{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "visMilkdrop", "..\..\xbmc\visualizations\Milkdrop\Plugin.vcxproj", "{5E479372-4F34-426D-AA1E-9879E94C105D}"
 EndProject
@@ -573,6 +577,16 @@ Global
 		{C04B0FB1-667D-4F1C-BDAE-A07CDFFA74A3}.Release (DirectX)|Win32.Build.0 = Release|Win32
 		{C04B0FB1-667D-4F1C-BDAE-A07CDFFA74A3}.Release (OpenGL)|Win32.ActiveCfg = Release|Win32
 		{C04B0FB1-667D-4F1C-BDAE-A07CDFFA74A3}.Release (OpenGL)|Win32.Build.0 = Release|Win32
+		{C04B0FB1-667D-4F1C-BDAE-A07CDFFA74A3}.Release|Win32.ActiveCfg = Release|Win32
+		{C04B0FB1-667D-4F1C-BDAE-A07CDFFA74A3}.Release|Win32.Build.0 = Release|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Debug (DirectX)|Win32.ActiveCfg = Debug|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Debug (DirectX)|Win32.Build.0 = Debug|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Debug (OpenGL)|Win32.ActiveCfg = Debug|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Debug (OpenGL)|Win32.Build.0 = Debug|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Release (DirectX)|Win32.ActiveCfg = Release|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Release (DirectX)|Win32.Build.0 = Release|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Release (OpenGL)|Win32.ActiveCfg = Release|Win32
+		{0F78AAF3-A188-4491-8BA6-203DC0B8D7F5}.Release (OpenGL)|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
