@@ -109,31 +109,6 @@ void CPVRManager::Destroy(void)
   }
 }
 
-void CPVRManager::Unload(void)
-{
-  CLog::Log(LOGNOTICE, "PVRManager - stopping");
-
-  /* stop playback if a pvr file is playing */
-  if (IsPlaying())
-  {
-    CLog::Log(LOGNOTICE,"PVRManager - %s - stopping PVR playback", __FUNCTION__);
-    g_application.StopPlaying();
-  }
-
-  /* stop all update threads */
-  StopUpdateThreads();
-
-  m_epg->RemoveObserver(this);
-  m_epg->Unload();
-
-  m_recordings->Unload();
-  m_timers->Unload();
-  m_channelGroups->Unload();
-  m_addons->Unload();
-
-  m_bLoaded = false;
-}
-
 void CPVRManager::Start(void)
 {
   /* first stop and remove any clients */
@@ -152,8 +127,6 @@ void CPVRManager::Start(void)
 void CPVRManager::Stop(void)
 {
   CSingleLock lock(m_critSectionTriggers);
-  if (!m_bLoaded)
-    return;
   m_bLoaded = false;
   lock.Leave();
 
@@ -166,7 +139,14 @@ void CPVRManager::Stop(void)
   }
 
   StopUpdateThreads();
-  Unload();
+
+  m_epg->RemoveObserver(this);
+  m_epg->Unload();
+
+  m_recordings->Unload();
+  m_timers->Unload();
+  m_channelGroups->Unload();
+  m_addons->Unload();
 }
 
 bool CPVRManager::StartUpdateThreads(void)
@@ -377,6 +357,7 @@ bool CPVRManager::DisableIfNoClients(void)
   {
     g_guiSettings.SetBool("pvrmanager.enabled", false);
     CLog::Log(LOGNOTICE,"PVRManager - no clients enabled. pvrmanager disabled.");
+    CGUIDialogOK::ShowAndGetInput(257,0,19223,0);
     bReturn = true;
   }
 
@@ -406,44 +387,68 @@ void CPVRManager::ResetDatabase(bool bShowProgress /* = true */)
   }
 
   if (bShowProgress)
+  {
     pDlgProgress->SetPercentage(10);
+    pDlgProgress->Progress();
+  }
 
   /* stop the thread */
   Stop();
   if (bShowProgress)
+  {
     pDlgProgress->SetPercentage(20);
+    pDlgProgress->Progress();
+  }
 
   if (m_database.Open())
   {
     /* clean the EPG database */
     m_epg->Clear(true);
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(30);
+      pDlgProgress->Progress();
+    }
 
     /* delete all TV channel groups */
     m_database.DeleteChannelGroups(false);
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(50);
+      pDlgProgress->Progress();
+    }
 
     /* delete all radio channel groups */
     m_database.DeleteChannelGroups(true);
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(60);
+      pDlgProgress->Progress();
+    }
 
     /* delete all channels */
     m_database.DeleteChannels();
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(70);
+      pDlgProgress->Progress();
+    }
 
     /* delete all channel settings */
     m_database.DeleteChannelSettings();
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(80);
+      pDlgProgress->Progress();
+    }
 
     /* delete all client information */
     m_database.DeleteClients();
     if (bShowProgress)
+    {
       pDlgProgress->SetPercentage(90);
+      pDlgProgress->Progress();
+    }
 
     m_database.Close();
   }
