@@ -802,5 +802,11 @@ void CPVRChannelGroup::SetSelectedGroup(void)
   /* set all channel numbers on members of this group */
   unsigned int iChannelNumber(1);
   for (unsigned int iChannelPtr = 0; iChannelPtr < size(); iChannelPtr++)
-    at(iChannelPtr).channel->SetCachedChannelNumber(iChannelNumber++);
+    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get()->GetClients()->GetNumActiveClient() == 1)) 
+    {
+      PVRChannelGroupMember member = at(iChannelPtr);     
+      at(iChannelPtr).channel->SetCachedChannelNumber(member.channel->ClientChannelNumber());
+    }
+    else
+      at(iChannelPtr).channel->SetCachedChannelNumber(iChannelNumber++);
 }
