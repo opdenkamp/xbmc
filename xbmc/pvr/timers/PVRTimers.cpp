@@ -197,6 +197,11 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
     lock.Leave();
 
     NotifyObservers("timers", false);
+
+    CPVRManager::Get()->UpdateWindow(PVR_WINDOW_TIMERS);
+    CPVRManager::Get()->UpdateWindow(PVR_WINDOW_EPG);
+    CPVRManager::Get()->UpdateWindow(PVR_WINDOW_CHANNELS_TV);
+    CPVRManager::Get()->UpdateWindow(PVR_WINDOW_CHANNELS_RADIO);
   }
 
   return bChanged;
@@ -358,7 +363,7 @@ CPVRTimerInfoTag *CPVRTimers::InstantTimer(CPVRChannel *channel, bool bStartTime
   int iLifetime = g_guiSettings.GetInt("pvrrecord.defaultlifetime");
   int iDuration = g_guiSettings.GetInt("pvrrecord.instantrecordtime");
 
-  CPVRTimerInfoTag *newTimer = CPVRTimerInfoTag::CreateFromEpg(*epgTag);
+  CPVRTimerInfoTag *newTimer = epgTag ? CPVRTimerInfoTag::CreateFromEpg(*epgTag) : NULL;
   if (!newTimer)
   {
     newTimer = new CPVRTimerInfoTag;

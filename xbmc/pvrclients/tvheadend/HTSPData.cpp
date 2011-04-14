@@ -37,9 +37,9 @@ cHTSPData::~cHTSPData()
   Close();
 }
 
-bool cHTSPData::Open(CStdString hostname, int port, CStdString user, CStdString pass, long timeout)
+bool cHTSPData::Open(const std::string &strHostname, unsigned int iPort, const std::string &strUsername, const std::string &strPassword, long iTimeout)
 {
-  if(!m_session.Connect(hostname, port))
+  if(!m_session.Connect(strHostname, iPort, iTimeout))
     return false;
 
   if(m_session.GetProtocol() < 2)
@@ -48,13 +48,19 @@ bool cHTSPData::Open(CStdString hostname, int port, CStdString user, CStdString 
     return false;
   }
 
-  if(!user.IsEmpty())
-    m_session.Auth(user, pass);
+  if(!strUsername.empty())
+  {
+    if (!m_session.Auth(strUsername, strPassword))
+    {
+      XBMC->Log(LOG_ERROR, "%s - failed to authenticate", __FUNCTION__);
+      return false;
+    }
+  }
 
   SetDescription("HTSP Data Listener");
   Start();
 
-  m_started.Wait(timeout);
+  m_started.Wait(iTimeout);
   return Running();
 }
 
@@ -67,10 +73,7 @@ void cHTSPData::Close()
 
 bool cHTSPData::CheckConnection()
 {
-  if (!m_session.IsConnected())
-    m_session.Connect(g_szHostname, g_iPortHTSP);
-
-  return m_session.IsConnected();
+  return m_session.CheckConnection();
 }
 
 htsmsg_t* cHTSPData::ReadResult(htsmsg_t* m)
@@ -278,6 +281,7 @@ int cHTSPData::GetNumRecordings()
 
 PVR_ERROR cHTSPData::GetRecordings(PVR_HANDLE handle)
 {
+  m_session.EnableNotifications(true);
   SRecordings recordings = GetDVREntries(true, false);
 
   for(SRecordings::const_iterator it = recordings.begin(); it != recordings.end(); ++it)
@@ -285,7 +289,7 @@ PVR_ERROR cHTSPData::GetRecordings(PVR_HANDLE handle)
     SRecording recording = it->second;
 
     CStdString strStreamURL = "http://";
-    CStdString strChannelName = "";
+    std::string strChannelName = "";
 
     /* lock */
     {
@@ -615,11 +619,11 @@ void cHTSPData::Action()
     else if(strstr(method, "initialSyncCompleted"))
       m_started.Signal();
     else if(strstr(method, "dvrEntryAdd"))
-      cHTSPSession::ParseDVREntryUpdate(msg, m_recordings);
+      cHTSPSession::ParseDVREntryUpdate(msg, m_recordings, g_bShowTimerNotifications && m_session.SendNotifications());
     else if(strstr(method, "dvrEntryUpdate"))
-      cHTSPSession::ParseDVREntryUpdate(msg, m_recordings);
+      cHTSPSession::ParseDVREntryUpdate(msg, m_recordings, g_bShowTimerNotifications && m_session.SendNotifications());
     else if(strstr(method, "dvrEntryDelete"))
-      cHTSPSession::ParseDVREntryDelete(msg, m_recordings);
+      cHTSPSession::ParseDVREntryDelete(msg, m_recordings, g_bShowTimerNotifications && m_session.SendNotifications());
     else
       XBMC->Log(LOG_DEBUG, "%s - Unmapped action recieved '%s'", __FUNCTION__, method);
 
