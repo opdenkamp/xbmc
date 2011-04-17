@@ -55,8 +55,6 @@ using namespace XFILE;
 using namespace MUSIC_INFO;
 using namespace ADDON;
 
-CPVRManager *CPVRManager::m_instance = NULL;
-
 CPVRManager::CPVRManager(void) :
     Observer()
 {
@@ -91,21 +89,10 @@ void CPVRManager::Notify(const Observable &obs, const CStdString& msg)
 {
 }
 
-CPVRManager *CPVRManager::Get(void)
+CPVRManager &CPVRManager::Get(void)
 {
-  if (!m_instance)
-    m_instance = new CPVRManager;
-
-  return m_instance;
-}
-
-void CPVRManager::Destroy(void)
-{
-  if (m_instance)
-  {
-    delete m_instance;
-    m_instance = NULL;
-  }
+  static CPVRManager pvrManagerInstance;
+  return pvrManagerInstance;
 }
 
 void CPVRManager::Start(void)
@@ -126,6 +113,8 @@ void CPVRManager::Start(void)
 void CPVRManager::Stop(void)
 {
   CSingleLock lock(m_critSectionTriggers);
+  if (!m_bLoaded)
+    return;
   m_bLoaded = false;
   lock.Leave();
 
@@ -237,6 +226,11 @@ void CPVRManager::Process(void)
     m_loadingBusyDialog = NULL;
   }
 
+  /* signal to window that clients are loaded */
+  CGUIWindowPVR *pWindow = (CGUIWindowPVR *) g_windowManager.GetWindow(WINDOW_PVR);
+  if (pWindow)
+    pWindow->UnlockWindow();
+
   CLog::Log(LOGDEBUG, "PVRManager - %s - entering main loop", __FUNCTION__);
 
   /* main loop */
@@ -308,17 +302,17 @@ bool CPVRManager::ContinueLastChannel(void)
   bool bReturn = false;
   m_bFirstStart = false;
 
-  const CPVRChannel *channel = GetChannelGroups()->GetGroupAllTV()->GetByIndex(0);
-  for (int i = 0; i < GetChannelGroups()->GetGroupAllTV()->GetNumChannels(); i++)
+  const CPVRChannel *channel = m_channelGroups->GetGroupAllTV()->GetByIndex(0);
+  for (int i = 0; i < m_channelGroups->GetGroupAllTV()->GetNumChannels(); i++)
   {
-    const CPVRChannel *nextChannel = GetChannelGroups()->GetGroupAllTV()->GetByIndex(i);
+    const CPVRChannel *nextChannel = m_channelGroups->GetGroupAllTV()->GetByIndex(i);
     if (nextChannel->ClientID() < 0 || !m_addons->IsValidClient(nextChannel->ClientID()))
       continue;
     channel = channel->LastWatched() > nextChannel->LastWatched() ? channel : nextChannel;
   }
-  for (int i = 0; i < GetChannelGroups()->GetGroupAllRadio()->GetNumChannels(); i++)
+  for (int i = 0; i < m_channelGroups->GetGroupAllRadio()->GetNumChannels(); i++)
   {
-    const CPVRChannel *nextChannel = GetChannelGroups()->GetGroupAllRadio()->GetByIndex(i);
+    const CPVRChannel *nextChannel = m_channelGroups->GetGroupAllRadio()->GetByIndex(i);
     if (nextChannel->ClientID() < 0 || !m_addons->IsValidClient(nextChannel->ClientID()))
       continue;
     channel = channel->LastWatched() > nextChannel->LastWatched() ? channel : nextChannel;
@@ -684,9 +678,9 @@ const CPVRChannelGroup *CPVRManager::GetPlayingGroup(bool bRadio /* = false */)
   CSingleLock lock(m_critSection);
 
   if (bRadio && !m_currentRadioGroup)
-    SetPlayingGroup((CPVRChannelGroup *) GetChannelGroups()->GetGroupAllRadio());
+    SetPlayingGroup((CPVRChannelGroup *) m_channelGroups->GetGroupAllRadio());
   else if (!bRadio &&!m_currentTVGroup)
-    SetPlayingGroup((CPVRChannelGroup *) GetChannelGroups()->GetGroupAllTV());
+    SetPlayingGroup((CPVRChannelGroup *) m_channelGroups->GetGroupAllTV());
 
   return bRadio ? m_currentRadioGroup : m_currentTVGroup;
 }
@@ -703,7 +697,7 @@ void CPVRManager::TriggerRecordingsUpdate(void)
 
 bool CPVRRecordingsUpdateJob::DoWork(void)
 {
-  CPVRManager::GetRecordings()->Update();
+  g_PVRRecordings->Update();
   return true;
 }
 
@@ -719,7 +713,7 @@ void CPVRManager::TriggerTimersUpdate(void)
 
 bool CPVRTimersUpdateJob::DoWork(void)
 {
-  return CPVRManager::GetTimers()->Update();
+  return g_PVRTimers->Update();
 }
 
 void CPVRManager::TriggerChannelsUpdate(void)
@@ -734,7 +728,7 @@ void CPVRManager::TriggerChannelsUpdate(void)
 
 bool CPVRChannelsUpdateJob::DoWork(void)
 {
-  return CPVRManager::GetChannelGroups()->Update(true);
+  return g_PVRChannelGroups->Update(true);
 }
 
 void CPVRManager::TriggerChannelGroupsUpdate(void)
@@ -750,7 +744,7 @@ void CPVRManager::TriggerChannelGroupsUpdate(void)
 
 bool CPVRChannelGroupsUpdateJob::DoWork(void)
 {
-  return CPVRManager::GetChannelGroups()->Update(false);
+  return g_PVRChannelGroups->Update(false);
 }
 
 void CPVRManager::OnJobComplete(unsigned int jobID, bool success, CJob* job)
@@ -864,6 +858,9 @@ bool CPVRManager::UpdateItem(CFileItem& item)
   }
 
   CSingleLock lock(m_critSection);
+  if (*m_currentFile->GetPVRChannelInfoTag() == *item.GetPVRChannelInfoTag())
+    return false;
+
   g_application.CurrentFileItem() = *m_currentFile;
   g_infoManager.SetCurrentItem(*m_currentFile);
 
@@ -1045,9 +1042,4 @@ bool CPVRManager::HasTimer(void) const
 bool CPVRManager::IsRecording(void) const
 {
   return m_guiInfo->IsRecording();
-}
-
-const CPVREpgInfoTag *CPVRManager::GetPlayingTag(void) const
-{
-  return m_guiInfo->GetPlayingTag();
 }

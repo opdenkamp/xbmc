@@ -76,7 +76,6 @@ void CPVRClients::Unload(void)
   m_currentRecording  = NULL;
   m_clientsProps.clear();
   m_clientMap.clear();
-  ResetQualityData();
 }
 
 int CPVRClients::GetFirstID(void)
@@ -213,7 +212,7 @@ bool CPVRClients::TryLoadClients(int iMaxTime /* = 0 */)
     LoadClients();
 
     /* always break if the pvrmanager's thread is stopped */
-    if (!CPVRManager::Get()->IsRunning())
+    if (!g_PVRManager.IsRunning())
       break;
 
     /* check whether iMaxTime has passed */
@@ -259,7 +258,7 @@ bool CPVRClients::ClientLoaded(const CStdString &strClientId)
 int CPVRClients::AddClientToDb(const CStdString &strClientId, const CStdString &strName)
 {
   /* add this client to the database if it's not in there yet */
-  int iClientDbId = CPVRManager::Get()->GetTVDatabase()->AddClient(strName, strClientId);
+  int iClientDbId = g_PVRManager.GetTVDatabase()->AddClient(strName, strClientId);
   if (iClientDbId == -1)
   {
     CLog::Log(LOGERROR, "PVR - %s - can't add client '%s' to the database",
@@ -283,7 +282,7 @@ bool CPVRClients::LoadClients(void)
     return false;
 
   /* load and initialise the clients */
-  CPVRDatabase *database = CPVRManager::Get()->GetTVDatabase();
+  CPVRDatabase *database = g_PVRManager.GetTVDatabase();
   if (!database || !database->Open())
   {
     CLog::Log(LOGERROR, "PVR - %s - cannot open the database", __FUNCTION__);
@@ -351,12 +350,12 @@ bool CPVRClients::StopClient(AddonPtr client, bool bRestart)
       CLog::Log(LOGINFO, "PVRManager - %s - %s client '%s'",
           __FUNCTION__, bRestart ? "restarting" : "removing", m_clientMap[(*itr).first]->Name().c_str());
 
-      CPVRManager::Get()->StopUpdateThreads();
+      g_PVRManager.StopUpdateThreads();
       if (bRestart)
         m_clientMap[(*itr).first]->ReCreate();
       else
         m_clientMap[(*itr).first]->Destroy();
-      CPVRManager::Get()->StartUpdateThreads();
+      g_PVRManager.StartUpdateThreads();
 
       bReturn = true;
       break;
@@ -965,7 +964,7 @@ void CPVRClients::StartChannelScan(void)
   long perfCnt = CTimeUtils::GetTimeMS();
 
   /* stop the supervisor thread */
-  CPVRManager::Get()->StopUpdateThreads();
+  g_PVRManager.StopUpdateThreads();
 
   /* do the scan */
   if (m_clientMap[scanningClientID]->StartChannelScan() != PVR_ERROR_NO_ERROR)
@@ -973,7 +972,7 @@ void CPVRClients::StartChannelScan(void)
     CGUIDialogOK::ShowAndGetInput(19111,0,19193,0);
 
   /* restart the supervisor thread */
-  CPVRManager::Get()->StartUpdateThreads();
+  g_PVRManager.StartUpdateThreads();
 
   CLog::Log(LOGNOTICE, "PVRManager - %s - channel scan finished after %li.%li seconds",
       __FUNCTION__, (CTimeUtils::GetTimeMS()-perfCnt)/1000, (CTimeUtils::GetTimeMS()-perfCnt)%1000);
@@ -1192,7 +1191,7 @@ void CPVRClients::OnClientMessage(const int iClientId, const PVR_EVENT clientEve
     {
       CLog::Log(LOGDEBUG, "PVR - %s - timers changed on client '%d'",
           __FUNCTION__, iClientId);
-      CPVRManager::Get()->TriggerTimersUpdate();
+      g_PVRManager.TriggerTimersUpdate();
     }
     break;
 
@@ -1200,7 +1199,7 @@ void CPVRClients::OnClientMessage(const int iClientId, const PVR_EVENT clientEve
     {
       CLog::Log(LOGDEBUG, "PVR - %s - recording list changed on client '%d'",
           __FUNCTION__, iClientId);
-      CPVRManager::Get()->TriggerRecordingsUpdate();
+      g_PVRManager.TriggerRecordingsUpdate();
     }
     break;
 
@@ -1208,7 +1207,7 @@ void CPVRClients::OnClientMessage(const int iClientId, const PVR_EVENT clientEve
     {
       CLog::Log(LOGDEBUG, "PVR - %s - channel list changed on client '%d'",
           __FUNCTION__, iClientId);
-      CPVRManager::Get()->TriggerChannelsUpdate();
+      g_PVRManager.TriggerChannelsUpdate();
     }
     break;
 
@@ -1216,7 +1215,7 @@ void CPVRClients::OnClientMessage(const int iClientId, const PVR_EVENT clientEve
     {
       CLog::Log(LOGDEBUG, "PVR - %s - channel groups list changed on client '%d'",
           __FUNCTION__, iClientId);
-      CPVRManager::Get()->TriggerChannelGroupsUpdate();
+      g_PVRManager.TriggerChannelGroupsUpdate();
     }
     break;
 
