@@ -803,7 +803,7 @@ void CPVRChannelGroup::SetSelectedGroup(void)
   CSingleLock lock(m_critSection);
 
   /* reset all channel numbers */
-  ((CPVRChannelGroup *) g_PVRChannelGroups->GetGroupAll(m_bRadio))->ResetChannelNumbers();
+  g_PVRChannelGroups->GetGroupAll(m_bRadio)->ResetChannelNumbers();
 
   /* set all channel numbers on members of this group */
   unsigned int iChannelNumber(1);
