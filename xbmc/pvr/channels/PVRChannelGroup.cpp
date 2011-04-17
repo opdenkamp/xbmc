@@ -370,7 +370,7 @@ const CPVRChannel *CPVRChannelGroup::GetByChannelNumber(unsigned int iChannelNum
 const CPVRChannel *CPVRChannelGroup::GetByChannelUp(const CPVRChannel &channel) const
 {
   CSingleLock lock(m_critSection);
-  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get()->GetClients()->GetNumActiveClient() == 1))
+  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1))
   {
     unsigned int iChannelNumber = GetChannelNumber(channel);
     unsigned int newIndex = GetIndexByNumber(iChannelNumber);       
@@ -393,7 +393,7 @@ const CPVRChannel *CPVRChannelGroup::GetByChannelUp(const CPVRChannel &channel) 
 const CPVRChannel *CPVRChannelGroup::GetByChannelDown(const CPVRChannel &channel) const
 {
   CSingleLock lock(m_critSection);
-  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get()->GetClients()->GetNumActiveClient() == 1)) 
+  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
   {
     unsigned int iChannelNumber = GetChannelNumber(channel);
     unsigned int newIndex = GetIndexByNumber(iChannelNumber);       
@@ -730,7 +730,7 @@ void CPVRChannelGroup::Renumber(void)
   {
     if (at(ptr).iChannelNumber != iChannelNumber + 1)
       m_bChanged = true;
-    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get()->GetClients()->GetNumActiveClient() == 1)) 
+    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
     {
       PVRChannelGroupMember member = at(ptr);     
       at(ptr).iChannelNumber = member.channel->ClientChannelNumber();
@@ -808,7 +808,7 @@ void CPVRChannelGroup::SetSelectedGroup(void)
   /* set all channel numbers on members of this group */
   unsigned int iChannelNumber(1);
   for (unsigned int iChannelPtr = 0; iChannelPtr < size(); iChannelPtr++)
-    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get()->GetClients()->GetNumActiveClient() == 1)) 
+    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
     {
       PVRChannelGroupMember member = at(iChannelPtr);     
       at(iChannelPtr).channel->SetCachedChannelNumber(member.channel->ClientChannelNumber());
