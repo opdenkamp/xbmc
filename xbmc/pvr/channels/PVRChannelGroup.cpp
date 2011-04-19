@@ -306,13 +306,13 @@ const CPVRChannel *CPVRChannelGroup::GetByUniqueID(int iUniqueID) const
 }
 
 unsigned int CPVRChannelGroup::GetIndexByNumber(unsigned int channelNumber) const
-{ 
+{
   unsigned int iSize = size();
   for (unsigned int iChannelPtr = 0; iChannelPtr < iSize; iChannelPtr++)
   {
     PVRChannelGroupMember member = at(iChannelPtr);
     if (member.iChannelNumber == channelNumber)
-      return iChannelPtr;       
+      return iChannelPtr;
   }
   return -1;
 }
@@ -325,9 +325,37 @@ unsigned int CPVRChannelGroup::GetMaxChannelNumber(void) const
   {
     PVRChannelGroupMember member = at(iChannelPtr);
     if (member.iChannelNumber > max)
-      max = member.iChannelNumber;      
+      max = member.iChannelNumber;
   }
   return max;
+}
+
+const CPVRChannel *CPVRChannelGroup::GetLastPlayedChannel(void) const
+{
+  CPVRChannel *channel = NULL;
+  CSingleLock lock(m_critSection);
+
+  for (unsigned int iChannelPtr = 0; iChannelPtr < size(); iChannelPtr++)
+  {
+    PVRChannelGroupMember groupMember = at(iChannelPtr);
+
+    /* check whether the client is loaded */
+    if (!g_PVRClients->IsValidClient(groupMember.channel->ClientID()))
+      continue;
+
+    /* always get the first channel */
+    if (channel == NULL)
+    {
+      channel = groupMember.channel;
+      continue;
+    }
+
+    /* check whether this channel has a later LastWatched time */
+    if (groupMember.channel->LastWatched() > channel->LastWatched())
+      channel = groupMember.channel;
+  }
+
+  return channel;
 }
 
 unsigned int CPVRChannelGroup::GetChannelNumber(const CPVRChannel &channel) const
