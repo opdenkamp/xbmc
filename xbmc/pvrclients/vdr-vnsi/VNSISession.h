@@ -22,6 +22,30 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#ifdef __WINDOWS__
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_
+#endif
+#pragma warning(disable:4005) // Disable "warning C4005: '_WINSOCKAPI_' : macro redefinition"
+#include <winsock2.h>
+#pragma warning(default:4005)
+#include <ws2tcpip.h>
+#define SHUT_RDWR SD_BOTH
+#undef SendMessage
+
+// other (linux) specific
+
+#else
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <poll.h>
+#define closesocket close
+#endif
+
+extern "C" {
+#include "libTcpSocket/os-dependent_socket.h"
+}
 
 class cResponsePacket;
 class cRequestPacket;
@@ -48,7 +72,7 @@ public:
   const std::string& GetVersion()    { return m_version; }
 
 private:
-  int         m_fd;
+  socket_t    m_fd;
   int         m_protocol;
   std::string m_server;
   std::string m_version;

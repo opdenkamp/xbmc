@@ -26,6 +26,8 @@
 #include "pvrclient-mediaportal.h"
 #include <ctime>
 
+#include "libPlatform/os-dependent.h"
+
 #define SEEK_POSSIBLE 0x10 // flag used to check if protocol allows seeks
 
 using namespace std;
@@ -213,7 +215,7 @@ void cPVRClientMediaPortal::Disconnect()
 
   m_bStop = true;
 
-  m_tcpclient->close();
+  m_tcpclient->close_();
 
   m_bConnected = false;
 }

@@ -33,8 +33,6 @@
 #endif
 
 extern "C" {
-#include "libhts/net.h"
-#include "libhts/htsmsg.h"
 #include "libhts/htsmsg_binary.h"
 #include "libhts/sha1.h"
 }
@@ -165,7 +163,7 @@ bool cHTSPSession::ConnectInternal(void)
 
   XBMC->Log(LOG_DEBUG, "%s - connecting to '%s', port '%d'\n", __FUNCTION__, m_strHostname.c_str(), m_iPortnumber);
 
-  m_fd = htsp_tcp_connect(m_strHostname.c_str(), m_iPortnumber, errbuf, errlen, m_iConnectTimeout);
+  m_fd = tcp_connect(m_strHostname.c_str(), m_iPortnumber, errbuf, errlen, m_iConnectTimeout);
   if(m_fd == INVALID_SOCKET)
   {
     XBMC->Log(LOG_ERROR, "%s - failed to connect to the backend (%s)\n", __FUNCTION__, errbuf);
@@ -219,7 +217,7 @@ htsmsg_t* cHTSPSession::ReadMessage(int timeout)
     return m;
   }
 
-  x = htsp_tcp_read_timeout(m_fd, &l, 4, timeout);
+  x = tcp_read_timeout(m_fd, &l, 4, timeout);
   if(x == ETIMEDOUT)
     return htsmsg_create_map();
 
@@ -236,7 +234,7 @@ htsmsg_t* cHTSPSession::ReadMessage(int timeout)
 
   buf = malloc(l);
 
-  x = htsp_tcp_read(m_fd, buf, l);
+  x = tcp_read(m_fd, buf, l);
   if(x)
   {
     XBMC->Log(LOG_ERROR, "%s - Failed to read packet (%d)\n", __FUNCTION__, x);
@@ -396,9 +394,10 @@ bool cHTSPSession::ParseEvent(htsmsg_t* msg, uint32_t id, SEvent &event)
   desc     = htsmsg_get_str(msg, "description");
   ext_desc = htsmsg_get_str(msg, "ext_text");
 
+  char * buf = 0;
   if (desc && ext_desc)
   {
-    char buf[strlen(desc) + strlen(ext_desc)];
+    buf = (char *)malloc(strlen(desc) + strlen(ext_desc));
     sprintf(buf, "%s%s", desc, ext_desc);
     event.descs = buf;
   }
@@ -434,6 +433,8 @@ bool cHTSPSession::ParseEvent(htsmsg_t* msg, uint32_t id, SEvent &event)
                     , event.stop
                     , event.next);
 
+  if (buf)
+    free(buf);
   return true;
 }
 

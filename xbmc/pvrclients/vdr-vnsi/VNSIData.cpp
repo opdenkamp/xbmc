@@ -27,6 +27,7 @@
 
 #ifdef __WINDOWS__
 #include <winsock2.h>
+#define usleep(t) Sleep((t)/1000)
 #undef SendMessage
 #else
 #include <arpa/inet.h>

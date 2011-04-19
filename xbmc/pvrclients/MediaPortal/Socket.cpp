@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include "os-dependent.h"
-#include "xbmc_pvr_types.h"
+extern "C" {
+#include "libTcpSocket/os-dependent_socket.h"
+}
 #include "libXBMC_addon.h"
 #include "utils.h"
 #include "client.h"
@@ -58,7 +58,7 @@ Socket::Socket()
 
 Socket::~Socket()
 {
-  close();
+  close_();
 }
 
 bool Socket::setHostname ( const std::string host )
@@ -83,7 +83,7 @@ bool Socket::setHostname ( const std::string host )
 }
 
 
-bool Socket::close()
+bool Socket::close_()
 {
   if (is_valid())
   {
@@ -99,7 +99,7 @@ bool Socket::create()
 {
   if( is_valid() )
   {
-    close();
+    close_();
   }
 
   if(!osInit())
