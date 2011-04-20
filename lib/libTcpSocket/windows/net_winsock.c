@@ -19,15 +19,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
-//#include <winsock2.h>
-//#include <Ws2tcpip.h>
-//#include "msvc.h"
 #include "../os-dependent_socket.h"
 #include <Ws2tcpip.h>
 
@@ -35,6 +31,7 @@
 #define ECONNRESET  WSAECONNRESET
 #define ETIMEDOUT   WSAETIMEDOUT
 #define EAGAIN      WSAEWOULDBLOCK
+#define EINVAL      WSAEINVAL
 
 #define snprintf _snprintf
 
@@ -62,14 +59,12 @@ static int recv_fixed (SOCKET s, char * buf, int len, int flags)
   }
   return buf - org;
 }
+
 #define recv(s, buf, len, flags) recv_fixed(s, buf, len, flags)
 
-/**
- *
- */
 socket_t
 tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
-	    int timeout)
+    int timeout)
 {
   socket_t fd;
   int r, err, val;
@@ -78,7 +73,7 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
   fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
   if(fd == -1) {
     snprintf(errbuf, errbufsize, "Unable to create socket: %s",
-	     strerror(WSAGetLastError()));
+     strerror(WSAGetLastError()));
     return -1;
   }
 
@@ -110,13 +105,13 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
       if(r == 0) {
         /* Timeout */
         snprintf(errbuf, errbufsize, "Connection attempt timed out");
-        closesocket(fd);
+        tcp_close(fd);
         return -1;
       }
 
       if(r == -1) {
         snprintf(errbuf, errbufsize, "select() error: %s", strerror(WSAGetLastError()));
-        closesocket(fd);
+        tcp_close(fd);
         return -1;
       }
 
@@ -130,7 +125,7 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
 
   if(err != 0) {
     snprintf(errbuf, errbufsize, "%s", strerror(err));
-    closesocket(fd);
+    tcp_close(fd);
     return -1;
   }
 
@@ -143,10 +138,9 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
   return fd;
 }
 
-
 socket_t
 tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
-	    int timeout)
+    int timeout)
 {
   struct   addrinfo hints;
   struct   addrinfo *result, *addr;
@@ -196,11 +190,6 @@ tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
   return fd;
 }
 
-
-
-/**
- *
- */
 int
 tcp_read(socket_t fd, void *buf, size_t len)
 {
@@ -214,9 +203,6 @@ tcp_read(socket_t fd, void *buf, size_t len)
 
 }
 
-/**
- *
- */
 int
 tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
 {
@@ -224,7 +210,8 @@ tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
   fd_set fd_read;
   struct timeval tv;
 
-  assert(timeout > 0);
+  if(timeout > 0)
+    return EINVAL;
 
   while(tot != len) {
 
@@ -262,9 +249,6 @@ tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
   return 0;
 }
 
-/**
- *
- */
 void
 tcp_close(socket_t fd)
 {

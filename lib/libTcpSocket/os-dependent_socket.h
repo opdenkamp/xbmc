@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Networking
  *  Copyright (C) 2007-2008 Andreas Öman
@@ -17,9 +18,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#ifndef LIBTCPSOCKET_OSDEPENDENT_SOCKET_H__
-#define LIBTCPSOCKET_OSDEPENDENT_SOCKET_H__
 
 #if defined _MSC_VER || defined(_WIN32) || defined(_WIN64)
 #ifndef __WINDOWS__
@@ -43,13 +41,25 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+/*
+ * used to establish a connection to a host on specified a port,
+ * returns a valid socket if connection was successful, provides
+ * error description if something went wrong
+ */
 socket_t tcp_connect(const char *hostname, int port, char *errbuf,
-	size_t errbufsize, int timeout);
+      size_t errbufsize, int timeout);
 
+/*
+ * used to read data from a socket opened with tcp_connect
+ */
 int tcp_read(socket_t fd, void *buf, size_t len);
 
+/*
+ * used to read data from a socket opened with tcp_connect
+ */
 int tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout);
 
+/*
+ * used to close a socket connection
+ */
 void tcp_close(socket_t fd);
-
-#endif /* LIBTCPSOCKET_OSDEPENDENT_SOCKET_H__ */

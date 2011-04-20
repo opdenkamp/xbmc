@@ -1,6 +1,7 @@
 /*
  *  Networking under POSIX
  *  Copyright (C) 2007-2008 Andreas Öman
+ *  Copyright (C) 2011 Team XBMC
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -32,7 +33,6 @@
 #include <sys/epoll.h>
 #endif
 #include <poll.h>
-#include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -49,13 +49,9 @@
 
 #include "../os-dependent_socket.h"
 
-
-/**
- *
- */
 socket_t
 tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
-	    int timeout)
+    int timeout)
 {
   socket_t fd;
   int r, err, val;
@@ -63,8 +59,7 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
 
   fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
   if(fd == -1) {
-    snprintf(errbuf, errbufsize, "Unable to create socket: %s",
-	     strerror(errno));
+    snprintf(errbuf, errbufsize, "Unable to create socket: %s", strerror(errno));
     return -1;
   }
 
@@ -85,16 +80,16 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
 
       r = poll(&pfd, 1, timeout);
       if(r == 0) {
-	/* Timeout */
-	snprintf(errbuf, errbufsize, "Connection attempt timed out");
-	close(fd);
-	return -1;
+        /* Timeout */
+        snprintf(errbuf, errbufsize, "Connection attempt timed out");
+        close(fd);
+        return -1;
       }
-      
+
       if(r == -1) {
-	snprintf(errbuf, errbufsize, "poll() error: %s", strerror(errno));
-	close(fd);
-	return -1;
+        snprintf(errbuf, errbufsize, "poll() error: %s", strerror(errno));
+        close(fd);
+        return -1;
       }
 
       getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen);
@@ -110,7 +105,7 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
     close(fd);
     return -1;
   }
-  
+
   fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) & ~O_NONBLOCK);
 
   val = 1;
@@ -119,10 +114,9 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
   return fd;
 }
 
-
 socket_t
 tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
-	    int timeout)
+    int timeout)
 {
   struct   addrinfo hints;
   struct   addrinfo *result, *addr;
@@ -172,9 +166,6 @@ tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
   return fd;
 }
 
-/**
- *
- */
 int
 tcp_read(socket_t fd, void *buf, size_t len)
 {
@@ -185,19 +176,16 @@ tcp_read(socket_t fd, void *buf, size_t len)
   if(x != (int)len)
     return ECONNRESET;
   return 0;
-
 }
 
-/**
- *
- */
 int
 tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
 {
   int x, tot = 0;
   struct pollfd fds;
 
-  assert(timeout > 0);
+  if(timeout > 0)
+    return EINVAL;
 
   fds.fd = fd;
   fds.events = POLLIN;
@@ -212,7 +200,7 @@ tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
     x = recv(fd, buf + tot, len - tot, MSG_DONTWAIT);
     if(x == -1) {
       if(errno == EAGAIN)
-	continue;
+        continue;
       return errno;
     }
 
@@ -224,9 +212,6 @@ tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
   return 0;
 }
 
-/**
- *
- */
 void
 tcp_close(socket_t fd)
 {

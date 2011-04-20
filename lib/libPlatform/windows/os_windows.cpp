@@ -22,14 +22,6 @@
 #include "os_windows.h"
 #include <sys/timeb.h>
 
-#ifndef THREADLOCAL
-#define THREADLOCAL __declspec(thread)
-#endif
-
-THREADLOCAL int ws32_result;
-THREADLOCAL int _so_err;
-THREADLOCAL int _so_err_siz = sizeof(int);
-
 int gettimeofday(struct timeval *pcur_time, struct timezone *tz)
 {
   struct _timeb current;

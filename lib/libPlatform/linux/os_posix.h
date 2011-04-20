@@ -18,9 +18,6 @@
  *
  */
 
-#ifndef LIBPLATFORM_OS_POSIX_H__
-#define LIBPLATFORM_OS_POSIX_H__
-
 #define _FILE_OFFSET_BITS 64
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,8 +30,6 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
-//#include <sys/signal.h>
-//#include <sys/wait.h>
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #ifndef __APPLE__
@@ -44,20 +39,8 @@
 #include <poll.h>
 #include <semaphore.h>
 
-typedef int bool_t;
-//
-// Success codes
-#define S_OK                             0L
-#define S_FALSE                          1L
-//
-// Error codes
-#define ERROR_FILENAME_EXCED_RANGE       206L
-#define E_OUTOFMEMORY                    0x8007000EL
-
 #define LIBTYPE
 
-#define console_vprintf vprintf
-#define console_printf printf
 #define THREAD_FUNC_PREFIX void *
 
 #ifndef __STL_CONFIG_H
@@ -69,16 +52,9 @@ template<class T> inline void swap(T &a, T &b) { T t = a; a = b; b = t; }
 
 #define Sleep(t) usleep(t*1000)
 
-typedef pthread_mutex_t criticalsection_t;
-typedef sem_t waitevent_t;
-
-#define PATH_SEPARATOR_CHAR '/'
-
 static inline uint64_t getcurrenttime(void)
 {
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	return ((uint64_t)t.tv_sec * 1000) + (t.tv_usec / 1000);
+      struct timeval t;
+      gettimeofday(&t, NULL);
+      return ((uint64_t)t.tv_sec * 1000) + (t.tv_usec / 1000);
 }
-
-#endif /* LIBPLATFORM_OS_POSIX_H__ */

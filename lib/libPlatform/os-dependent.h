@@ -18,9 +18,6 @@
  *
  */
 
-#ifndef LIBPLATFORM_OS_DEPENDENT_H__
-#define LIBPLATFORM_OS_DEPENDENT_H__
-
 #if defined(_WIN32) || defined(_WIN64)
 #ifndef __WINDOWS__
 #define __WINDOWS__
@@ -40,5 +37,3 @@
 #if !defined(FALSE)
 #define FALSE 0
 #endif
-
-#endif /* LIBPLATFORM_OS_DEPENDENT_H__ */

@@ -18,9 +18,6 @@
  *
  */
 
-#ifndef LIBTCPSOCKET_NET_POSIX_H
-#define LIBTCPSOCKET_NET_POSIX_H
-
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -29,14 +26,11 @@
 
 typedef int socket_t;
 typedef socket_t SOCKET;
-#define closesocket close
 
 static inline int setsocktimeout(int s, int level, int optname, uint64_t timeout)
 {
-	struct timeval t;
-	t.tv_sec = timeout / 1000;
-	t.tv_usec = (timeout % 1000) * 1000;
-	return setsockopt(s, level, optname, (char *)&t, sizeof(t));
+      struct timeval t;
+      t.tv_sec = timeout / 1000;
+      t.tv_usec = (timeout % 1000) * 1000;
+      return setsockopt(s, level, optname, (char *)&t, sizeof(t));
 }
-
-#endif /* LIBTCPSOCKET_NET_POSIX_H */
