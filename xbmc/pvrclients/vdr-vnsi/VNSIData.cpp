@@ -19,7 +19,6 @@
  *
  */
 
-#include <unistd.h>
 #include "VNSIData.h"
 #include "responsepacket.h"
 #include "requestpacket.h"

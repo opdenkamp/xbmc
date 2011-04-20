@@ -22,7 +22,6 @@
 #include "VNSISession.h"
 #include "client.h"
 
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -38,11 +37,7 @@
 #ifndef SOL_TCP
 #define SOL_TCP IPPROTO_TCP
 #endif
-/*
-#ifndef INVALID_SOCKET
-#define INVALID_SOCKET (-1)
-#endif
-*/
+
 cVNSISession::cVNSISession()
   : m_fd(INVALID_SOCKET)
   , m_protocol(0)
@@ -127,7 +122,7 @@ bool cVNSISession::Open(const std::string& hostname, int port, const char *name)
   catch (const char * str)
   {
     XBMC->Log(LOG_ERROR, "cVNSISession::Open - %s", str);
-    close(m_fd);
+    tcp_close(m_fd);
     m_fd = INVALID_SOCKET;
     return false;
   }

@@ -25,6 +25,8 @@
 #include "utils.h"
 #include "pvrclient-mediaportal.h"
 #include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "libPlatform/os-dependent.h"
 
@@ -215,7 +217,7 @@ void cPVRClientMediaPortal::Disconnect()
 
   m_bStop = true;
 
-  m_tcpclient->close_();
+  m_tcpclient->close();
 
   m_bConnected = false;
 }

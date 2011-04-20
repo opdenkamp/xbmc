@@ -23,7 +23,6 @@
  * Most of this code is taken from tools.c in the Video Disk Recorder ('VDR')
  */
 
-#include <sys/time.h>
 #include "tools.h"
 #include "libPlatform/os-dependent.h"
 #include "client.h"

@@ -78,14 +78,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.pvr</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\..\..\..\lib\ffmpeg;..\..\..\..\..\lib\ffmpeg\include-xbmc-win32;..\..\..\..\..\lib\libdvd\libdvdnav\msvc\include;..\..\..\..\cores\dvdplayer\DVDDemuxers;$(SolutionDir)\..\..\lib;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\..\..\lib\ffmpeg;..\..\..\..\..\lib\ffmpeg\include-xbmc-win32;..\..\..\..\cores\dvdplayer\DVDDemuxers;..\..\..\..\win32;$(SolutionDir)\..\..\lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\..\..\..\addons\pvr.vdr.vnsi\</OutDir>
     <TargetName>XBMC_VDR_vnsi_win32</TargetName>
     <TargetExt>.pvr</TargetExt>
     <ExtensionsToDeleteOnClean>*.cdf;*.cache;*.obj;*.ilk;*.resources;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;*.tlog;*.manifest;*.res;*.pch;*.exp;*.idb;*.rep;*.xdc;*.pdb;*_manifest.rc;*.bsc;*.sbr;*.xml;*.pvr</ExtensionsToDeleteOnClean>
-    <IncludePath>..\..\..\..\..\lib\ffmpeg;..\..\..\..\..\lib\ffmpeg\include-xbmc-win32;..\..\..\..\..\lib\libdvd\libdvdnav\msvc\include;..\..\..\..\cores\dvdplayer\DVDDemuxers;$(SolutionDir)\..\..\lib;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\..\..\lib\ffmpeg;..\..\..\..\..\lib\ffmpeg\include-xbmc-win32;..\..\..\..\cores\dvdplayer\DVDDemuxers;..\..\..\..\win32;$(SolutionDir)\..\..\lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,7 +98,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>..\..\..\..\..\addons\pvr.vdr.vnsi\XBMC_VDR_vnsi_win32.pvr</OutputFile>
-      <AdditionalDependencies>ws2_32.lib;$(SolutionDir)\..\..\lib\libPlatform\pthread_win32\pthreadVC2.lib;$(SolutionDir)\libs\libTcpSocket\$(Configuration)\libTcpSocket.lib;$(SolutionDir)\libs\libPlatform\$(Configuration)\libPlatform.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;$(SolutionDir)\..\..\lib\libPlatform\pthread_win32\pthreadVC2d.lib;$(SolutionDir)\libs\libTcpSocket\$(Configuration)\libTcpSocket.lib;$(SolutionDir)\libs\libPlatform\$(Configuration)\libPlatform.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmtd</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>

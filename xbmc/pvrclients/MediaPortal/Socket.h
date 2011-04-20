@@ -188,7 +188,7 @@ class Socket
      * Close the socket
      * \return     True if succesful
      */
-    bool close_();
+    bool close();
 
     /*!
      * Socket bind

@@ -40,7 +40,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <poll.h>
-#define closesocket close
 #endif
 
 extern "C" {

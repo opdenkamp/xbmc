@@ -58,7 +58,7 @@ Socket::Socket()
 
 Socket::~Socket()
 {
-  close_();
+  close();
 }
 
 bool Socket::setHostname ( const std::string host )
@@ -83,11 +83,11 @@ bool Socket::setHostname ( const std::string host )
 }
 
 
-bool Socket::close_()
+bool Socket::close()
 {
   if (is_valid())
   {
-    closesocket(_sd);
+    tcp_close(_sd);
     _sd = INVALID_SOCKET;
     osCleanup();
     return true;
@@ -99,7 +99,7 @@ bool Socket::create()
 {
   if( is_valid() )
   {
-    close_();
+    close();
   }
 
   if(!osInit())
