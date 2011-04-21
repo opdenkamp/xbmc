@@ -49,6 +49,7 @@
 
 using namespace std;
 using namespace MUSIC_INFO;
+using namespace PVR;
 
 CPVRManager::CPVRManager(void)
 {
@@ -157,7 +158,7 @@ void CPVRManager::StopUpdateThreads(void)
 {
   StopThread();
   m_epg->RemoveObserver(this);
-  m_epg->StopThread();
+  m_epg->Stop();
   m_guiInfo->Stop();
   m_addons->Stop();
 }
@@ -335,11 +336,6 @@ void CPVRManager::UpdateWindow(PVRWindow window)
   CGUIWindowPVR *pWindow = (CGUIWindowPVR *) g_windowManager.GetWindow(WINDOW_PVR);
   if (pWindow)
     pWindow->UpdateWindow(window);
-}
-
-bool CPVRManager::IsRunningChannelScan(void) const
-{
-  return m_addons->IsRunningChannelScan();
 }
 
 void CPVRManager::ResetProperties(void)
@@ -1059,4 +1055,39 @@ bool CPVRManager::IsRunning(void) const
 {
   CSingleLock lock(m_critSection);
   return !m_bStop;
+}
+
+bool CPVRManager::IsPlayingTV(void) const
+{
+  return m_addons->IsPlayingTV();
+}
+
+bool CPVRManager::IsPlayingRadio(void) const
+{
+  return m_addons->IsPlayingRadio();
+}
+
+bool CPVRManager::IsPlayingRecording(void) const
+{
+  return m_addons->IsPlayingRecording();
+}
+
+bool CPVRManager::IsRunningChannelScan(void) const
+{
+  return m_addons->IsRunningChannelScan();
+}
+
+PVR_ADDON_CAPABILITIES *CPVRManager::GetCurrentClientProperties(void)
+{
+  return m_addons->GetCurrentClientProperties();
+}
+
+void CPVRManager::StartChannelScan(void)
+{
+  return m_addons->StartChannelScan();
+}
+
+void CPVRManager::SearchMissingChannelIcons(void)
+{
+  return m_channelGroups->SearchMissingChannelIcons();
 }

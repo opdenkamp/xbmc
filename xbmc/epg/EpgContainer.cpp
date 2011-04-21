@@ -35,9 +35,9 @@
 #include "EpgSearchFilter.h"
 
 #include "pvr/PVRManager.h"
-#include "pvr/addons/PVRClients.h"
 
 using namespace std;
+using namespace PVR;
 
 CEpgContainer g_EpgContainer;
 
@@ -325,7 +325,7 @@ bool CEpgContainer::UpdateSingleTable(CEpg *epg, const time_t start, const time_
 
 bool CEpgContainer::InterruptUpdate(void) const
 {
-  return (m_bStop || (g_PVRManager.IsStarted() && g_PVRClients->IsPlaying()));;
+  return (m_bStop || (g_PVRManager.IsStarted() && g_PVRManager.IsPlaying()));;
 }
 
 bool CEpgContainer::UpdateEPG(bool bShowProgress /* = false */)
