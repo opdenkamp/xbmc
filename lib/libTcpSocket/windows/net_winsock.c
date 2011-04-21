@@ -210,7 +210,7 @@ tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
   fd_set fd_read;
   struct timeval tv;
 
-  if(timeout > 0)
+  if(timeout <= 0)
     return EINVAL;
 
   while(tot != len) {

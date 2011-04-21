@@ -184,7 +184,7 @@ tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
   int x, tot = 0;
   struct pollfd fds;
 
-  if(timeout > 0)
+  if(timeout <= 0)
     return EINVAL;
 
   fds.fd = fd;
