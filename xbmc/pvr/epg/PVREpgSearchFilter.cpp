@@ -28,6 +28,8 @@
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 
 using namespace std;
+using namespace PVR;
+using namespace EPG;
 
 void PVREpgSearchFilter::Reset()
 {

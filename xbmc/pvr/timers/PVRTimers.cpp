@@ -33,6 +33,8 @@
 #include "pvr/addons/PVRClients.h"
 
 using namespace std;
+using namespace PVR;
+using namespace EPG;
 
 CPVRTimers::CPVRTimers(void)
 {
@@ -129,7 +131,8 @@ bool CPVRTimers::IsRecording(void)
 
 bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
 {
-  bool bChanged = false;
+  bool bChanged(false);
+  bool bAddedOrDeleted(false);
 
   CSingleLock lock(m_critSection);
 
@@ -158,6 +161,7 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
       newTimer->UpdateEntry(*timer);
       push_back(newTimer);
       bChanged = true;
+      bAddedOrDeleted = true;
 
       CLog::Log(LOGINFO,"PVRTimers - %s - added timer %d on client %d",
           __FUNCTION__, timer->m_iClientIndex, timer->m_iClientId);
@@ -186,6 +190,7 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
       iTimerPtr--;
       iSize--;
       bChanged = true;
+      bAddedOrDeleted = true;
     }
   }
 
@@ -198,11 +203,11 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
 
     NotifyObservers("timers", false);
 
-    g_PVRManager.UpdateWindow(PVR_WINDOW_TIMERS);
-    g_PVRManager.UpdateWindow(PVR_WINDOW_EPG);
-    g_PVRManager.UpdateWindow(PVR_WINDOW_RECORDINGS);
-    g_PVRManager.UpdateWindow(PVR_WINDOW_CHANNELS_TV);
-    g_PVRManager.UpdateWindow(PVR_WINDOW_CHANNELS_RADIO);
+    g_PVRManager.UpdateWindow(PVR_WINDOW_TIMERS, bAddedOrDeleted);
+    g_PVRManager.UpdateWindow(PVR_WINDOW_EPG, false);
+    g_PVRManager.UpdateWindow(PVR_WINDOW_RECORDINGS, bAddedOrDeleted);
+    g_PVRManager.UpdateWindow(PVR_WINDOW_CHANNELS_TV, false);
+    g_PVRManager.UpdateWindow(PVR_WINDOW_CHANNELS_RADIO, false);
   }
 
   return bChanged;

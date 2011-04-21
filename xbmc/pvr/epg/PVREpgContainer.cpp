@@ -30,6 +30,8 @@
 #include "utils/log.h"
 
 using namespace std;
+using namespace PVR;
+using namespace EPG;
 
 void CPVREpgContainer::Clear(bool bClearDb /* = false */)
 {
@@ -56,9 +58,8 @@ bool CPVREpgContainer::CreateChannelEpgs(void)
         channel->GetEPG();
       else
       {
-        channel->m_EPG     = (CPVREpg *) epg;
-        epg->m_Channel     = channel;
-        epg->m_bHasChannel = true;
+        channel->m_EPG = (CPVREpg *) epg;
+        epg->SetChannel(channel);
       }
     }
   }
