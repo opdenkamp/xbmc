@@ -796,6 +796,7 @@ void CGUISettings::Initialize()
   CSettingsCategory* pvr = AddCategory(8, "pvrmanager", 128);
   AddBool(pvr, "pvrmanager.enabled", 449, false);
   AddBool(pvr, "pvrmanager.syncchannelgroups", 19221, true);
+  AddBool(pvr, "pvrmanager.usebackchannum", 19250, true);
   AddString(pvr, "pvrmanager.channelmanager", 19199, "", BUTTON_CONTROL_STANDARD);
   AddString(pvr, "pvrmanager.channelscan", 19117, "", BUTTON_CONTROL_STANDARD);
   AddString(pvr, "pvrmanager.resetdb", 19185, "", BUTTON_CONTROL_STANDARD);
@@ -831,8 +832,8 @@ void CGUISettings::Initialize()
   AddInt(pvrr, "pvrrecord.instantrecordtime", 19172, 180, 1, 1, 720, SPIN_CONTROL_INT_PLUS, MASK_MINS);
   AddInt(pvrr, "pvrrecord.defaultpriority", 19173, 50, 1, 1, 100, SPIN_CONTROL_INT_PLUS);
   AddInt(pvrr, "pvrrecord.defaultlifetime", 19174, 99, 1, 1, 365, SPIN_CONTROL_INT_PLUS, MASK_DAYS);
-  AddInt(pvrr, "pvrrecord.marginstart", 19175, 2, 1, 1, 60, SPIN_CONTROL_INT_PLUS, MASK_MINS);
-  AddInt(pvrr, "pvrrecord.marginend", 19176, 10, 1, 1, 60, SPIN_CONTROL_INT_PLUS, MASK_MINS);
+  AddInt(pvrr, "pvrrecord.marginstart", 19175, 2, 0, 1, 60, SPIN_CONTROL_INT_PLUS, MASK_MINS);
+  AddInt(pvrr, "pvrrecord.marginend", 19176, 10, 0, 1, 60, SPIN_CONTROL_INT_PLUS, MASK_MINS);
 }
 
 CGUISettings::~CGUISettings(void)

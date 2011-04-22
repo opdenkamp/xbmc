@@ -318,6 +318,9 @@ namespace PVR
      */
     virtual unsigned int GetChannelNumber(const CPVRChannel &channel) const;
 
+    virtual unsigned int GetIndexByNumber(unsigned int channelNumber) const;
+    virtual unsigned int GetMaxChannelNumber(void) const;
+
     /*!
      * @brief Get the next channel in this group.
      * @param channel The current channel.
