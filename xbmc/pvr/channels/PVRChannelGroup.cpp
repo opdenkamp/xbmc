@@ -323,15 +323,13 @@ unsigned int CPVRChannelGroup::GetIndexByNumber(unsigned int channelNumber) cons
 
 unsigned int CPVRChannelGroup::GetMaxChannelNumber(void) const
 {
-  unsigned int max = 0;
-  unsigned int iSize = size();
-  for (unsigned int iChannelPtr = 0; iChannelPtr < iSize; iChannelPtr++)
+  if (size() > 0)
   {
-    PVRChannelGroupMember member = at(iChannelPtr);
-    if (member.iChannelNumber > max)
-      max = member.iChannelNumber;
+    PVRChannelGroupMember member = at(size()-1);
+    return member.iChannelNumber;
   }
-  return max;
+  else
+    return 0;
 }
 
 const CPVRChannel *CPVRChannelGroup::GetLastPlayedChannel(void) const
@@ -402,16 +400,15 @@ const CPVRChannel *CPVRChannelGroup::GetByChannelNumber(unsigned int iChannelNum
 const CPVRChannel *CPVRChannelGroup::GetByChannelUp(const CPVRChannel &channel) const
 {
   CSingleLock lock(m_critSection);
-  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1))
+  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1))
   {
     unsigned int iChannelNumber = GetChannelNumber(channel);
-    unsigned int newIndex = GetIndexByNumber(iChannelNumber);       
-    if ( (newIndex+1) >= size() )
-      newIndex = 0;  
+    int iNewChannelNumber;
+    if ( (GetIndexByNumber(iChannelNumber)+1) < size() )
+      iNewChannelNumber = at( GetIndexByNumber(iChannelNumber)+1 ).iChannelNumber;
     else
-      newIndex++;
-    int newChannelNumber = at(newIndex).iChannelNumber;
-    return GetByChannelNumber(newChannelNumber);
+      iNewChannelNumber = at(0).iChannelNumber;
+    return GetByChannelNumber(iNewChannelNumber);
   }
   else
   {
@@ -425,16 +422,15 @@ const CPVRChannel *CPVRChannelGroup::GetByChannelUp(const CPVRChannel &channel) 
 const CPVRChannel *CPVRChannelGroup::GetByChannelDown(const CPVRChannel &channel) const
 {
   CSingleLock lock(m_critSection);
-  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
+  if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1))
   {
     unsigned int iChannelNumber = GetChannelNumber(channel);
-    unsigned int newIndex = GetIndexByNumber(iChannelNumber);       
-    if ( (newIndex-1) < 0 )
-      newIndex = size()-1;  
+    int iNewChannelNumber;
+    if ( (GetIndexByNumber(iChannelNumber)-1) > 0 )
+      iNewChannelNumber = at( GetIndexByNumber(iChannelNumber)-1 ).iChannelNumber;
     else
-      newIndex--;
-    int newChannelNumber = at(newIndex).iChannelNumber;
-    return GetByChannelNumber(newChannelNumber);
+      iNewChannelNumber = at( size()-1 ).iChannelNumber;
+    return GetByChannelNumber(iNewChannelNumber);
   }
   else
   {
@@ -764,7 +760,7 @@ void CPVRChannelGroup::Renumber(void)
   {
     if (at(ptr).iChannelNumber != iChannelNumber + 1)
       m_bChanged = true;
-    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
+    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1)) 
     {
       PVRChannelGroupMember member = at(ptr);     
       at(ptr).iChannelNumber = member.channel->ClientChannelNumber();
@@ -842,7 +838,7 @@ void CPVRChannelGroup::SetSelectedGroup(void)
   /* set all channel numbers on members of this group */
   unsigned int iChannelNumber(1);
   for (unsigned int iChannelPtr = 0; iChannelPtr < size(); iChannelPtr++)
-    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
+    if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1)) 
     {
       PVRChannelGroupMember member = at(iChannelPtr);     
       at(iChannelPtr).channel->SetCachedChannelNumber(member.channel->ClientChannelNumber());

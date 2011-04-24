@@ -266,17 +266,14 @@ void CPVRChannelGroupInternal::Renumber(void)
     }
     else
     {
-      if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->GetNumActiveClient() == 1)) 
+      if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1)) 
       {
         PVRChannelGroupMember member = at(ptr);
         at(ptr).iChannelNumber = member.channel->ClientChannelNumber();
-        at(ptr).channel->UpdatePath(member.channel->ClientChannelNumber());
       }
       else
-      {
         at(ptr).iChannelNumber = ++iChannelNumber;
-        at(ptr).channel->UpdatePath(iChannelNumber);
-      }
+      at(ptr).channel->UpdatePath( at(ptr).iChannelNumber );
     }
   }
 }

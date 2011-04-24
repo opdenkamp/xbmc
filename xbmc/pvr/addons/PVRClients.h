@@ -29,7 +29,6 @@
 
 namespace PVR
 {
-
   class CPVRGUIInfo;
 
   typedef std::map< long, boost::shared_ptr<CPVRClient> >           CLIENTMAP;
@@ -172,7 +171,6 @@ namespace PVR
     int GetChannels(CPVRChannelGroupInternal *group, PVR_ERROR *error);
 
     int GetClients(std::map<long, CStdString> *clients);
-    int GetNumActiveClient(void);
 
     /*!
      * @brief Check whether a client has any PVR specific menu entries.
