@@ -266,7 +266,7 @@ void CPVRChannelGroupInternal::Renumber(void)
     }
     else
     {
-      if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (CPVRManager::Get().Clients()->ActiveClientAmount() == 1)) 
+      if (g_guiSettings.GetBool("pvrmanager.usebackchannum") && (g_PVRClients->ActiveClientAmount() == 1)) 
       {
         PVRChannelGroupMember member = at(ptr);
         at(ptr).iChannelNumber = member.channel->ClientChannelNumber();
