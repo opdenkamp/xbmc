@@ -41,8 +41,6 @@
 
 #define LIBTYPE
 
-#define THREAD_FUNC_PREFIX void *
-
 #ifndef __STL_CONFIG_H
 template<class T> inline T min(T a, T b) { return a <= b ? a : b; }
 template<class T> inline T max(T a, T b) { return a >= b ? a : b; }
@@ -50,8 +48,10 @@ template<class T> inline int sgn(T a) { return a < 0 ? -1 : a > 0 ? 1 : 0; }
 template<class T> inline void swap(T &a, T &b) { T t = a; a = b; b = t; }
 #endif
 
-#define Sleep(t) usleep(t*1000)
-
+/*!
+	\brief	wraps unix gettimeofday
+	\return	current time value in µs since unix epoch
+ */
 static inline uint64_t getcurrenttime(void)
 {
       struct timeval t;

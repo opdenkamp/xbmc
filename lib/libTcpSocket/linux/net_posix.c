@@ -18,7 +18,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <netdb.h>
 #ifdef __APPLE__
 /* Needed on Mac OS/X */
 #ifndef SOL_TCP
@@ -32,67 +31,70 @@
 #else
 #include <sys/epoll.h>
 #endif
-#include <poll.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-
-#if defined(__FreeBSD__)
-#include <sys/socket.h>
-#endif
 
 #include "../os-dependent_socket.h"
 
 socket_t
-tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
-    int timeout)
+tcp_connect_addr(struct addrinfo* addr, char *szErrbuf, size_t nErrbufSize,
+    int nTimeout)
 {
-  socket_t fd;
-  int r, err, val;
-  socklen_t errlen = sizeof(int);
+  socket_t fdSock;
 
-  fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-  if(fd == -1) {
-    snprintf(errbuf, errbufsize, "Unable to create socket: %s", strerror(errno));
-    return -1;
+  fdSock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+  if(fdSock == -1) {
+    snprintf(szErrbuf, nErrbufSize, "Unable to create socket: %s", strerror(errno));
+    return SOCKET_ERROR;
   }
 
   /**
    * Switch to nonblocking
    */
-  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+  if (tcp_connect_addr_socket_nonblocking(addr, fdSock, szErrbuf, nErrbufSize, nTimeout) == SOCKET_ERROR)
+    return SOCKET_ERROR;
 
-  r = connect(fd, addr->ai_addr, addr->ai_addrlen);
+  return fdSock;
+}
+
+int
+tcp_connect_addr_socket_nonblocking(struct addrinfo* addr, socket_t fdSock, char *szErrbuf, size_t nErrbufSize,
+    int nTimeout)
+{
+  int r, err, val;
+  socklen_t errlen = sizeof(int);
+
+  fcntl(fdSock, F_SETFL, fcntl(fdSock, F_GETFL) | O_NONBLOCK);
+
+  r = connect(fdSock, addr->ai_addr, addr->ai_addrlen);
 
   if(r == -1) {
     if(errno == EINPROGRESS) {
       struct pollfd pfd;
 
-      pfd.fd = fd;
+      pfd.fd = fdSock;
       pfd.events = POLLOUT;
       pfd.revents = 0;
 
-      r = poll(&pfd, 1, timeout);
+      r = poll(&pfd, 1, nTimeout);
       if(r == 0) {
         /* Timeout */
-        snprintf(errbuf, errbufsize, "Connection attempt timed out");
-        close(fd);
-        return -1;
+        snprintf(szErrbuf, nErrbufSize, "Connection attempt timed out");
+        close(fdSock);
+        return SOCKET_ERROR;
       }
 
       if(r == -1) {
-        snprintf(errbuf, errbufsize, "poll() error: %s", strerror(errno));
-        close(fd);
-        return -1;
+        snprintf(szErrbuf, nErrbufSize, "poll() error: %s", strerror(errno));
+        close(fdSock);
+        return SOCKET_ERROR;
       }
 
-      getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen);
+      getsockopt(fdSock, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen);
     } else {
       err = errno;
     }
@@ -101,103 +103,103 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
   }
 
   if(err != 0) {
-    snprintf(errbuf, errbufsize, "%s", strerror(err));
-    close(fd);
-    return -1;
+    snprintf(szErrbuf, nErrbufSize, "%s", strerror(err));
+    close(fdSock);
+    return SOCKET_ERROR;
   }
 
-  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) & ~O_NONBLOCK);
+  fcntl(fdSock, F_SETFL, fcntl(fdSock, F_GETFL) & ~O_NONBLOCK);
 
   val = 1;
-  setsockopt(fd, SOL_TCP, TCP_NODELAY, &val, sizeof(val));
+  setsockopt(fdSock, SOL_TCP, TCP_NODELAY, &val, sizeof(val));
 
-  return fd;
+  return 0;
 }
 
 socket_t
-tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
-    int timeout)
+tcp_connect(const char *szHostname, int nPort, char *szErrbuf, size_t nErrbufSize,
+    int nTimeout)
 {
   struct   addrinfo hints;
   struct   addrinfo *result, *addr;
   char     service[33];
   int      res;
-  socket_t fd = -1;
+  socket_t fdSock = INVALID_SOCKET;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family   = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
-  sprintf(service, "%d", port);
+  sprintf(service, "%d", nPort);
 
-  res = getaddrinfo(hostname, service, &hints, &result);
+  res = getaddrinfo(szHostname, service, &hints, &result);
   if(res) {
     switch(res) {
     case EAI_NONAME:
-      snprintf(errbuf, errbufsize, "The specified host is unknown");
+      snprintf(szErrbuf, nErrbufSize, "The specified host is unknown");
       break;
 
     case EAI_FAIL:
-      snprintf(errbuf, errbufsize, "A nonrecoverable failure in name resolution occurred");
+      snprintf(szErrbuf, nErrbufSize, "A nonrecoverable failure in name resolution occurred");
       break;
 
     case EAI_MEMORY:
-      snprintf(errbuf, errbufsize, "A memory allocation failure occurred");
+      snprintf(szErrbuf, nErrbufSize, "A memory allocation failure occurred");
       break;
 
     case EAI_AGAIN:
-      snprintf(errbuf, errbufsize, "A temporary error occurred on an authoritative name server");
+      snprintf(szErrbuf, nErrbufSize, "A temporary error occurred on an authoritative name server");
       break;
 
     default:
-      snprintf(errbuf, errbufsize, "Unknown error %d", res);
+      snprintf(szErrbuf, nErrbufSize, "Unknown error %d", res);
       break;
     }
-    return -1;
+    return SOCKET_ERROR;
   }
 
   for(addr = result; addr; addr = addr->ai_next) {
-    fd = tcp_connect_addr(addr, errbuf, errbufsize, timeout);
-    if(fd != -1)
+    fdSock = tcp_connect_addr(addr, szErrbuf, nErrbufSize, nTimeout);
+    if(fdSock != INVALID_SOCKET)
       break;
   }
 
   freeaddrinfo(result);
-  return fd;
+  return fdSock;
 }
 
 int
-tcp_read(socket_t fd, void *buf, size_t len)
+tcp_read(socket_t fdSock, void *buf, size_t nLen)
 {
-  int x = recv(fd, buf, len, MSG_WAITALL);
+  int x = recv(fdSock, buf, nLen, MSG_WAITALL);
 
   if(x == -1)
     return errno;
-  if(x != (int)len)
+  if(x != (int)nLen)
     return ECONNRESET;
   return 0;
 }
 
 int
-tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
+tcp_read_timeout(socket_t fdSock, void *buf, size_t nLen, int nTimeout)
 {
   int x, tot = 0;
   struct pollfd fds;
 
-  if(timeout <= 0)
+  if(nTimeout <= 0)
     return EINVAL;
 
-  fds.fd = fd;
+  fds.fd = fdSock;
   fds.events = POLLIN;
   fds.revents = 0;
 
-  while(tot != (int)len) {
+  while(tot != (int)nLen) {
 
-    x = poll(&fds, 1, timeout);
+    x = poll(&fds, 1, nTimeout);
     if(x == 0)
       return ETIMEDOUT;
 
-    x = recv(fd, buf + tot, len - tot, MSG_DONTWAIT);
+    x = recv(fdSock, buf + tot, nLen - tot, MSG_DONTWAIT);
     if(x == -1) {
       if(errno == EAGAIN)
         continue;
@@ -213,7 +215,7 @@ tcp_read_timeout(socket_t fd, void *buf, size_t len, int timeout)
 }
 
 void
-tcp_close(socket_t fd)
+tcp_close(socket_t fdSock)
 {
-  close(fd);
+  close(fdSock);
 }

@@ -24,6 +24,11 @@
 
 int gettimeofday(struct timeval *pcur_time, struct timezone *tz)
 {
+  if (pcur_time == NULL)
+  {
+    SetLastError(EFAULT);
+    return -1;
+  }
   struct _timeb current;
 
   _ftime(&current);

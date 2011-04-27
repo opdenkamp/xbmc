@@ -23,14 +23,12 @@
 #include <sys/socket.h>
 #include <stdint.h>
 #include <errno.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <poll.h>
 
 typedef int socket_t;
 typedef socket_t SOCKET;
 
-static inline int setsocktimeout(int s, int level, int optname, uint64_t timeout)
-{
-      struct timeval t;
-      t.tv_sec = timeout / 1000;
-      t.tv_usec = (timeout % 1000) * 1000;
-      return setsockopt(s, level, optname, (char *)&t, sizeof(t));
-}

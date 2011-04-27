@@ -65,4 +65,10 @@ struct timezone
   int	tz_dsttime;	/* type of dst correction */
 };
 
-extern int gettimeofday(struct timeval *, struct timezone *);
+/*!
+	\brief	implements similar unix call under windows
+	\return		0 on success, -1 on failure (if pcur_time was NULL)
+	\param		pcur_time points to a timeval structure, should not be NULL
+	\param		tz points to a timezone structure, may be NULL
+ */
+extern int gettimeofday(struct timeval *pcur_time, struct timezone *tz);

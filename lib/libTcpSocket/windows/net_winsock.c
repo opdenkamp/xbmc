@@ -25,65 +25,83 @@
 #include <stdarg.h>
 
 #include "../os-dependent_socket.h"
-#include <Ws2tcpip.h>
 
+#ifndef EINPROGRESS
 #define EINPROGRESS WSAEINPROGRESS
-#define ECONNRESET  WSAECONNRESET
-#define ETIMEDOUT   WSAETIMEDOUT
-#define EAGAIN      WSAEWOULDBLOCK
-#define EINVAL      WSAEINVAL
+#endif
 
-#define snprintf _snprintf
+#ifndef ECONNRESET
+#define ECONNRESET  WSAECONNRESET
+#endif
+
+#ifndef EAGAIN
+#define EAGAIN      WSAEWOULDBLOCK
+#endif
+
+#ifndef EINVAL
+#define EINVAL      WSAEINVAL
+#endif
 
 #ifndef MSG_WAITALL
 #define MSG_WAITALL 0x8
 #endif
 
-static int recv_fixed (SOCKET s, char * buf, int len, int flags)
+static int recv_fixed (SOCKET fdSock, char * szBuf, int nLen, int nFlags)
 {
-  char* org = buf;
+  char* org = szBuf;
   int   res = 1;
 
-  if((flags & MSG_WAITALL) == 0)
-    return recv(s, buf, len, flags);
+  if((nFlags & MSG_WAITALL) == 0)
+    return recv(fdSock, szBuf, nLen, nFlags);
 
-  flags &= ~MSG_WAITALL;
-  while(len > 0 && res > 0)
+  nFlags &= ~MSG_WAITALL;
+  while(nLen > 0 && res > 0)
   {
-    res = recv(s, buf, len, flags);
+    res = recv(fdSock, szBuf, nLen, nFlags);
     if(res < 0)
       return res;
 
-    buf += res;
-    len -= res;
+    szBuf += res;
+    nLen -= res;
   }
-  return buf - org;
+  return szBuf - org;
 }
 
-#define recv(s, buf, len, flags) recv_fixed(s, buf, len, flags)
+#define recv(fdSock, szBuf, nLen, nFlags) recv_fixed(fdSock, szBuf, nLen, nFlags)
 
 socket_t
-tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
-    int timeout)
+tcp_connect_addr(struct addrinfo* addr, char *szErrbuf, size_t nErrbufSize,
+    int nTimeout)
 {
-  socket_t fd;
-  int r, err, val;
-  socklen_t errlen = sizeof(int);
+  socket_t fdSock;
 
-  fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-  if(fd == -1) {
-    snprintf(errbuf, errbufsize, "Unable to create socket: %s",
+  fdSock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+  if(fdSock == -1) {
+    _snprintf(szErrbuf, nErrbufSize, "Unable to create socket: %s",
      strerror(WSAGetLastError()));
-    return -1;
+    return SOCKET_ERROR;
   }
 
   /**
    * Switch to nonblocking
    */
-  val = 1;
-  ioctlsocket(fd, FIONBIO, &val);
+  if(tcp_connect_addr_socket_nonblocking(addr, fdSock, szErrbuf, nErrbufSize, nTimeout) == SOCKET_ERROR)
+    return SOCKET_ERROR;
 
-  r = connect(fd, addr->ai_addr, addr->ai_addrlen);
+  return fdSock;
+}
+
+int
+tcp_connect_addr_socket_nonblocking(struct addrinfo* addr, socket_t fdSock,
+    char *szErrbuf, size_t nErrbufSize, int nTimeout)
+{
+  int r, err, val;
+  socklen_t errlen = sizeof(int);
+
+  val = 1;
+  ioctlsocket(fdSock, FIONBIO, &val);
+
+  r = connect(fdSock, addr->ai_addr, addr->ai_addrlen);
 
   if(r == -1) {
     if(WSAGetLastError() == EINPROGRESS ||
@@ -91,31 +109,31 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
       fd_set fd_write, fd_except;
       struct timeval tv;
 
-      tv.tv_sec  =         timeout / 1000;
-      tv.tv_usec = 1000 * (timeout % 1000);
+      tv.tv_sec  =         nTimeout / 1000;
+      tv.tv_usec = 1000 * (nTimeout % 1000);
 
       FD_ZERO(&fd_write);
       FD_ZERO(&fd_except);
 
-      FD_SET(fd, &fd_write);
-      FD_SET(fd, &fd_except);
+      FD_SET(fdSock, &fd_write);
+      FD_SET(fdSock, &fd_except);
 
-      r = select((int)fd+1, NULL, &fd_write, &fd_except, &tv);
+      r = select((int)fdSock+1, NULL, &fd_write, &fd_except, &tv);
 
       if(r == 0) {
         /* Timeout */
-        snprintf(errbuf, errbufsize, "Connection attempt timed out");
-        tcp_close(fd);
-        return -1;
+        _snprintf(szErrbuf, nErrbufSize, "Connection attempt timed out");
+        tcp_close(fdSock);
+        return SOCKET_ERROR;
       }
 
       if(r == -1) {
-        snprintf(errbuf, errbufsize, "select() error: %s", strerror(WSAGetLastError()));
-        tcp_close(fd);
-        return -1;
+        _snprintf(szErrbuf, nErrbufSize, "select() error: %s", strerror(WSAGetLastError()));
+        tcp_close(fdSock);
+        return SOCKET_ERROR;
       }
 
-      getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen);
+      getsockopt(fdSock, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen);
     } else {
       err = WSAGetLastError();
     }
@@ -124,116 +142,116 @@ tcp_connect_addr(struct addrinfo* addr, char *errbuf, size_t errbufsize,
   }
 
   if(err != 0) {
-    snprintf(errbuf, errbufsize, "%s", strerror(err));
-    tcp_close(fd);
-    return -1;
+    _snprintf(szErrbuf, nErrbufSize, "%s", strerror(err));
+    tcp_close(fdSock);
+    return SOCKET_ERROR;
   }
 
   val = 0;
-  ioctlsocket(fd, FIONBIO, &val);
+  ioctlsocket(fdSock, FIONBIO, &val);
 
   val = 1;
-  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&val, sizeof(val));
+  setsockopt(fdSock, IPPROTO_TCP, TCP_NODELAY, (const char*)&val, sizeof(val));
 
-  return fd;
+  return 0;
 }
 
 socket_t
-tcp_connect(const char *hostname, int port, char *errbuf, size_t errbufsize,
-    int timeout)
+tcp_connect(const char *szHostname, int nPort, char *szErrbuf, size_t nErrbufSize,
+    int nTimeout)
 {
   struct   addrinfo hints;
   struct   addrinfo *result, *addr;
   char     service[33];
   int      res;
-  socket_t fd = INVALID_SOCKET;
+  socket_t fdSock = INVALID_SOCKET;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family   = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
-  sprintf(service, "%d", port);
+  sprintf(service, "%d", nPort);
 
-  res = getaddrinfo(hostname, service, &hints, &result);
+  res = getaddrinfo(szHostname, service, &hints, &result);
   if(res) {
     switch(res) {
     case EAI_NONAME:
-      snprintf(errbuf, errbufsize, "The specified host is unknown");
+      _snprintf(szErrbuf, nErrbufSize, "The specified host is unknown");
       break;
 
     case EAI_FAIL:
-      snprintf(errbuf, errbufsize, "A nonrecoverable failure in name resolution occurred");
+      _snprintf(szErrbuf, nErrbufSize, "A nonrecoverable failure in name resolution occurred");
       break;
 
     case EAI_MEMORY:
-      snprintf(errbuf, errbufsize, "A memory allocation failure occurred");
+      _snprintf(szErrbuf, nErrbufSize, "A memory allocation failure occurred");
       break;
 
     case EAI_AGAIN:
-      snprintf(errbuf, errbufsize, "A temporary error occurred on an authoritative name server");
+      _snprintf(szErrbuf, nErrbufSize, "A temporary error occurred on an authoritative name server");
       break;
 
     default:
-      snprintf(errbuf, errbufsize, "Unknown error %d", res);
+      _snprintf(szErrbuf, nErrbufSize, "Unknown error %d", res);
       break;
     }
-    return INVALID_SOCKET;
+    return SOCKET_ERROR;
   }
 
   for(addr = result; addr; addr = addr->ai_next) {
-    fd = tcp_connect_addr(addr, errbuf, errbufsize, timeout);
-    if(fd != INVALID_SOCKET)
+    fdSock = tcp_connect_addr(addr, szErrbuf, nErrbufSize, nTimeout);
+    if(fdSock != INVALID_SOCKET)
       break;
   }
 
   freeaddrinfo(result);
-  return fd;
+  return fdSock;
 }
 
 int
-tcp_read(socket_t fd, void *buf, size_t len)
+tcp_read(socket_t fdSock, void *buf, size_t nLen)
 {
-  int x = recv(fd, buf, len, MSG_WAITALL);
+  int x = recv(fdSock, buf, nLen, MSG_WAITALL);
 
   if(x == -1)
     return WSAGetLastError();
-  if(x != len)
+  if(x != nLen)
     return ECONNRESET;
   return 0;
 
 }
 
 int
-tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
+tcp_read_timeout(socket_t fdSock, char *buf, size_t nLen, int nTimeout)
 {
   int x, tot = 0, val, err;
   fd_set fd_read;
   struct timeval tv;
 
-  if(timeout <= 0)
+  if(nTimeout <= 0)
     return EINVAL;
 
-  while(tot != len) {
+  while(tot != nLen) {
 
-    tv.tv_sec  =         timeout / 1000;
-    tv.tv_usec = 1000 * (timeout % 1000);
+    tv.tv_sec  =         nTimeout / 1000;
+    tv.tv_usec = 1000 * (nTimeout % 1000);
 
     FD_ZERO(&fd_read);
-    FD_SET(fd, &fd_read);
+    FD_SET(fdSock, &fd_read);
 
-    x = select((int)fd+1, &fd_read, NULL, NULL, &tv);
+    x = select((int)fdSock+1, &fd_read, NULL, NULL, &tv);
 
     if(x == 0)
       return ETIMEDOUT;
 
     val = 1;
-    ioctlsocket(fd, FIONBIO, &val);
+    ioctlsocket(fdSock, FIONBIO, &val);
 
-    x   = recv(fd, buf + tot, len - tot, 0);
+    x   = recv(fdSock, buf + tot, nLen - tot, 0);
     err = WSAGetLastError();
 
     val = 0;
-    ioctlsocket(fd, FIONBIO, &val);
+    ioctlsocket(fdSock, FIONBIO, &val);
 
     if(x == 0)
       return ECONNRESET;
@@ -250,7 +268,7 @@ tcp_read_timeout(socket_t fd, char *buf, size_t len, int timeout)
 }
 
 void
-tcp_close(socket_t fd)
+tcp_close(socket_t fdSock)
 {
-  closesocket(fd);
+  closesocket(fdSock);
 }

@@ -28,7 +28,14 @@
 #pragma warning(default:4005)
 #include <ws2spi.h>
 #include <ws2ipdef.h>
+#include <ws2tcpip.h>
 #include <io.h>
+
+#define SHUT_RDWR SD_BOTH
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT WSAETIMEDOUT
+#endif
 
 typedef SOCKET socket_t;
 typedef int socklen_t;
