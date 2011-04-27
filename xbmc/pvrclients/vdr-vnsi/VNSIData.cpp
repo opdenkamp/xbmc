@@ -24,13 +24,9 @@
 #include "requestpacket.h"
 #include "vdrcommand.h"
 
-#ifdef __WINDOWS__
-#include <winsock2.h>
-#define usleep(t) Sleep((t)/1000)
-#undef SendMessage
-#else
-#include <arpa/inet.h>
-#endif
+extern "C" {
+#include "libTcpSocket/os-dependent_socket.h"
+}
 
 #define CMD_LOCK cMutexLock CmdLock((cMutex*)&m_Mutex)
 

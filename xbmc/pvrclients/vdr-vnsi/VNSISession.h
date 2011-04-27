@@ -22,25 +22,6 @@
 #pragma once
 #include <stdint.h>
 #include <string>
-#ifdef __WINDOWS__
-#ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_
-#endif
-#pragma warning(disable:4005) // Disable "warning C4005: '_WINSOCKAPI_' : macro redefinition"
-#include <winsock2.h>
-#pragma warning(default:4005)
-#include <ws2tcpip.h>
-#define SHUT_RDWR SD_BOTH
-#undef SendMessage
-
-// other (linux) specific
-
-#else
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <poll.h>
-#endif
 
 extern "C" {
 #include "libTcpSocket/os-dependent_socket.h"

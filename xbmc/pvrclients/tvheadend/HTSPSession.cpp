@@ -21,18 +21,9 @@
 
 #include "HTSPSession.h"
 #include "client.h"
-#ifdef _MSC_VER
-#include <winsock2.h>
-#define SHUT_RDWR SD_BOTH
-#ifndef ETIMEDOUT
-#define ETIMEDOUT WSAETIMEDOUT
-#endif
-#else
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#endif
 
 extern "C" {
+#include "libTcpSocket/os-dependent_socket.h"
 #include "libhts/htsmsg_binary.h"
 #include "libhts/sha1.h"
 }
