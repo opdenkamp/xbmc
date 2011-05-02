@@ -135,7 +135,17 @@ int64_t CPVRFile::GetPosition()
 
 int CPVRFile::GetTotalTime()
 {
-  return g_PVRManager.GetTotalTime();
+  int iReturn;
+  if (m_isPlayRecording)
+  {
+    CPVRRecording tag;
+    if (g_PVRClients->GetPlayingRecording(&tag))
+      iReturn = tag.m_duration.GetSeconds() * 1000;
+  }
+  else
+    iReturn = g_PVRManager.GetTotalTime();
+
+  return iReturn;
 }
 
 int CPVRFile::GetStartTime()
