@@ -312,27 +312,38 @@ int CEpgDatabase::Persist(const CEpg &epg, bool bQueueWrite /* = false */)
 {
   int iReturn = -1;
 
-  CStdString strQuery;
-  if (epg.EpgID() > 0)
-  {
-    strQuery = FormatSQL("REPLACE INTO epg (idEpg, sName, sScraperName) "
-        "VALUES (%u, '%s', '%s');", epg.EpgID(), epg.Name().c_str(), epg.ScraperName().c_str());
-  }
-  else
-  {
-    strQuery = FormatSQL("REPLACE INTO epg (sName, sScraperName) "
-        "VALUES ('%s', '%s');", epg.Name().c_str(), epg.ScraperName().c_str());
-  }
+  CStdString strWhereClause = FormatSQL("idEpg = %u AND sName = '%s' AND sScraperName = '%s'",
+  		epg.EpgID(), epg.Name().c_str(), epg.ScraperName().c_str());
+  CStdString strValue = GetSingleValue("epg", "sName", strWhereClause);
 
-  if (bQueueWrite)
-  {
-    if (QueueInsertQuery(strQuery))
-      iReturn = epg.EpgID() <= 0 ? 0 : epg.EpgID();
+  if (strValue.IsEmpty()) {
+
+    CStdString strQuery;
+    if (epg.EpgID() > 0)
+    {
+      strQuery = FormatSQL("REPLACE INTO epg (idEpg, sName, sScraperName) "
+          "VALUES (%u, '%s', '%s');", epg.EpgID(), epg.Name().c_str(), epg.ScraperName().c_str());
+    }
+    else
+    {
+      strQuery = FormatSQL("REPLACE INTO epg (sName, sScraperName) "
+          "VALUES ('%s', '%s');", epg.Name().c_str(), epg.ScraperName().c_str());
+    }
+
+    if (bQueueWrite)
+    {
+      if (QueueInsertQuery(strQuery))
+        iReturn = epg.EpgID() <= 0 ? 0 : epg.EpgID();
+    }
+    else
+    {
+      if (ExecuteQuery(strQuery))
+        iReturn = epg.EpgID() <= 0 ? (int) m_pDS->lastinsertid() : epg.EpgID();
+    }
   }
   else
   {
-    if (ExecuteQuery(strQuery))
-      iReturn = epg.EpgID() <= 0 ? (int) m_pDS->lastinsertid() : epg.EpgID();
+  	iReturn = epg.EpgID();
   }
 
   return iReturn;
