@@ -94,12 +94,6 @@ bool CGUIWindowPVRSearch::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 
 void CGUIWindowPVRSearch::OnInitWindow(void)
 {
-  if (!m_bSearchStarted)
-  {
-    m_bSearchStarted = true;
-    m_searchfilter.Reset();
-  }
-
   CGUIWindowPVRCommon::OnInitWindow();
 }
 
@@ -307,6 +301,12 @@ void CGUIWindowPVRSearch::ShowSearchResults()
 
   if (!pDlgInfo)
     return;
+
+  if (!m_bSearchStarted)
+  {
+    m_bSearchStarted = true;
+    m_searchfilter.Reset();
+  }
 
   pDlgInfo->SetFilterData(&m_searchfilter);
 

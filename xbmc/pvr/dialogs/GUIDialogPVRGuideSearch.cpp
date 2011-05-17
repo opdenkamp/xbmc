@@ -147,6 +147,7 @@ void CGUIDialogPVRGuideSearch::OnSearch()
   CGUIEditControl        *pEdit;
   CGUIRadioButtonControl *pRadioButton;
   CDateTime               dateTime;
+  int                     h, m;
 
   if (!m_searchfilter)
     return;
@@ -193,14 +194,16 @@ void CGUIDialogPVRGuideSearch::OnSearch()
   pEdit = (CGUIEditControl *)GetControl(CONTROL_EDIT_START_TIME);
   if (pEdit)
   {
-    dateTime.SetFromDBTime(pEdit->GetLabel2());
+    sscanf(pEdit->GetLabel2(), "%d:%d", &h, &m);
+    dateTime.SetDateTime(1960,1,1,h,m,0);
     dateTime.GetAsSystemTime(m_searchfilter->m_startTime);
   }
 
   pEdit = (CGUIEditControl *)GetControl(CONTROL_EDIT_STOP_TIME);
   if (pEdit)
   {
-    dateTime.SetFromDBTime(pEdit->GetLabel2());
+    sscanf(pEdit->GetLabel2(), "%d:%d", &h, &m);
+    dateTime.SetDateTime(1960,1,1,h,m,59);
     dateTime.GetAsSystemTime(m_searchfilter->m_endTime);
   }
 
