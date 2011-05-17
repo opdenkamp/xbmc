@@ -34,6 +34,18 @@ using namespace EPG;
 void PVR::PVREpgSearchFilter::Reset()
 {
   EpgSearchFilter::Reset();
+  g_PVREpg->GetFirstEPGDate().GetAsSystemTime(m_startDate);
+  m_startDate.wHour          = 0;
+  m_startDate.wMinute        = 0;
+  g_PVREpg->GetLastEPGDate().GetAsSystemTime(m_endDate);
+  m_endDate.wHour            = 23;
+  m_endDate.wMinute          = 59;
+  m_startTime                = m_startDate;
+  m_startTime.wHour          = 0;
+  m_startTime.wMinute        = 0;
+  m_endTime                  = m_endDate;
+  m_endTime.wHour            = 23;
+  m_endTime.wMinute          = 59;
   m_iChannelNumber           = -1;
   m_bFTAOnly                 = false;
   m_iChannelGroup            = -1;
