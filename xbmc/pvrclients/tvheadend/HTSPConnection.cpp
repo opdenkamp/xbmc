@@ -398,7 +398,7 @@ bool CHTSPConnection::ParseEvent(htsmsg_t* msg, uint32_t id, SEvent &event)
   return true;
 }
 
-void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
+void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels, STags &tags)
 {
   bool bChanged(false);
   uint32_t iChannelId, iEventId = 0, iChannelNumber = 0, iCaid = 0;
@@ -435,15 +435,15 @@ void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
     channel.num = iNewChannelNumber;
   }
 
-  htsmsg_t *tags;
+  htsmsg_t *cTags;
 
-  if((tags = htsmsg_get_list(msg, "tags")))
+  if((cTags = htsmsg_get_list(msg, "tags")))
   {
     bChanged = true;
     channel.tags.clear();
 
     htsmsg_field_t *f;
-    HTSMSG_FOREACH(f, tags)
+    HTSMSG_FOREACH(f, cTags)
     {
       if(f->hmf_type != HMF_S64)
         continue;
@@ -467,6 +467,15 @@ void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
       if(service_type != NULL)
       {
         channel.radio = !strcmp(service_type, "Radio");
+
+        if(!channel.radio)
+        {
+            for(unsigned int iTagPtr = 0; iTagPtr < channel.tags.size(); iTagPtr++)
+            {
+                if(tags[channel.tags[iTagPtr]].radio)
+                    channel.radio = true;
+            }
+        }
       }
 
       if(!htsmsg_get_u32(service, "caid", &iCaid))
@@ -474,8 +483,8 @@ void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
     }
   }
   
-  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', event:%u",
-      __FUNCTION__, iChannelId, strName ? strName : "(null)", strIconPath ? strIconPath : "(null)", iEventId);
+  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', event:%u, radio:%u",
+      __FUNCTION__, iChannelId, strName ? strName : "(null)", strIconPath ? strIconPath : "(null)", iEventId, channel.radio);
 
   if (bChanged)
     PVR->TriggerChannelUpdate();
@@ -516,6 +525,11 @@ void CHTSPConnection::ParseTagUpdate(htsmsg_t* msg, STags &tags)
   if((name = htsmsg_get_str(msg, "tagName")))
     tag.name  = name;
 
+  if(!strcmp(name, "Radio") || !strcmp(name, "radio"))
+    tag.radio = true;
+  else
+    tag.radio = false;
+
   htsmsg_t *channels;
 
   if((channels = htsmsg_get_list(msg, "members")))
@@ -531,8 +545,8 @@ void CHTSPConnection::ParseTagUpdate(htsmsg_t* msg, STags &tags)
     }
   }
 
-  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s'"
-      , __FUNCTION__, id, name ? name : "(null)", icon ? icon : "(null)");
+  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', radio:%u"
+      , __FUNCTION__, id, name ? name : "(null)", icon ? icon : "(null)", tag.radio);
 
   PVR->TriggerChannelGroupsUpdate();
 }
