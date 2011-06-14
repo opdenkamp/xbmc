@@ -378,7 +378,7 @@ PVR_ERROR CHTSPData::GetChannelGroups(PVR_HANDLE handle)
     PVR_CHANNEL_GROUP tag;
     memset(&tag, 0 , sizeof(PVR_CHANNEL_GROUP));
 
-    tag.bIsRadio     = false;
+    tag.bIsRadio = m_tags[iTagPtr].radio;
     tag.strGroupName = m_tags[iTagPtr].name.c_str();
 
     PVR->TransferChannelGroup(handle, &tag);
@@ -401,6 +401,9 @@ PVR_ERROR CHTSPData::GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL
     for(SChannels::iterator it = channels.begin(); it != channels.end(); ++it)
     {
       SChannel& channel = it->second;
+
+      if(m_tags[iTagPtr].radio)
+          channel.radio = true;
 
       PVR_CHANNEL_GROUP_MEMBER tag;
       memset(&tag,0 , sizeof(PVR_CHANNEL_GROUP_MEMBER));
@@ -621,9 +624,9 @@ void CHTSPData::Action()
 
     CMD_LOCK;
     if     (strstr(method, "channelAdd"))
-      CHTSPConnection::ParseChannelUpdate(msg, m_channels);
+      CHTSPConnection::ParseChannelUpdate(msg, m_channels, m_tags);
     else if(strstr(method, "channelUpdate"))
-      CHTSPConnection::ParseChannelUpdate(msg, m_channels);
+      CHTSPConnection::ParseChannelUpdate(msg, m_channels, m_tags);
     else if(strstr(method, "channelDelete"))
       CHTSPConnection::ParseChannelRemove(msg, m_channels);
     else if(strstr(method, "tagAdd"))

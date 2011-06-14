@@ -49,7 +49,7 @@ public:
   bool        ReadSuccess(htsmsg_t* m, bool sequence = true, std::string action = "");
 
   static bool ParseEvent         (htsmsg_t* msg, uint32_t id, SEvent &event);
-  static void ParseChannelUpdate (htsmsg_t* msg, SChannels &channels);
+  static void ParseChannelUpdate (htsmsg_t* msg, SChannels &channels, STags &tags);
   static void ParseChannelRemove (htsmsg_t* msg, SChannels &channels);
   static void ParseTagUpdate     (htsmsg_t* msg, STags &tags);
   static void ParseTagRemove     (htsmsg_t* msg, STags &tags);
