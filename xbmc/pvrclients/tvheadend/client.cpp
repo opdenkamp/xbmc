@@ -477,22 +477,14 @@ int GetChannelGroupsAmount(void)
 
 PVR_ERROR GetChannelGroups(PVR_HANDLE handle, bool bRadio)
 {
-  /* tvheadend doesn't support separated groups, so we only support TV groups */
-  if (bRadio)
-    return PVR_ERROR_NO_ERROR;
-
   if (!HTSPData || !HTSPData->IsConnected())
     return PVR_ERROR_SERVER_ERROR;
 
-  return HTSPData->GetChannelGroups(handle);
+  return HTSPData->GetChannelGroups(handle, bRadio);
 }
 
 PVR_ERROR GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL_GROUP &group)
 {
-  /* tvheadend doesn't support separated groups, so we only support TV groups */
-  if (group.bIsRadio)
-    return PVR_ERROR_NO_ERROR;
-
   if (!HTSPData || !HTSPData->IsConnected())
     return PVR_ERROR_SERVER_ERROR;
 

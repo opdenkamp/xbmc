@@ -398,9 +398,10 @@ bool CHTSPConnection::ParseEvent(htsmsg_t* msg, uint32_t id, SEvent &event)
   return true;
 }
 
-void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
+void CHTSPConnection::ParseChannelUpdate(htsmsg_t *msg, SChannels &channels, STags &tags)
 {
   bool bChanged(false);
+  bool radio = false;
   uint32_t iChannelId, iEventId = 0, iChannelNumber = 0, iCaid = 0;
   const char *strName, *strIconPath;
   if(htsmsg_get_u32(msg, "channelId", &iChannelId))
@@ -435,15 +436,15 @@ void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
     channel.num = iNewChannelNumber;
   }
 
-  htsmsg_t *tags;
+  htsmsg_t *tag;
 
-  if((tags = htsmsg_get_list(msg, "tags")))
+  if((tag = htsmsg_get_list(msg, "tags")))
   {
     bChanged = true;
     channel.tags.clear();
 
     htsmsg_field_t *f;
-    HTSMSG_FOREACH(f, tags)
+    HTSMSG_FOREACH(f, tag)
     {
       if(f->hmf_type != HMF_S64)
         continue;
@@ -466,16 +467,26 @@ void CHTSPConnection::ParseChannelUpdate(htsmsg_t* msg, SChannels &channels)
       const char *service_type = htsmsg_get_str(service, "type");
       if(service_type != NULL)
       {
-        channel.radio = !strcmp(service_type, "Radio");
+        radio = !strcmp(service_type, "Radio");
+
+        if(!radio)
+        {
+          for(unsigned int iTagPtr = 0; iTagPtr < tags.size(); iTagPtr++)
+          {
+            if(channel.MemberOf(iTagPtr) && tags[iTagPtr].radio)
+              radio = true;
+          }
+        }
       }
+      channel.radio = radio;
 
       if(!htsmsg_get_u32(service, "caid", &iCaid))
         channel.caid = (int) iCaid;
     }
   }
   
-  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', event:%u",
-      __FUNCTION__, iChannelId, strName ? strName : "(null)", strIconPath ? strIconPath : "(null)", iEventId);
+  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', event:%u, radio:%u",
+      __FUNCTION__, iChannelId, strName ? strName : "(null)", strIconPath ? strIconPath : "(null)", iEventId, radio);
 
   if (bChanged)
     PVR->TriggerChannelUpdate();
@@ -501,6 +512,7 @@ void CHTSPConnection::ParseTagUpdate(htsmsg_t* msg, STags &tags)
 {
   uint32_t id;
   const char *name, *icon;
+  bool radio = false, hidden = false;
   if(htsmsg_get_u32(msg, "tagId", &id))
   {
     XBMC->Log(LOG_ERROR, "%s - malformed message received", __FUNCTION__);
@@ -515,6 +527,13 @@ void CHTSPConnection::ParseTagUpdate(htsmsg_t* msg, STags &tags)
 
   if((name = htsmsg_get_str(msg, "tagName")))
     tag.name  = name;
+
+  if(!strcmp(name, "Radio") || !strcmp(name, "radio")) {
+    radio = true;
+    hidden = true;
+  }
+  tag.radio = radio;
+  tag.hidden = hidden;
 
   htsmsg_t *channels;
 
@@ -531,8 +550,8 @@ void CHTSPConnection::ParseTagUpdate(htsmsg_t* msg, STags &tags)
     }
   }
 
-  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s'"
-      , __FUNCTION__, id, name ? name : "(null)", icon ? icon : "(null)");
+  XBMC->Log(LOG_DEBUG, "%s - id:%u, name:'%s', icon:'%s', radio:%u"
+      , __FUNCTION__, id, name ? name : "(null)", icon ? icon : "(null)", radio);
 
   PVR->TriggerChannelGroupsUpdate();
 }

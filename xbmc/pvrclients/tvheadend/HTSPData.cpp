@@ -371,14 +371,19 @@ unsigned int CHTSPData::GetNumChannelGroups(void)
   return m_tags.size();
 }
 
-PVR_ERROR CHTSPData::GetChannelGroups(PVR_HANDLE handle)
+PVR_ERROR CHTSPData::GetChannelGroups(PVR_HANDLE handle, bool bRadio)
 {
   for(unsigned int iTagPtr = 0; iTagPtr < m_tags.size(); iTagPtr++)
   {
+    if(m_tags[iTagPtr].hidden)
+      continue;
+    if(!GetNumChannels(m_tags[iTagPtr], bRadio))
+      continue;
+
     PVR_CHANNEL_GROUP tag;
     memset(&tag, 0 , sizeof(PVR_CHANNEL_GROUP));
 
-    tag.bIsRadio     = false;
+    tag.bIsRadio     = m_tags[iTagPtr].radio;
     tag.strGroupName = m_tags[iTagPtr].name.c_str();
 
     PVR->TransferChannelGroup(handle, &tag);
@@ -621,9 +626,9 @@ void CHTSPData::Action()
 
     CMD_LOCK;
     if     (strstr(method, "channelAdd"))
-      CHTSPConnection::ParseChannelUpdate(msg, m_channels);
+      CHTSPConnection::ParseChannelUpdate(msg, m_channels, m_tags);
     else if(strstr(method, "channelUpdate"))
-      CHTSPConnection::ParseChannelUpdate(msg, m_channels);
+      CHTSPConnection::ParseChannelUpdate(msg, m_channels, m_tags);
     else if(strstr(method, "channelDelete"))
       CHTSPConnection::ParseChannelRemove(msg, m_channels);
     else if(strstr(method, "tagAdd"))
@@ -670,7 +675,7 @@ SChannels CHTSPData::GetChannels(int tag)
   return GetChannels(it->second);
 }
 
-SChannels CHTSPData::GetChannels(STag& tag)
+SChannels CHTSPData::GetChannels(STag &tag)
 {
   CMD_LOCK;
   SChannels channels;
@@ -687,6 +692,21 @@ SChannels CHTSPData::GetChannels(STag& tag)
     channels[*it] = it2->second;
   }
   return channels;
+}
+
+int CHTSPData::GetNumChannels(STag &tag, bool bRadio)
+{
+  CMD_LOCK;
+  SChannels channels = GetChannels(tag);
+  int count = 0;
+
+  for(SChannels::iterator it = channels.begin(); it != channels.end(); ++it)
+  {
+    SChannel& channel = it->second;
+    if(channel.radio == bRadio)
+      count++;
+  }
+  return count;
 }
 
 STags CHTSPData::GetTags()

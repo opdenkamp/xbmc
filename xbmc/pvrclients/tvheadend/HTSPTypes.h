@@ -86,6 +86,8 @@ struct STag
   std::string      name;
   std::string      icon;
   std::vector<int> channels;
+  bool             radio;
+  bool             hidden;
 
   STag() { Clear(); }
   void Clear()
@@ -94,6 +96,8 @@ struct STag
     name.clear();
     icon.clear();
     channels.clear();
+    radio = false;
+    hidden = false;
   }
   bool BelongsTo(int channel) const
   {
