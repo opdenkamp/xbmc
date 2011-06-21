@@ -60,7 +60,7 @@ public:
   PVR_ERROR    GetTimers(PVR_HANDLE handle);
   PVR_ERROR    DeleteTimer(const PVR_TIMER &timerinfo, bool force);
   unsigned int GetNumChannelGroups(void);
-  PVR_ERROR    GetChannelGroups(PVR_HANDLE handle);
+  PVR_ERROR    GetChannelGroups(PVR_HANDLE handle, bool bRadio);
   PVR_ERROR    GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL_GROUP &group);
 
 protected:
@@ -77,6 +77,7 @@ private:
   SChannels GetChannels();
   SChannels GetChannels(int tag);
   SChannels GetChannels(STag &tag);
+  int GetNumChannels(STag &tag, bool bRadio);
   STags GetTags();
   bool GetEvent(SEvent& event, uint32_t id);
   bool SendEnableAsync();
