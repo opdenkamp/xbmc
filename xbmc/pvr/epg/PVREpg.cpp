@@ -40,6 +40,7 @@ PVR::CPVREpg::CPVREpg(CPVRChannel *channel, bool bLoadedFromDb /* = false */) :
   CEpg(channel->EpgID(), channel->ChannelName(), channel->EPGScraper(), bLoadedFromDb)
 {
   SetChannel(channel);
+  m_iEpgID = channel->ChannelID();
 }
 
 bool PVR::CPVREpg::HasValidEntries(void) const
