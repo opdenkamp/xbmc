@@ -446,7 +446,7 @@ CPVRTimerInfoTag *CPVRTimers::InstantTimer(CPVRChannel *channel, bool bStartTime
         newTimer->EndAsLocalTime().GetAsLocalizedTime("", false));
   }
 
-  CDateTime startTime;
+  CDateTime startTime = CDateTime::GetCurrentDateTime().GetAsUTCDateTime();
   newTimer->SetStartFromUTC(startTime);
   newTimer->m_iMarginStart = 0; /* set the start margin to 0 for instant timers */
 
