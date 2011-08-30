@@ -673,6 +673,7 @@ bool CPVRManager::OpenLiveStream(const CPVRChannel &tag)
     if(m_currentFile)
       delete m_currentFile;
     m_currentFile = new CFileItem(tag);
+    LoadCurrentChannelSettings();
   }
 
   return bReturn;
@@ -848,6 +849,7 @@ bool CPVRManager::PerformChannelSwitch(const CPVRChannel &channel, bool bPreview
       CLog::Log(LOGNOTICE, "PVRManager - %s - switched to channel '%s'",
           __FUNCTION__, channel.ChannelName().c_str());
 
+    LoadCurrentChannelSettings();
     m_bIsSwitchingChannels = false;
   }
 
