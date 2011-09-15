@@ -26,6 +26,8 @@
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 
+#define FF_MAX_EXTRADATA_SIZE ((1 << 28) - FF_INPUT_BUFFER_PADDING_SIZE)
+
 using namespace PVR;
 
 void CDemuxStreamVideoPVRClient::GetStreamInfo(std::string& strInfo)
@@ -89,7 +91,18 @@ bool CDVDDemuxPVRClient::Open(CDVDInputStream* pInput)
   if (!g_PVRClients->GetPlayingClient(m_pvrClient))
     return false;
 
+  m_bNeedExtraData = false;
   RequestStreams();
+
+  m_pParser = NULL;
+  if (!m_dllAvCodec.Load())
+  {
+    CLog::Log(LOGWARNING, "%s could not load ffmpeg", __FUNCTION__);
+    return false;
+  }
+
+  // register codecs
+  m_dllAvCodec.avcodec_register_all();
   return true;
 }
 
@@ -106,6 +119,12 @@ void CDVDDemuxPVRClient::Dispose()
     m_streams[i] = NULL;
   }
   m_pInput = NULL;
+
+  if (m_pParser)
+  {
+    m_dllAvCodec.av_parser_close(m_pParser);
+  }
+  m_dllAvCodec.Unload();
 }
 
 void CDVDDemuxPVRClient::Reset()
@@ -130,6 +149,66 @@ void CDVDDemuxPVRClient::Flush()
     m_pvrClient->DemuxFlush();
 }
 
+bool CDVDDemuxPVRClient::ParseVideoPacket(DemuxPacket* pPacket)
+{
+  bool bReturn(false);
+
+  if (pPacket && pPacket->iSize && m_bNeedExtraData)
+  {
+    CDemuxStream* st = GetStream(pPacket->iStreamId);
+    if (st && st->type == STREAM_NONE)
+    {
+      if (!m_pParser)
+      {
+        m_pParser = m_dllAvCodec.av_parser_init(st->codec);
+        if (!m_pParser)
+        {
+          CLog::Log(LOGWARNING, "%s no parser for codec: %d", __FUNCTION__, st->codec);
+        }
+      }
+      if (m_pParser && m_pParser->parser->split)
+      {
+        AVCodec *codec;
+        AVCodecContext *pCodecContext;
+        codec = m_dllAvCodec.avcodec_find_decoder(st->codec);
+        if (!codec)
+        {
+          CLog::Log(LOGERROR, "%s - Error, can't find decoder", __FUNCTION__);
+        }
+        else
+        {
+          pCodecContext = m_dllAvCodec.avcodec_alloc_context3(codec);
+          int i = m_pParser->parser->split(pCodecContext, pPacket->pData, pPacket->iSize);
+          if (i > 0 && i < FF_MAX_EXTRADATA_SIZE)
+          {
+            if (st->ExtraData)
+              delete[] (uint8_t*)(st->ExtraData);
+            st->ExtraSize = i;
+            st->ExtraData = new uint8_t[st->ExtraSize+FF_INPUT_BUFFER_PADDING_SIZE];
+            memcpy(st->ExtraData, pPacket->pData, st->ExtraSize);
+            memset((uint8_t*)st->ExtraData + st->ExtraSize, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
+            m_bNeedExtraData = false;
+            st->type = STREAM_VIDEO;
+          }
+          else
+          {
+            CLog::Log(LOGERROR, "%s - Error, could not split extra data", __FUNCTION__);
+          }
+        }
+        m_dllAvCodec.avcodec_close(pCodecContext);
+      }
+      else
+      {
+        CLog::Log(LOGWARNING,  "%s - Error, no parser parser", __FUNCTION__);
+      }
+    }
+  }
+  if (!m_bNeedExtraData)
+    bReturn = true;
+
+  return bReturn;
+}
+
 DemuxPacket* CDVDDemuxPVRClient::Read()
 {
   if (!g_PVRManager.IsStarted())
@@ -152,6 +231,12 @@ DemuxPacket* CDVDDemuxPVRClient::Read()
   else if (pPacket->iStreamId == DMX_SPECIALID_STREAMCHANGE)
   {
     Reset();
+  }
+
+  if (m_bNeedExtraData && !ParseVideoPacket(pPacket))
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+    return CDVDDemuxUtils::AllocateDemuxPacket(0);
   }
 
   return pPacket;
@@ -191,7 +276,9 @@ void CDVDDemuxPVRClient::RequestStreams()
       st->iHeight         = props.stream[i].iHeight;
       st->iWidth          = props.stream[i].iWidth;
       st->fAspect         = props.stream[i].fAspect;
-      m_streams[props.stream[i].iStreamIndex] = st;
+      st->type            = STREAM_NONE;
+      m_bNeedExtraData    = true;
+      m_streams[props->stream[i].iStreamIndex] = st;
     }
     else if (props.stream[i].iCodecId == CODEC_ID_DVB_TELETEXT)
     {
