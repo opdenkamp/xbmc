@@ -97,6 +97,24 @@ bool CAddonsDirectory::GetDirectory(const CStdString& strPath, CFileItemList &it
     items.SetProperty("reponame",g_localizeStrings.Get(24032));
     items.SetLabel(g_localizeStrings.Get(24032));
   }
+  else if (path.GetHostName().Equals("search"))
+  {
+    CStdString search(path.GetFileName());
+    if (search.IsEmpty() && !GetKeyboardInput(16017, search))
+      return false;
+
+    items.SetProperty("reponame",g_localizeStrings.Get(283));
+    items.SetLabel(g_localizeStrings.Get(283));
+
+    CAddonDatabase database;
+    database.Open();
+    database.Search(search, addons);
+    GenerateListing(path, addons, items, true);
+
+    path.SetFileName(search);
+    items.SetPath(path.Get());
+    return true;
+  }
   else
   {
     reposAsFolders = false;
@@ -198,8 +216,8 @@ void CAddonsDirectory::GenerateListing(CURL &path, VECADDONS& addons, CFileItemL
     AddonPtr addon2;
     if (CAddonMgr::Get().GetAddon(addon->ID(),addon2))
       pItem->SetProperty("Addon.Status",g_localizeStrings.Get(305));
-    else if (pItem->GetProperty("Addon.Path").Left(xbmcPath.size()).Equals(xbmcPath))
-      pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24095));
+    else if ((addon->Type() == ADDON_PVRDLL) && (pItem->GetProperty("Addon.Path").Left(xbmcPath.size()).Equals(xbmcPath)))
+      pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24023));
 
     if (!addon->Props().broken.IsEmpty())
       pItem->SetProperty("Addon.Status",g_localizeStrings.Get(24098));
@@ -226,7 +244,13 @@ CFileItemPtr CAddonsDirectory::FileItemFromAddon(AddonPtr &addon, const CStdStri
     URIUtils::AddSlashAtEnd(path);
 
   CFileItemPtr item(new CFileItem(path, folder));
-  item->SetLabel(addon->Name());
+
+  CStdString strLabel(addon->Name());
+  if (url.GetHostName().Equals("search"))
+    strLabel.Format("%s - %s", TranslateType(addon->Type(), true), addon->Name());
+
+  item->SetLabel(strLabel);
+
   if (!(basePath.Equals("addons://") && addon->Type() == ADDON_REPOSITORY))
     item->SetLabel2(addon->Version().c_str());
   item->SetThumbnailImage(addon->Icon());
