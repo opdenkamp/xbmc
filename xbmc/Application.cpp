@@ -341,6 +341,7 @@ CApplication::CApplication(void) : m_itemCurrentFile(new CFileItem), m_progressT
 {
   m_iPlaySpeed = 1;
   m_pPlayer = NULL;
+  m_bInhibitIdleShutdown = false;
   m_bScreenSave = false;
   m_dpms = NULL;
   m_dpmsIsActive = false;
@@ -4449,7 +4450,8 @@ void CApplication::CheckShutdown()
   CGUIDialogVideoScan *pVideoScan = (CGUIDialogVideoScan *)g_windowManager.GetWindow(WINDOW_DIALOG_VIDEO_SCAN);
 
   // first check if we should reset the timer
-  bool resetTimer = false;
+  bool resetTimer = m_bInhibitIdleShutdown;
+
   if (IsPlaying() || IsPaused()) // is something playing?
     resetTimer = true;
 
@@ -4479,6 +4481,16 @@ void CApplication::CheckShutdown()
     // Sleep the box
     getApplicationMessenger().Shutdown();
   }
+}
+
+void CApplication::InhibitIdleShutdown(bool inhibit)
+{
+  m_bInhibitIdleShutdown = inhibit;
+}
+
+bool CApplication::IsIdleShutdownInhibited() const
+{
+  return m_bInhibitIdleShutdown;
 }
 
 bool CApplication::OnMessage(CGUIMessage& message)
