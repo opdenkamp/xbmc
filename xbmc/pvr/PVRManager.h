@@ -113,6 +113,11 @@ namespace PVR
      */
     void Stop(void);
 
+    /*!
+     * @brief Delete PVRManager's objects.
+     */
+    void Cleanup(void);
+
   public:
 
     /*!
@@ -423,7 +428,7 @@ namespace PVR
 
   private:
 
-    void Cleanup(void);
+    
 
     /*!
      * @brief Load at least one client and load all other PVR data after loading the client.
