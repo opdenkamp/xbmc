@@ -113,6 +113,11 @@ namespace PVR
      */
     void Stop(void);
 
+    /*!
+     * @brief Delete PVRManager's objects.
+     */
+    void Cleanup(void);
+
   public:
 
     /*!
@@ -252,6 +257,12 @@ namespace PVR
      * @return True if there are active recordings, false otherwise.
      */
     bool IsRecording(void) const;
+
+    /*!
+     * @brief Check whether the pvr backend is idle.
+     * @return True if there are no active timers/recordings/wake-ups within the configured time span.
+     */
+    bool IsIdle(void) const;
 
     /*!
      * @brief Set the current playing group, used to load the right channel.
@@ -417,7 +428,7 @@ namespace PVR
 
   private:
 
-    void Cleanup(void);
+    
 
     /*!
      * @brief Load at least one client and load all other PVR data after loading the client.
@@ -435,6 +446,11 @@ namespace PVR
      * @brief Update all timers.
      */
     void UpdateTimers(void);
+
+    /*!
+     * @brief Calculate next event time (timer or daily wake up)
+     */
+    CDateTime CalcNextEventTime(void) const;
 
     /*!
      * @brief Update all channels.
