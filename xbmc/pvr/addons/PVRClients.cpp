@@ -1069,7 +1069,7 @@ void CPVRClients::StartChannelScan(void)
 
 int CPVRClients::AddClientToDb(const AddonPtr client)
 {
-  CSingleLock lock(m_critSection);
+  //CSingleLock lock(m_critSection); //FIXME: why is this a critical region?
 
   /* add this client to the database if it's not in there yet */
   CPVRDatabase *database = OpenPVRDatabase();
@@ -1107,7 +1107,7 @@ bool CPVRClients::InitialiseClient(AddonPtr client)
   if (!client->Enabled())
     return bReturn;
 
-  CSingleLock lock(m_critSection);
+  // CSingleLock lock(m_critSection); //FIXME: why is this a critical section?
   CLog::Log(LOGDEBUG, "%s - initialising add-on '%s'", __FUNCTION__, client->Name().c_str());
 
   /* register this client in the db */
@@ -1119,7 +1119,10 @@ bool CPVRClients::InitialiseClient(AddonPtr client)
   boost::shared_ptr<CPVRClient> addon = boost::dynamic_pointer_cast<CPVRClient>(client);
   if (addon && addon->Create(iClientId))
   {
-    m_clientMap.insert(std::make_pair(iClientId, addon));
+    {
+      CSingleLock lock(m_critSection);
+      m_clientMap.insert(std::make_pair(iClientId, addon));
+    }
     bReturn = true;
   }
   else
@@ -1134,7 +1137,7 @@ bool CPVRClients::InitialiseClient(AddonPtr client)
 bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = false */)
 {
   bool bReturn(false);
-  CSingleLock lock(m_critSection);
+  //CSingleLock lock(m_critSection); //FIXME: why is this a critical section?
 
   /* make sure that the callback is registered */
   CAddonMgr::Get().RegisterAddonMgrCallback(ADDON_PVRDLL, this);
@@ -1163,7 +1166,10 @@ bool CPVRClients::UpdateAndInitialiseClients(bool bInitialiseAllClients /* = fal
   }
 
   /* check whether all clients are (still) connected */
-  m_bAllClientsConnected = ConnectedClientAmount() == EnabledClientAmount();
+  {
+    CSingleLock lock(m_critSection);
+    m_bAllClientsConnected = (ConnectedClientAmount() == EnabledClientAmount());
+  }
 
   return bReturn;
 }
