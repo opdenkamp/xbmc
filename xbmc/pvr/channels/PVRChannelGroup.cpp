@@ -113,7 +113,9 @@ int CPVRChannelGroup::Load(void)
   }
 
   SortByChannelNumber();
-  Renumber();
+    /* check whether this channel group has to be renumbered */
+    if (m_bUsingBackendChannelOrder || m_bUsingBackendChannelNumbers)
+		Renumber();
 
   g_guiSettings.RegisterObserver(this);
   m_bLoaded = true;
