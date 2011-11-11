@@ -1396,6 +1396,7 @@ den här visualiseringen</string>
   <string id="16319">DXVA</string>
   <string id="16400">Efterbearbetning</string>
   <string id="17500">Visa insommningstimeout</string>
+  <!-- strings 19000 thru 19999 used for tv interface -->
   <string id="19000">Byt till kanal</string>
   <string id="19001">Separera sökorden genom att använda AND, OR och/eller NOT.</string>
   <string id="19002">eller använd en fraser för att hitta en exakt matchning, exempelvis "The wizard of Oz".</string>
