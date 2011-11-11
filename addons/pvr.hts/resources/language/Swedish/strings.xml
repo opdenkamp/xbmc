@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- settings labels -->
+    <string id="30000">Tvheadend värdnamn eller ip-adress</string>
+    <string id="30001">HTTP port</string>
+    <string id="30002">HTSP port</string>
+    <string id="30003">Användarnamn</string>
+    <string id="30004">Lösenord</string>
+    <string id="30006">Anslutningestids time-out i sekunder</string>
+    <string id="30007">Svarstids time-out i sekunder</string>
+
+    <!-- notifications -->
+    <string id="30500">Nerkopplad från '%s'</string>
+    <string id="30501">Återansluten till '%s'</string>
+</strings>
