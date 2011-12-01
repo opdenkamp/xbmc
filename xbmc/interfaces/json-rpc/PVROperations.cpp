@@ -12,6 +12,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "epg/EpgInfoTag.h"
+#include "epg/EpgContainer.h"
 
 using namespace JSONRPC;
 using namespace PVR;
@@ -19,13 +20,13 @@ using namespace EPG;
 
 JSON_STATUS CPVROperations::ChannelSwitch(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  unsigned int iChannelId = (unsigned int) parameterObject["channelid"].asUnsignedInteger();
+  int iChannelId = (int) parameterObject["channelid"].asInteger();
 
   CLog::Log(LOGINFO, "JSON PVR:Switch channel: %d", iChannelId);
 
   if ( g_PVRManager.IsStarted() )
   {
-    const CPVRChannel *channel = g_PVRManager.ChannelGroups()->GetByChannelIDFromAll(iChannelId);
+    const CPVRChannel *channel = g_PVRChannelGroups->GetByChannelIDFromAll(iChannelId);
     if ( g_PVRManager.StartPlayback(channel, false) )
       return OK;
     else
@@ -69,19 +70,29 @@ JSON_STATUS CPVROperations::ChannelDown(const CStdString &method, ITransportLaye
   return OK;
 }
 
+JSON_STATUS CPVROperations::ChannelRecording(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  bool bOnOff = (bool) parameterObject["on"].asBoolean();
+
+  CLog::Log(LOGINFO, "PVR: channel recording on/off %d", bOnOff);
+
+  if ( g_PVRManager.IsStarted() && g_PVRManager.IsPlaying() && g_application.m_pPlayer )
+  {
+    g_PVRManager.StartRecordingOnPlayingChannel(bOnOff);
+  }
+  return OK;
+}
+
 JSON_STATUS CPVROperations::ScheduleRecording(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result){
 
   if ( g_PVRManager.IsStarted() ) {
 
-    unsigned int iChannelId = (unsigned int) parameterObject["channelid"].asUnsignedInteger();
-    unsigned int iUniquetId = (unsigned int) parameterObject["uniqueid"].asUnsignedInteger();
-    unsigned int iStartTime = (unsigned int) parameterObject["starttime"].asUnsignedInteger();
-
-    CPVRChannelGroupsContainer *CGC = g_PVRManager.ChannelGroups();
-    const CPVRChannel *channel = CGC->GetByChannelIDFromAll(iChannelId);
+    int iEpgId = (int) parameterObject["idepg"].asInteger();
+    int iUniqueId = (int) parameterObject["uniqueid"].asInteger();
+    int iStartTime = (int) parameterObject["starttime"].asInteger();
 
     CDateTime *startTime = new CDateTime( iStartTime );
-    CEpgInfoTag *tag = channel->GetEPG()->GetTag(iUniquetId, *startTime );
+    CEpgInfoTag *tag = g_EpgContainer.GetById(iEpgId)->GetTag(iUniqueId, *startTime);
     delete startTime;
 
     if ( tag ){

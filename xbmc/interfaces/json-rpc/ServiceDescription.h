@@ -2072,7 +2072,7 @@ namespace JSONRPC
       "\"transport\": \"Response\","
       "\"permission\": \"ControlPlayback\","
       "\"params\": ["
-        "{ \"name\": \"channelid\", \"type\": \"integer\", \"minimum\": 0, \"required\": true },"
+        "{ \"name\": \"idepg\", \"type\": \"integer\", \"minimum\": 0, \"required\": true },"
         "{ \"name\": \"uniqueid\", \"type\": \"integer\", \"minimum\": 0, \"required\": true },"
         "{ \"name\": \"starttime\", \"type\": \"integer\", \"minimum\": 0, \"required\": true }"
       "],"
