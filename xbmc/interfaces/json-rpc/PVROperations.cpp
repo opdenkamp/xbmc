@@ -87,7 +87,7 @@ JSON_STATUS CPVROperations::ScheduleRecording(const CStdString &method, ITranspo
 
   if ( g_PVRManager.IsStarted() ) {
 
-    int iEpgId = (int) parameterObject["idepg"].asInteger();
+    int iEpgId = (int) parameterObject["epgid"].asInteger();
     int iUniqueId = (int) parameterObject["uniqueid"].asInteger();
     int iStartTime = (int) parameterObject["starttime"].asInteger();
 
