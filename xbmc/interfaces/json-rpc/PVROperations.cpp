@@ -37,25 +37,39 @@ using namespace EPG;
 
 JSON_STATUS CPVROperations::ChannelSwitch(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
+  if (!parameterObject["channelid"].isInteger())
+    return InvalidParams;
+
   int iChannelId = (int) parameterObject["channelid"].asInteger();
 
-  CLog::Log(LOGDEBUG, "JSON PVR: Switch channel: %d", iChannelId);
+  if (iChannelId > 0)
+    {
+      CLog::Log(LOGDEBUG, "JSON PVR: Switch channel: %d", iChannelId);
 
-  if ( g_PVRManager.IsStarted() )
-  {
-    const CPVRChannel *channel = g_PVRChannelGroups->GetByChannelIDFromAll(iChannelId);
-    if ( g_PVRManager.StartPlayback(channel, false) )
+      if ( g_PVRManager.IsStarted() )
+      {
+        const CPVRChannel *channel = g_PVRChannelGroups->GetByChannelIDFromAll(iChannelId);
+        if ( g_PVRManager.StartPlayback(channel, false) )
+          {
+            return OK;
+          }
+        else
+          {
+            return InternalError;
+          }
+      }
+      else
+      {
+        CLog::Log(LOGDEBUG, "JSON PVR: failed to Switch channels. PVR not started");
+        return FailedToExecute;
+      }
       return OK;
-    else
-      return InternalError;
-  }
+    }
   else
-  {
-    CLog::Log(LOGDEBUG, "JSON PVR: failed to Switch channels. PVR not started");
-    return FailedToExecute;
-  }
+    {
+      return InvalidParams;
+    }
 
-  return OK;
 }
 
 JSON_STATUS CPVROperations::ChannelUp(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
@@ -68,8 +82,14 @@ JSON_STATUS CPVROperations::ChannelUp(const CStdString &method, ITransportLayer 
     g_PVRManager.ChannelUp( &iNewChannelNumber );
 
     CLog::Log(LOGDEBUG, "JSON PVR: new channel %d", iNewChannelNumber);
+    return OK;
   }
-  return OK;
+  else
+  {
+    CLog::Log(LOGDEBUG, "JSON PVR: PVR not started");
+    return FailedToExecute;
+  }
+
 }
 
 JSON_STATUS CPVROperations::ChannelDown(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
@@ -82,13 +102,20 @@ JSON_STATUS CPVROperations::ChannelDown(const CStdString &method, ITransportLaye
     g_PVRManager.ChannelDown( &iNewChannelNumber );
 
     CLog::Log(LOGDEBUG, "JSON PVR: new channel %d", iNewChannelNumber);
+    return OK;
   }
-
-  return OK;
+  else
+  {
+    CLog::Log(LOGDEBUG, "JSON PVR: PVR not started");
+    return FailedToExecute;
+  }
 }
 
 JSON_STATUS CPVROperations::ChannelRecording(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
+  if (!parameterObject["on"].isBoolean())
+    return InvalidParams;
+
   bool bOnOff = (bool) parameterObject["on"].asBoolean();
 
   CLog::Log(LOGDEBUG, "JSON PVR: channel recording on/off %d", bOnOff);
@@ -96,31 +123,56 @@ JSON_STATUS CPVROperations::ChannelRecording(const CStdString &method, ITranspor
   if ( g_PVRManager.IsStarted() && g_PVRManager.IsPlaying() && g_application.m_pPlayer )
   {
     g_PVRManager.StartRecordingOnPlayingChannel(bOnOff);
+    return OK;
   }
-  return OK;
+  else
+  {
+    CLog::Log(LOGDEBUG, "JSON PVR: PVR not started");
+    return FailedToExecute;
+  }
 }
 
 JSON_STATUS CPVROperations::ScheduleRecording(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result){
 
-  if ( g_PVRManager.IsStarted() ) {
+  if (!parameterObject["epgid"].isInteger() || !parameterObject["uniqueid"].isInteger() || !parameterObject["starttime"].isInteger())
+    return InvalidParams;
 
-    int iEpgId = (int) parameterObject["epgid"].asInteger();
-    int iUniqueId = (int) parameterObject["uniqueid"].asInteger();
-    int iStartTime = (int) parameterObject["starttime"].asInteger();
+  if ( g_PVRManager.IsStarted() )
+    {
+      int iEpgId = (int) parameterObject["epgid"].asInteger();
+      int iUniqueId = (int) parameterObject["uniqueid"].asInteger();
+      int iStartTime = (int) parameterObject["starttime"].asInteger();
 
-    CDateTime *startTime = new CDateTime( iStartTime );
-    CEpgInfoTag *tag = g_EpgContainer.GetById(iEpgId)->GetTag(iUniqueId, *startTime);
-    delete startTime;
+      if (iEpgId > 0 && iUniqueId > 0 && iStartTime > 0)
+        {
+          CDateTime *startTime = new CDateTime( iStartTime );
+          CEpgInfoTag *tag = g_EpgContainer.GetById(iEpgId)->GetTag(iUniqueId, *startTime);
+          delete startTime;
 
-    if ( tag ){
-      CPVRTimerInfoTag *newTimer = CPVRTimerInfoTag::CreateFromEpg(*tag);
-      bool bReturn = CPVRTimers::AddTimer(*newTimer);
+          if ( tag )
+            {
+              CPVRTimerInfoTag *newTimer = CPVRTimerInfoTag::CreateFromEpg(*tag);
+              bool bReturn = CPVRTimers::AddTimer(*newTimer);
 
-      CLog::Log(LOGDEBUG, "JSON PVR: record result %d", bReturn);
+              CLog::Log(LOGDEBUG, "JSON PVR: record result %d", bReturn);
 
-      delete newTimer;
+              delete newTimer;
+              return OK;
+            }
+          else
+            {
+              return InternalError;
+            }
+        }
+      else
+        {
+        return InvalidParams;
+        }
     }
+  else
+  {
+    CLog::Log(LOGDEBUG, "JSON PVR: PVR not started");
+    return FailedToExecute;
   }
 
-  return OK;
 }
