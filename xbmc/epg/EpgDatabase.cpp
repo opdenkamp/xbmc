@@ -83,7 +83,7 @@ bool CEpgDatabase::CreateTables(void)
           "iEpisodeId      integer, "
           "iEpisodePart    integer, "
           "sEpisodeName    varchar(128)"
-        ");"
+        ")"
     );
     m_pDS->exec("CREATE UNIQUE INDEX idx_epg_idEpg_iStartTime on epgtags(idEpg, iStartTime desc);");
     m_pDS->exec("CREATE INDEX idx_epg_iEndTime on epgtags(iEndTime);");
@@ -240,6 +240,7 @@ int CEpgDatabase::Get(CEpgContainer &container)
               __FUNCTION__, iEpgID);
 
           CStdString strWhereClause = FormatSQL("idEpg = %u", iEpgID);
+          DeleteValues("lastepgscan", strWhereClause);
           DeleteValues("epgtags", strWhereClause);
           DeleteValues("epg", strWhereClause);
         }
@@ -391,10 +392,7 @@ int CEpgDatabase::Persist(const CEpgInfoTag &tag, bool bSingleUpdate /* = true *
 
   if (bSingleUpdate)
   {
-    time_t start, end;
-    tag.StartAsUTC().GetAsTime(start);
-    tag.EndAsUTC().GetAsTime(end);
-    Delete(*tag.GetTable(), start, end);
+    Delete(*tag.GetTable(), iStartTime, iEndTime);
   }
 
   int iBroadcastId = tag.BroadcastId();
@@ -426,7 +424,7 @@ int CEpgDatabase::Persist(const CEpgInfoTag &tag, bool bSingleUpdate /* = true *
         "VALUES (%u, %u, %u, '%s', '%s', '%s', %i, %i, '%s', %u, %i, %i, %i, %i, %i, %i, '%s', %i, %i);",
         iEpgId, iStartTime, iEndTime,
         tag.Title().c_str(), tag.PlotOutline().c_str(), tag.Plot().c_str(), tag.GenreType(), tag.GenreSubType(), strGenre.c_str(),
-        tag.FirstAiredAsUTC().GetAsDBDateTime().c_str(), tag.ParentalRating(), tag.StarRating(), tag.Notify(),
+        iFirstAired, tag.ParentalRating(), tag.StarRating(), tag.Notify(),
         tag.SeriesNum(), tag.EpisodeNum(), tag.EpisodePart(), tag.EpisodeName().c_str(),
         tag.UniqueBroadcastID(), iBroadcastId);
   }
