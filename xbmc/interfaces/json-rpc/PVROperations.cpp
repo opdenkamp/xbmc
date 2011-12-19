@@ -30,6 +30,7 @@
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "epg/EpgInfoTag.h"
 #include "epg/EpgContainer.h"
+#include "cores/dvdplayer/DVDPlayer.h"
 
 using namespace JSONRPC;
 using namespace PVR;
@@ -55,7 +56,10 @@ JSON_STATUS CPVROperations::ChannelSwitch(const CStdString &method, ITransportLa
 
   CPVRChannel currentChannel;
   if (g_PVRManager.GetCurrentChannel(currentChannel) && currentChannel.IsRadio() == channel->IsRadio())
-    return g_PVRManager.PerformChannelSwitch(channel,false) ? ACK : InternalError;
+  {
+    CDVDPlayer *player = (CDVDPlayer *) g_application.m_pPlayer;
+    return player->SwitchChannel(*channel) ? ACK : InternalError;
+  }
   return g_PVRManager.StartPlayback(channel) ? ACK : InternalError;
 
 }
