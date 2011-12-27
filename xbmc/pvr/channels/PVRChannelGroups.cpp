@@ -213,6 +213,22 @@ bool CPVRChannelGroups::Update(bool bChannelsOnly /* = false */)
 bool CPVRChannelGroups::UpdateGroupsEntries(const CPVRChannelGroups &groups)
 {
   CSingleLock lock(m_critSection);
+  /* go through groups list and check for deleted groups */
+  for (unsigned int iGroupPtr = 0; iGroupPtr < size(); iGroupPtr++)
+  {
+    CPVRChannelGroup *existingGroup = at(iGroupPtr);
+    if (!existingGroup->IsInternalGroup())
+    {
+      CPVRChannelGroup *group = (CPVRChannelGroup *) groups.GetByName(existingGroup->GroupName());
+      if (group == NULL)
+      {
+        CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - User defined group %s with GroupID %u does not exist in client anymore, deleting",
+            __FUNCTION__, existingGroup->GroupName().c_str(), existingGroup->GroupID());
+        DeleteGroup(*at(iGroupPtr));
+        iGroupPtr--;
+      }
+    }
+  }
   /* go through the groups list and check for new groups */
   for (unsigned int iGroupPtr = 0; iGroupPtr < groups.size(); iGroupPtr++)
   {
