@@ -1,0 +1,24 @@
+XBMC Vu+ PVR Add-on
+------------------------------------------
+
+THIS IS A PRELIMINARY README AND IS SUBJECT TO CHANGE!!!
+
+Written by:                  Joerg Dembski
+
+Project's homepage:          
+
+Latest version available at: 
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+------------------------------------------
+
+This is a PVR Add-on for XBMC to add vu+ DVRs as a TV/PVR Backend to XBMC.
+
+It want to add support for Live TV watching, replaying of Recordings, programming Timers and
+EPG TV Guide to use over the Network.
+
+For parsing the XML output from the VU+ webinterface it uses the xmlParser library developed by Frank Vanden Berghen (http://www.applied-mathematics.net/tools/xmlParser.html). Many thanks for this!    
