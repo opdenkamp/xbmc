@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--Translator: ezechiel1917-->
-<!--Date of translation: 26/09/2010-->
-<!--updated 22/10/2011 by mirek-->
+<!--Date of translation: 26.09.2010-->
+<!--Updated 03.12.2011 by mirek-->
+<!--Updated 06.01.2012 by babča: Live TV section-->
 <strings>
   <!-- Misc labels -->
   <string id="31000">Změnit</string>
@@ -39,7 +40,7 @@
   <string id="31044">PŘETÁČÍ SE VPŘED</string>
   <string id="31045">PŘETÁČÍ SE ZPĚT</string>
   <string id="31046">Vlastnosti zvuku</string>
-  <string id="31047">Akutální předvolba</string>
+  <string id="31047">Aktuální předvolba</string>
   <string id="31048">Předvolby vizualizace</string>
   <string id="31049">Čas ukončení</string>
   <string id="31050">Seřadit: vzestupně</string>
@@ -129,7 +130,7 @@
   <string id="31318">Malý Fanart</string>
   <string id="31319">Vybraný profil</string>
   <string id="31320">Naposledy přihlášen</string>
-  <string id="31321">Vyběr Karaoke skladby</string>
+  <string id="31321">Výběr Karaoke skladby</string>
   <string id="31322">Odvysíláno</string>
   <string id="31323">Nejnovější filmy</string>
   <string id="31324">Nejnovější epizody</string>
@@ -165,8 +166,21 @@
   <string id="31406">[B]MOŽNOSTI SYSTÉMU[/B][CR][CR]Nastavení a kalibrace obrazovky · Konfigurace výstupu zvuku · Nastavení dálkového ovládání[CR]Možnosti úsporného režimu · Ukládání informací o ladění · Konfigurace rodičovského zámku</string>
   <string id="31407">[B]MOŽNOSTI VZHLEDU[/B][CR][CR]Přizpůsobení vzhledu Confluence · Správa sekcí na úvodní obrazovce[CR]Nastavení pozadí vzhledu</string>
   <string id="31408">[B]MOŽNOSTI DOPLŇKŮ[/B][CR][CR]Správa nainstalovaných doplňků · Vyhledávání a instalace doplňků z xbmc.org[CR]Nastavení doplňků</string>
+  <string id="31409">[B]MOŽNOSTI PŘEHRÁVÁNÍ TELEVIZNÍHO STREAMU[/B][CR][CR]Změnit zobrazení přes celou obrazovku · Správa EPG dat</string>
 
   <string id="31421">Přihlášení uživatele[CR]Pokračujte výběrem profilu</string>
+  
+  <!-- Extra Unified PVR labels -->
+  <string id="31500">Časovače</string>
+  <string id="31501">Naplánovaný čas</string>
+  <string id="31502">Televize</string>
+  <string id="31503">Přidat skupinu</string>
+  <string id="31504">Přejmenovat skupinu</string>
+  <string id="31505">Smazat skupinu</string>
+  <string id="31506">Dostupné[CR]skupiny</string>
+  <string id="31509">Skupina programů</string>
+  <string id="31510">Timer Set</string> <!-- check this later -->
+  <string id="31511">Nastavení programu</string>
   
   <!-- Weather plugin -->
   <string id="31900">Mapy počasí</string>
