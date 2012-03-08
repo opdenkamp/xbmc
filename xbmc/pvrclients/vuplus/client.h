@@ -42,6 +42,7 @@ extern int                       g_iClientId;
 extern unsigned int              g_iPacketSequence;
 extern bool                      g_bShowTimerNotifications;
 extern bool 	                 g_bShowTimersCompleted;
+extern bool                      g_bAutomaticTimerlistCleanup;
 extern std::string               g_szUserPath;
 extern std::string               g_szClientPath;
 extern ADDON::CHelper_libXBMC_addon *   XBMC;

@@ -87,7 +87,14 @@ void  Vu::Action()
     XBMC->Log(LOG_INFO, "%s Perform Updates!", __FUNCTION__);
     PVR->TriggerTimerUpdate();
     PVR->TriggerRecordingUpdate();
-
+    if (g_bAutomaticTimerlistCleanup) 
+    {
+      CStdString strTmp;
+      strTmp.Format("web/timercleanup?cleanup=true");
+      CStdString strResult;
+      if(!SendSimpleCommand(strTmp, strResult))
+        XBMC->Log(LOG_ERROR, "%s - AutomaticTimerlistCleanup failed!", __FUNCTION__);
+    }
   }
   XBMC->Log(LOG_DEBUG, "%s - exiting", __FUNCTION__);
 }

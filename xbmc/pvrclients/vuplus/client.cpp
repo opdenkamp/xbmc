@@ -46,6 +46,7 @@ std::string g_strUserPath             = "";
 std::string g_strClientPath           = "";
 std::string g_strIconPath             = "";
 bool        g_bShowTimersCompleted    = false;
+bool        g_bAutomaticTimerlistCleanup = false;
 
 CHelper_libXBMC_addon *XBMC           = NULL;
 CHelper_libXBMC_pvr   *PVR            = NULL;
@@ -86,6 +87,10 @@ void ADDON_ReadSettings(void)
   /* read setting "showcompleted" from settings.xml */
   if (!XBMC->GetSetting("showcompleted", &g_bShowTimersCompleted))
     g_bShowTimersCompleted = false;
+  
+  /* read setting "timerlistcleanup" from settings.xml */
+  if (!XBMC->GetSetting("timerlistcleanup", &g_bAutomaticTimerlistCleanup))
+    g_bAutomaticTimerlistCleanup = false;
 
   /* read setting "updateint" from settings.xml */
   if (!XBMC->GetSetting("updateint", &g_iUpdateInterval))
