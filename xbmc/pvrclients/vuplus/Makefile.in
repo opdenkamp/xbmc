@@ -11,9 +11,7 @@ LIB    = @abs_top_srcdir@/addons/pvr.vuplus/XBMC_vuplus.pvr
 
 SRCS=client.cpp \
      xmlParser.cpp \
-     VuData.cpp \
-     thread.cpp \
-     tools.cpp
+     VuData.cpp
 
 include ../Makefile.include
 

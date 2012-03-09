@@ -4,9 +4,7 @@
 #include "client.h" 
 
 using namespace ADDON;
-
-#define CMD_LOCK cMutexLock CmdLock((cMutex*)&m_Mutex)
-
+using namespace PLATFORM;
 
 Vu::Vu() 
 {
@@ -48,6 +46,7 @@ int Vu::VuWebResponseCallback(void *contents, int iLength, int iSize, void *memP
 
 bool Vu::Open()
 {
+  CLockObject lock(m_mutex);
   m_bIsConnected = false;
 
   // Load the TV channels - close connection if no channels are found
@@ -68,22 +67,23 @@ bool Vu::Open()
 
   XBMC->Log(LOG_INFO, "%s Starting separate client update thread...", __FUNCTION__);
 
-  SetDescription("VU+ Updater");
-  Start(); 
+  CreateThread(); 
   m_bIsConnected = true;
 
-  return Running(); 
+  m_started.Wait(m_mutex, m_bIsConnected, 1000);
+
+  return IsRunning(); 
 }
 
-void  Vu::Action()
+void  *Vu::Process()
 {
   XBMC->Log(LOG_DEBUG, "%s - starting", __FUNCTION__);
 
-  while(Running())
+  while(IsRunning())
   {
-    CMD_LOCK;
+    CLockObject lock(m_mutex);
     // Trigger Timer and Recording updates acording to the addon settings
-    cCondWait::SleepMs(1000 * g_iUpdateInterval * 60);
+    Sleep(g_iUpdateInterval * 60 * 1000);
     XBMC->Log(LOG_INFO, "%s Perform Updates!", __FUNCTION__);
     PVR->TriggerTimerUpdate();
     PVR->TriggerRecordingUpdate();
@@ -96,7 +96,12 @@ void  Vu::Action()
         XBMC->Log(LOG_ERROR, "%s - AutomaticTimerlistCleanup failed!", __FUNCTION__);
     }
   }
+
+  CLockObject lock(m_mutex);
+  m_started.Broadcast();
   XBMC->Log(LOG_DEBUG, "%s - exiting", __FUNCTION__);
+
+  return NULL;
 }
 
 void Vu::Close()

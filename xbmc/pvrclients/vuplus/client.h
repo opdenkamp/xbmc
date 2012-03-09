@@ -37,7 +37,6 @@ extern int                       g_iPortWeb;
 extern std::string               g_strUsername;
 extern std::string               g_strPassword;
 extern std::string               g_strIconPath;
-extern int                       g_iConnectTimeout;
 extern int                       g_iResponseTimeout;
 extern int 			 g_iUpdateInterval;
 extern int                       g_iClientId;

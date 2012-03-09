@@ -3,9 +3,9 @@
 #include "utils/StdString.h"
 #include "xmlParser.h"
 #include "client.h"
-#include "thread.h"
+#include "../../../lib/platform/threads/threads.h"
     
-#include "../../../addons/library.xbmc.addon/libXBMC_addon.h"
+//#include "../../../addons/library.xbmc.addon/libXBMC_addon.h"
 
 struct VuWebResponse {
   char *response;
@@ -66,7 +66,7 @@ struct VuChannel
   std::string strIconPath;
 };
 
-class Vu  : public cThread
+class Vu  : public PLATFORM::CThread
 {
 private:
 
@@ -82,8 +82,10 @@ private:
   std::vector<VuTimer> m_timers;
   std::vector<VuRecording> m_recordings;
   std::vector<VuChannelGroup> m_groups;
+
+  PLATFORM::CMutex m_mutex;
+  PLATFORM::CCondition<bool> m_started;
  
-  cMutex m_Mutex;
 
   // functions
 
@@ -103,7 +105,8 @@ private:
   static long TimeStringToSeconds(const CStdString &timeString);
   static int SplitString(const CStdString& input, const CStdString& delimiter, CStdStringArray &results, unsigned int iMaxStrings = 0);
 
-
+protected:
+  virtual void *Process(void);
 
 public:
   Vu(void);

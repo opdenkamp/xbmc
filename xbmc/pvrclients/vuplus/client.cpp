@@ -101,10 +101,6 @@ void ADDON_ReadSettings(void)
   if (!XBMC->GetSetting("updateint", &g_iUpdateInterval))
     g_iConnectTimeout = DEFAULT_UPDATE_INTERVAL;
 
-  /* read setting "connect_timeout" from settings.xml */
-  if (!XBMC->GetSetting("connect_timeout", &g_iConnectTimeout))
-    g_iConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
-
   /* read setting "read_timeout" from settings.xml */
   if (!XBMC->GetSetting("response_timeout", &g_iResponseTimeout))
     g_iResponseTimeout = DEFAULT_RESPONSE_TIMEOUT;
@@ -249,13 +245,23 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
       return ADDON_STATUS_NEED_RESTART;
     }
   }
-  else if (str == "connect_timeout")
+  else if (str == "streamport")
   {
     int iNewValue = *(int*) settingValue + 1;
-    if (g_iConnectTimeout != iNewValue)
+    if (g_iPortStream != iNewValue)
     {
-      XBMC->Log(LOG_INFO, "%s - Changed Setting 'connect_timeout' from %u to %u", __FUNCTION__, g_iConnectTimeout, iNewValue);
-      g_iConnectTimeout = iNewValue;
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'streamport' from %u to %u", __FUNCTION__, g_iPortStream, iNewValue);
+      g_iPortStream = iNewValue;
+      return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "webport")
+  {
+    int iNewValue = *(int*) settingValue + 1;
+    if (g_iPortWeb != iNewValue)
+    {
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'webport' from %u to %u", __FUNCTION__, g_iPortWeb, iNewValue);
+      g_iPortWeb = iNewValue;
       return ADDON_STATUS_OK;
     }
   }
@@ -315,7 +321,7 @@ const char *GetBackendVersion(void)
 
 const char *GetConnectionString(void)
 {
-  static CStdString strConnectionString;
+  CStdString strConnectionString;
   if (VuData)
     strConnectionString.Format("%s%s", g_strHostname.c_str(), VuData->IsConnected() ? "" : " (Not connected!)");
   else
