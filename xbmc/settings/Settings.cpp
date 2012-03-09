@@ -57,7 +57,7 @@
 #include "utils/URIUtils.h"
 #include "input/MouseStat.h"
 #include "filesystem/File.h"
-#include "addons/AddonManager.h"
+#include "filesystem/DirectoryCache.h"
 
 using namespace std;
 using namespace XFILE;
@@ -954,7 +954,7 @@ bool CSettings::LoadProfile(unsigned int index)
     CStdString strLanguagePath;
     strLanguagePath.Format("special://xbmc/language/%s/strings.xml", strLanguage.c_str());
 
-    CButtonTranslator::GetInstance().Load();
+    CButtonTranslator::GetInstance().Load(true);
     g_localizeStrings.Load(strLanguagePath);
 
     g_Mouse.SetEnabled(g_guiSettings.GetBool("input.enablemouse"));
@@ -982,10 +982,8 @@ bool CSettings::LoadProfile(unsigned int index)
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL,0,0,GUI_MSG_WINDOW_RESET);
     g_windowManager.SendMessage(msg);
 
-    CUtil::DeleteMusicDatabaseDirectoryCache();
-    CUtil::DeleteVideoDatabaseDirectoryCache();
-
-    ADDON::CAddonMgr::Get().StartServices(false);
+    CUtil::DeleteDirectoryCache();
+    g_directoryCache.Clear();
 
     return true;
   }

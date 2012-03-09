@@ -20,7 +20,7 @@ import xbmcgui, xbmcaddon
 __addon__      = xbmcaddon.Addon()
 __provider__   = __addon__.getAddonInfo('name')
 __cwd__        = __addon__.getAddonInfo('path')
-__resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib'))
+__resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')).decode("utf-8")
 
 sys.path.append (__resource__)
 
@@ -28,8 +28,10 @@ from utilities import *
 
 LOCATION_URL    = 'http://autocomplete.wunderground.com/aq?query=%s&format=JSON'
 WEATHER_URL     = 'http://api.wunderground.com/api/%s/conditions/forecast7day/hourly%s.json'
+GEOIP_URL       = 'http://api.wunderground.com/api/%s/geolookup/q/autoip.json'
 A_I_K           = 'NDEzNjBkMjFkZjFhMzczNg=='
 WEATHER_WINDOW  = xbmcgui.Window(12600)
+MAXDAYS         = 6
 
 socket.setdefaulttimeout(10)
 
@@ -66,7 +68,8 @@ def fetch(url):
     except:
         json_string = ''
     try:
-        parsed_json = simplejson.loads(json_string)
+        json_clean = json_string.replace('"-9999.00"','""').replace('"-9998"','""').replace('"NA"','""')
+        parsed_json = simplejson.loads(json_clean)
     except:
         parsed_json = ''
     return parsed_json
@@ -82,6 +85,16 @@ def location(string):
         locid.append(locationid)
     return loc, locid
 
+def geoip():
+    data = fetch(GEOIP_URL % aik[::-1])
+    if data != '' and data.has_key('location'):
+        location = data['location']['l']
+        __addon__.setSetting('Location1', data['location']['city'])
+        __addon__.setSetting('Location1id', location)
+    else:
+        location = ''
+    return location
+
 def forecast(city):
     data = fetch(WEATHER_URL % (aik[::-1], city))
     if data != '':
@@ -91,7 +104,7 @@ def properties(query):
     weathercode = WEATHER_CODES[query['current_observation']['icon_url'][31:-4]]
     set_property('Current.Condition'     , query['current_observation']['weather'])
     set_property('Current.Temperature'   , str(query['current_observation']['temp_c']))
-    set_property('Current.Wind'          , str(int(query['current_observation']['wind_mph'] * 1.609344)))
+    set_property('Current.Wind'          , str(query['current_observation']['wind_kph']))
     set_property('Current.WindDirection' , query['current_observation']['wind_dir'])
     set_property('Current.Humidity'      , query['current_observation']['relative_humidity'].rstrip('%'))
     set_property('Current.FeelsLike'     , str((int(query['hourly_forecast'][0]['feelslike']['english'])-32)*5/9))
@@ -108,7 +121,7 @@ def properties(query):
         set_property('Day%i.Outlook'     % count, item['conditions'])
         set_property('Day%i.OutlookIcon' % count, '%s.png' % weathercode)
         set_property('Day%i.FanartCode'  % count, weathercode)
-        if count == 3:
+        if count == MAXDAYS:
             break
 
 if sys.argv[1].startswith('Location'):
@@ -129,7 +142,31 @@ if sys.argv[1].startswith('Location'):
 else:
     location = __addon__.getSetting('Location%sid' % sys.argv[1])
     aik = base64.b64decode(A_I_K)
-    forecast(location)
+    if (location == '') and (sys.argv[1] != '1'):
+        location = __addon__.getSetting('Location1id')
+    if location == '':
+        location = geoip()
+    if not location == '':
+        forecast(location)
+    else:
+        # workaround to fix incrementing values on each weather refresh when no locations are set up:
+        set_property('Current.Condition'     , 'N/A')
+        set_property('Current.Temperature'   , '0')
+        set_property('Current.Wind'          , '0')
+        set_property('Current.WindDirection' , 'N/A')
+        set_property('Current.Humidity'      , '0')
+        set_property('Current.FeelsLike'     , '0')
+        set_property('Current.UVIndex'       , '0')
+        set_property('Current.DewPoint'      , '0')
+        set_property('Current.OutlookIcon'   , 'na.png')
+        set_property('Current.FanartCode'    , 'na')
+        for count in range (0, MAXDAYS):
+            set_property('Day%i.Title'       % count, 'N/A')
+            set_property('Day%i.HighTemp'    % count, '0')
+            set_property('Day%i.LowTemp'     % count, '0')
+            set_property('Day%i.Outlook'     % count, 'N/A')
+            set_property('Day%i.OutlookIcon' % count, 'na.png')
+            set_property('Day%i.FanartCode'  % count, 'na')
 
 refresh_locations()
 set_property('WeatherProvider', 'Weather Underground')

@@ -717,6 +717,15 @@ void CDVDPlayer::OpenDefaultStreams()
       CLog::Log(LOGWARNING, "%s - failed to restore selected subtitle stream (%d)", __FUNCTION__, g_settings.m_currentVideoSettings.m_SubtitleStream);
   }
 
+  // check if there are external subtitles available
+  for(int i = 0;i<count && !valid; i++)
+  {
+    SelectionStream& s = m_SelectionStreams.Get(STREAM_SUBTITLE, i);
+    if ((s.source == STREAM_SOURCE_DEMUX_SUB || s.source == STREAM_SOURCE_TEXT)
+    && OpenSubtitleStream(s.id, s.source))
+      valid = true;
+  }
+
   // select default
   if(!valid
   && m_SelectionStreams.Get(STREAM_SUBTITLE, CDemuxStream::FLAG_DEFAULT, st))
@@ -765,6 +774,15 @@ bool CDVDPlayer::ReadPacket(DemuxPacket*& packet, CDemuxStream*& stream)
 
     if(packet)
     {
+      if(packet->iStreamId == DMX_SPECIALID_STREAMCHANGE)
+      {
+        // reset the caching state for pvr streams
+        if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
+          SetCaching(CACHESTATE_PVR);
+        CDVDDemuxUtils::FreeDemuxPacket(packet);
+        return true;
+      }
+
       if(packet->iStreamId < 0)
         return true;
 
@@ -1476,7 +1494,7 @@ void CDVDPlayer::HandlePlaySpeed()
     {
       if(level  < 0.0)
       {
-        CGUIDialogKaiToast::QueueNotification("Cache full", "Cache filled before reaching required amount for continous playback");
+        CGUIDialogKaiToast::QueueNotification(g_localizeStrings.Get(21454), g_localizeStrings.Get(21455));
         caching = CACHESTATE_INIT;
       }
       if(level >= 1.0)
@@ -2596,7 +2614,7 @@ void CDVDPlayer::GetGeneralInfo(CStdString& strGeneralInfo)
 {
   if (!m_bStop)
   {
-    double dDelay = (double)m_dvdPlayerVideo.GetDelay() / DVD_TIME_BASE;
+    double dDelay = m_dvdPlayerVideo.GetDelay() / DVD_TIME_BASE - g_renderManager.GetDisplayLatency();
 
     double apts = m_dvdPlayerAudio.GetCurrentPts();
     double vpts = m_dvdPlayerVideo.GetCurrentPts();
@@ -2903,7 +2921,10 @@ bool CDVDPlayer::OpenVideoStream(int iStream, int source)
     /* set aspect ratio as requested by navigator for dvd's */
     float aspect = static_cast<CDVDInputStreamNavigator*>(m_pInputStream)->GetVideoAspectRatio();
     if(aspect != 0.0)
+    {
       hint.aspect = aspect;
+      hint.forced_aspect = true;
+    }
     hint.software = true;
     hint.stills   = static_cast<CDVDInputStreamNavigator*>(m_pInputStream)->IsInMenu();
   }

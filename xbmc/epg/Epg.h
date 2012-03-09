@@ -37,7 +37,7 @@ namespace PVR
 /** EPG container for CEpgInfoTag instances */
 namespace EPG
 {
-  class CEpg : public std::vector<CEpgInfoTag*>, public Observable
+  class CEpg : public Observable
   {
     friend class CEpgDatabase;
 
@@ -83,13 +83,16 @@ namespace EPG
      * @brief The channel this EPG belongs to.
      * @return The channel this EPG belongs to
      */
-    virtual const PVR::CPVRChannel *Channel(void) const { return m_Channel; }
+    virtual PVR::CPVRChannel *Channel(void) const;
+
+    virtual int ChannelID(void) const;
+    virtual int ChannelNumber(void) const;
 
     /*!
      * @brief Channel the channel tag linked to this EPG table.
      * @param channel The new channel tag.
      */
-    virtual void SetChannel(PVR::CPVRChannel *channel) { m_Channel = channel; }
+    virtual void SetChannel(PVR::CPVRChannel *channel);
 
     /*!
      * @brief Get the name of the scraper to use for this table.
@@ -130,7 +133,7 @@ namespace EPG
     /*!
      * @return True if this EPG has a PVR channel set, false otherwise.
      */
-    virtual bool HasPVRChannel(void) const { return !(m_Channel == NULL); }
+    virtual bool HasPVRChannel(void) const;
 
     /*!
      * @brief Remove all entries from this EPG that finished before the given time
@@ -154,13 +157,13 @@ namespace EPG
      * @brief Get the event that is occurring now.
      * @return The current event.
      */
-    virtual bool InfoTagNow(CEpgInfoTag &tag) const;
+    virtual bool InfoTagNow(CEpgInfoTag &tag, bool bUpdateIfNeeded = true);
 
     /*!
      * @brief Get the event that will occur next.
      * @return The next event.
      */
-    virtual bool InfoTagNext(CEpgInfoTag &tag) const;
+    virtual bool InfoTagNext(CEpgInfoTag &tag);
 
     /*!
      * @brief Get the event that occurs at the given time.
@@ -193,9 +196,10 @@ namespace EPG
      * @brief Update an entry in this EPG.
      * @param tag The tag to update.
      * @param bUpdateDatabase If set to true, this event will be persisted in the database.
+     * @param bSort If set to false, epg entries will not be sorted after updating; used for mass updates
      * @return True if it was updated successfully, false otherwise.
      */
-    virtual bool UpdateEntry(const CEpgInfoTag &tag, bool bUpdateDatabase = false);
+    virtual bool UpdateEntry(const CEpgInfoTag &tag, bool bUpdateDatabase = false, bool bSort = true);
 
     /*!
      * @brief Update the EPG from 'start' till 'end'.
@@ -232,18 +236,18 @@ namespace EPG
      * @brief Get the start time of the first entry in this table.
      * @return The first date in UTC.
      */
-    virtual const CDateTime &GetFirstDate(void) const;
+    virtual CDateTime GetFirstDate(void) const;
 
     /*!
      * @brief Get the end time of the last entry in this table.
      * @return The last date in UTC.
      */
-    virtual const CDateTime &GetLastDate(void) const;
+    virtual CDateTime GetLastDate(void) const;
 
     /*!
      * @return The last time this table was scanned.
      */
-    virtual const CDateTime &GetLastScanTime(void);
+    virtual CDateTime GetLastScanTime(void);
 
     /*!
      * @brief Notify observers when the currently active tag changed.
@@ -271,6 +275,11 @@ namespace EPG
      */
     virtual bool IsRadio(void) const;
 
+    virtual const CEpgInfoTag *GetNextEvent(const CEpgInfoTag& tag) const;
+    virtual const CEpgInfoTag *GetPreviousEvent(const CEpgInfoTag& tag) const;
+
+    virtual size_t Size(void) const { return m_tags.size(); }
+
   protected:
     CEpg(void);
 
@@ -291,14 +300,10 @@ namespace EPG
 
     /*!
      * @brief Fix overlapping events from the tables.
+     * @param bUpdateDb If set to yes, any changes to tags during fixing will be persisted to database
      * @return True if anything changed, false otherwise.
      */
-    virtual bool FixOverlappingEvents(void);
-
-    /*!
-     * @brief Sort all entries in this EPG by date.
-     */
-    virtual void Sort(void);
+    virtual bool FixOverlappingEvents(bool bUpdateDb = false);
 
     /*!
      * @brief Add an infotag to this container.
@@ -322,30 +327,22 @@ namespace EPG
      */
     virtual bool UpdateEntries(const CEpg &epg, bool bStoreInDb = true);
 
-    virtual void UpdatePreviousAndNextPointers(void);
-
-    /*!
-     * @brief Update the cached first and last date.
-     */
-    virtual void UpdateFirstAndLastDates(void);
-
     virtual bool IsRemovableTag(const EPG::CEpgInfoTag *tag) const;
 
+    std::map<CDateTime, CEpgInfoTag*> m_tags;
     bool                       m_bChanged;        /*!< true if anything changed that needs to be persisted, false otherwise */
     bool                       m_bTagsChanged;    /*!< true when any tags are changed and not persisted, false otherwise */
-    bool                       m_bInhibitSorting; /*!< don't sort the table if this is true */
     bool                       m_bLoaded;         /*!< true when the initial entries have been loaded */
     int                        m_iEpgID;          /*!< the database ID of this table */
     CStdString                 m_strName;         /*!< the name of this table */
     CStdString                 m_strScraperName;  /*!< the name of the scraper to use */
-    mutable const CEpgInfoTag *m_nowActive;       /*!< the tag that is currently active */
+    CDateTime                  m_nowActiveStart;  /*!< the start time of the tag that is currently active */
 
     CDateTime                  m_lastScanTime;    /*!< the last time the EPG has been updated */
-    CDateTime                  m_firstDate;       /*!< start time of the first epg event in this table */
-    CDateTime                  m_lastDate;        /*!< end time of the last epg event in this table */
 
-    PVR::CPVRChannel *         m_Channel;         /*!< the channel this EPG belongs to */
+    int                        m_iPVRChannelId;   /*!< the channel this EPG belongs to */
+    int                        m_iPVRChannelNumber; /*!< the channel number in the "all channels" group. set on create and not updated */
 
-    mutable CCriticalSection   m_critSection;     /*!< critical section for changes in this table */
+    CCriticalSection           m_critSection;     /*!< critical section for changes in this table */
   };
 }

@@ -25,6 +25,7 @@
 #include <arpa/inet.h>
 #include "DllLibPlist.h"
 #include "utils/log.h"
+#include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 #include "threads/SingleLock.h"
 #include "filesystem/File.h"
@@ -33,6 +34,7 @@
 #include "Application.h"
 #include "utils/md5.h"
 #include "utils/Variant.h"
+#include "guilib/GUIWindowManager.h"
 
 #ifdef TARGET_WINDOWS
 #define close closesocket
@@ -678,6 +680,34 @@ int CAirPlayServer::CTCPClient::ProcessRequest( CStdString& responseHeader,
         }
       }
   }
+  
+  // The volume command is used to change playback volume.
+  // A value argument should be supplied which indicates how loud we should get.
+  // 0.000000 => silent
+  // 1.000000 => loud
+  else if (uri == "/volume")
+  {
+      const char* found = strstr(queryString.c_str(), "volume=");
+      double volume = found ? (double)(atof(found + strlen("volume="))) : 0;
+
+      CLog::Log(LOGDEBUG, "AIRPLAY: got request %s with volume %f", uri.c_str(), volume);
+
+      if (needAuth && !checkAuthorization(authorization, method, uri))
+      {
+        status = AIRPLAY_STATUS_NEED_AUTH;
+      }
+      else if (volume >= 0 && volume <= 1)
+      {
+        int oldVolume = g_application.GetVolume();
+        volume *= 100;
+        if(oldVolume != (int)volume)
+        {
+          g_application.SetVolume(volume);          
+          g_application.getApplicationMessenger().ShowVolumeBar(oldVolume < volume);
+        }
+      }
+  }
+
 
   // Contains a header like format in the request body which should contain a
   // Content-Location and optionally a Start-Position
@@ -764,7 +794,11 @@ int CAirPlayServer::CTCPClient::ProcessRequest( CStdString& responseHeader,
 
     if (status != AIRPLAY_STATUS_NEED_AUTH)
     {
-      CFileItem fileToPlay(location + "|User-Agent=AppleCoreMedia/1.0.0.8F455 (Apple†TV; U; CPU OS 4_3 like Mac OS X; de_de)", false);
+      CStdString userAgent="AppleCoreMedia/1.0.0.8F455 (AppleTV; U; CPU OS 4_3 like Mac OS X; de_de)";
+      CURL::Encode(userAgent);
+      location += "|User-Agent=" + userAgent;
+
+      CFileItem fileToPlay(location, false);
       fileToPlay.SetProperty("StartPercent", position*100.0f);
       g_application.getApplicationMessenger().MediaPlay(fileToPlay);
       ComposeReverseEvent(reverseHeader, reverseBody, sessionId, EVENT_PLAYING);
@@ -823,8 +857,15 @@ int CAirPlayServer::CTCPClient::ProcessRequest( CStdString& responseHeader,
     }
     else
     {
-      g_application.getApplicationMessenger().MediaStop();
-      CAirPlayServer::m_isPlaying--;
+      if (IsPlaying()) //only stop player if we started him
+      {
+        g_application.getApplicationMessenger().MediaStop();
+        CAirPlayServer::m_isPlaying--;
+      }
+      else //if we are not playing and get the stop request - we just wanna stop picture streaming
+      {
+        g_windowManager.PreviousWindow();
+      }
       ComposeReverseEvent(reverseHeader, reverseBody, sessionId, EVENT_STOPPED);
     }
   }

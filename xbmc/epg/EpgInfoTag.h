@@ -24,6 +24,7 @@
 #include "addons/include/xbmc_pvr_types.h"
 #include "XBDateTime.h"
 #include "Epg.h"
+#include "utils/StringUtils.h"
 
 namespace PVR
 {
@@ -39,18 +40,13 @@ namespace EPG
   {
     friend class CEpg;
     friend class CEpgDatabase;
+    friend class PVR::CPVRTimerInfoTag;
 
   public:
     /*!
-     * @brief Create a new EPG event.
-     * @param iUniqueBroadcastId The unique broadcast ID for this event.
-     */
-    CEpgInfoTag(int iUniqueBroadcastId);
-
-    /*!
      * @brief Create a new empty event without a unique ID.
      */
-    CEpgInfoTag(void);
+    CEpgInfoTag(int iEpgId = -1, int iPVRChannelNumber = -1, int iPVRChannelID = -1, const CStdString &strTableName = StringUtils::EmptyString);
 
     /*!
      * @brief Create a new EPG infotag with 'data' as content.
@@ -86,6 +82,16 @@ namespace EPG
     virtual bool IsActive(void) const;
 
     /*!
+     * @return True when this event has already passed, false otherwise.
+     */
+    virtual bool WasActive(void) const;
+
+    /*!
+     * @return True when this event is in the future, false otherwise.
+     */
+    virtual bool InTheFuture(void) const;
+
+    /*!
      * @return The current progress of this tag.
      */
     virtual float ProgressPercentage(void) const;
@@ -106,7 +112,9 @@ namespace EPG
      * @brief The table this event belongs to
      * @return The table this event belongs to
      */
-    virtual const CEpg *GetTable() const { return m_Epg; }
+    virtual const CEpg *GetTable() const;
+
+    virtual const int EpgID(void) const { return m_iEpgId; }
 
     /*!
      * @brief Change the unique broadcast ID of this event.
@@ -372,6 +380,10 @@ namespace EPG
      */
     virtual bool HasPVRChannel(void) const;
 
+    virtual int PVRChannelNumber(void) const;
+
+    virtual CStdString PVRChannelName(void) const;
+
     /*!
      * @brief Get the channel that plays this event.
      * @return a pointer to the channel.
@@ -394,9 +406,10 @@ namespace EPG
     /*!
      * @brief Update the information in this tag with the info in the given tag.
      * @param tag The new info.
+     * @param bUpdateBroadcastId If set to false, the tag BroadcastId (locally unique) will not be chacked/updated
      * @return True if something changed, false otherwise.
      */
-    virtual bool Update(const CEpgInfoTag &tag);
+    virtual bool Update(const CEpgInfoTag &tag, bool bUpdateBroadcastId = true);
 
   protected:
     /*!
@@ -405,16 +418,9 @@ namespace EPG
     virtual void UpdatePath(void);
 
     /*!
-     * @brief Change the pointer to the next event.
-     * @param event The next event.
+     * @brief Called by the CPVRTimerInfoTag destructor
      */
-    virtual void SetNextEvent(CEpgInfoTag *event);
-
-    /*!
-     * @brief Change the pointer to the previous event.
-     * @param event The previous event.
-     */
-    virtual void SetPreviousEvent(CEpgInfoTag *event);
+    virtual void OnTimerDeleted(void);
 
     bool                   m_bNotify;            /*!< notify on start */
     bool                   m_bChanged;           /*!< keep track of changes to this entry */
@@ -439,11 +445,13 @@ namespace EPG
     CDateTime              m_endTime;            /*!< event end time */
     CDateTime              m_firstAired;         /*!< first airdate */
 
-    CEpgInfoTag *          m_nextEvent;          /*!< the event that will occur after this one */
-    CEpgInfoTag *          m_previousEvent;      /*!< the event that occurred before this one */
+    CDateTime              m_timerStart;         /*!< the start time of the timer (if any) */
+    int                    m_iTimerId;           /*!< the id of the timer (if any) */
+    int                    m_iEpgId;             /*!< the ID of the schedule that this event belongs to */
 
-    PVR::CPVRTimerInfoTag *m_Timer;              /*!< a pointer to a timer for this event or NULL if there is none */
-    CEpg *                 m_Epg;                /*!< the schedule this event belongs to */
+    int                    m_iPVRChannelNumber;  /*!< the channel number in the "all channels" group */
+    int                    m_iPVRChannelID;      /*!< the ID of the PVR channel */
+    CStdString             m_strTableName;       /*!< the name of the EPG table (or PVR channel, if it's a PVR epg table */
     CCriticalSection       m_critSection;
   };
 }
