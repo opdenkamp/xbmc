@@ -27,11 +27,13 @@
 #define DEFAULT_CONNECT_TIMEOUT  30
 #define DEFAULT_RESPONSE_TIMEOUT 3
 #define DEFAULT_STREAM_PORT      8001 
+#define DEFAULT_WEB_PORT         80
 #define DEFAULT_UPDATE_INTERVAL  2
 
 extern bool                      m_bCreated;
 extern std::string               g_strHostname;
 extern int                       g_iPortStream;
+extern int                       g_iPortWeb;
 extern std::string               g_strUsername;
 extern std::string               g_strPassword;
 extern std::string               g_strIconPath;

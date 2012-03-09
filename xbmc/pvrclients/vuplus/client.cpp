@@ -39,6 +39,7 @@ std::string g_strHostname             = DEFAULT_HOST;
 int         g_iConnectTimeout         = DEFAULT_CONNECT_TIMEOUT;
 int         g_iResponseTimeout        = DEFAULT_RESPONSE_TIMEOUT;
 int         g_iPortStream             = DEFAULT_STREAM_PORT;
+int         g_iPortWeb                = DEFAULT_WEB_PORT;
 int         g_iUpdateInterval         = DEFAULT_UPDATE_INTERVAL;
 std::string g_strUsername             = "";
 std::string g_strPassword             = "";
@@ -83,6 +84,10 @@ void ADDON_ReadSettings(void)
   /* read setting "streamport" from settings.xml */
   if (!XBMC->GetSetting("streamport", &g_iPortStream))
     g_iPortStream = DEFAULT_STREAM_PORT;
+  
+  /* read setting "webport" from settings.xml */
+  if (!XBMC->GetSetting("webport", &g_iPortWeb))
+    g_iPortWeb = DEFAULT_WEB_PORT;
   
   /* read setting "showcompleted" from settings.xml */
   if (!XBMC->GetSetting("showcompleted", &g_bShowTimersCompleted))

@@ -17,7 +17,7 @@ Vu::Vu()
   // simply add user@pass in front of the URL if username/password is set
   if ((g_strUsername.length() > 0) && (g_strPassword.length() > 0))
     strURL.Format("%s:%s@", g_strUsername.c_str(), g_strPassword.c_str());
-  strURL.Format("http://%s%s/", strURL.c_str(), g_strHostname.c_str());
+  strURL.Format("http://%s%s:%u/", strURL.c_str(), g_strHostname.c_str(), g_iPortWeb);
   m_strURL = strURL.c_str();
   m_iNumChannels = 0;
   m_iNumTimers = 0; 
