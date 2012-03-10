@@ -70,8 +70,6 @@ bool Vu::Open()
   CreateThread(); 
   m_bIsConnected = true;
 
-  m_started.Wait(m_mutex, m_bIsConnected, 1000);
-
   return IsRunning(); 
 }
 
