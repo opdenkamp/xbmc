@@ -80,9 +80,9 @@ void  *Vu::Process()
 
   while(IsRunning())
   {
-    CLockObject lock(m_mutex);
     // Trigger Timer and Recording updates acording to the addon settings
     Sleep(g_iUpdateInterval * 60 * 1000);
+    CLockObject lock(m_mutex);
     XBMC->Log(LOG_INFO, "%s Perform Updates!", __FUNCTION__);
     PVR->TriggerTimerUpdate();
     PVR->TriggerRecordingUpdate();
@@ -242,6 +242,7 @@ bool Vu::IsConnected()
 
 CStdString Vu::GetHttpXML(CStdString& url) 
 {
+  CLockObject lock(m_mutex);
   CURL* curl_handle;
 
   XBMC->Log(LOG_INFO, "%s Open webAPI with URL: '%s'", __FUNCTION__, url.c_str());
@@ -479,14 +480,23 @@ PVR_ERROR Vu::GetTimers(PVR_HANDLE handle)
     CStdString strTmp;
     int iTmp;
     bool bTmp;
+    int iDisabled;
+    
+    if (GetString(xTmp, "e2name", strTmp)) 
+      XBMC->Log(LOG_DEBUG, "%s Processing timer '%s'", __FUNCTION__, strTmp.c_str());
+ 
 
-    if (((!g_bShowTimersCompleted) && (GetInt(xTmp, "e2state", iTmp))) && (iTmp == 3))
+    if (((!g_bShowTimersCompleted) && (GetInt(xTmp, "e2state", iTmp))) && (iTmp == 3)) {
+      XBMC->Log(LOG_DEBUG, "%s Skipping timer!", __FUNCTION__);
       continue;
+    }
 
-    if ((!GetInt(xTmp, "e2disabled", iTmp)) || (iTmp != 0))
+    if (!GetInt(xTmp, "e2disabled", iDisabled))
       continue;
 
     VuTimer timer;
+    
+    timer.strTitle          = strTmp;
 
     if (GetString(xTmp, "e2servicereference", strTmp))
       timer.iChannelId = GetChannelNumber(strTmp.c_str());
@@ -501,10 +511,6 @@ PVR_ERROR Vu::GetTimers(PVR_HANDLE handle)
  
     timer.endTime           = iTmp;
     
-    if (GetString(xTmp, "e2name", strTmp)) {
-      timer.strTitle          = strTmp;
-    }
-
     if (GetString(xTmp, "e2description", strTmp))
       timer.strPlot        = strTmp.c_str();
  
@@ -528,29 +534,32 @@ PVR_ERROR Vu::GetTimers(PVR_HANDLE handle)
     if (!GetInt(xTmp, "e2state", iTmp))
       continue;
 
-    XBMC->Log(LOG_INFO, "%s e2state is: %d ", __FUNCTION__, iTmp);
+    XBMC->Log(LOG_DEBUG, "%s e2state is: %d ", __FUNCTION__, iTmp);
   
     if (iTmp == 0) {
       timer.state = PVR_TIMER_STATE_SCHEDULED;
-      XBMC->Log(LOG_INFO, "%s Timer state is: SCHEDULED", __FUNCTION__);
+      XBMC->Log(LOG_DEBUG, "%s Timer state is: SCHEDULED", __FUNCTION__);
     }
     
     if (iTmp == 2) {
       timer.state = PVR_TIMER_STATE_RECORDING;
-      XBMC->Log(LOG_INFO, "%s Timer state is: RECORDING", __FUNCTION__);
+      XBMC->Log(LOG_DEBUG, "%s Timer state is: RECORDING", __FUNCTION__);
     }
     
-    if (iTmp == 3) {
+    if (iTmp == 3 && iDisabled == 0) {
       timer.state = PVR_TIMER_STATE_COMPLETED;
-      XBMC->Log(LOG_INFO, "%s Timer state is: COMPLETED", __FUNCTION__);
+      XBMC->Log(LOG_DEBUG, "%s Timer state is: COMPLETED", __FUNCTION__);
     }
 
     if (GetBoolean(xTmp, "e2cancled", bTmp)) {
       if (bTmp)  {
         timer.state = PVR_TIMER_STATE_CANCELLED;
-        XBMC->Log(LOG_INFO, "%s Timer state is: CANCELLED", __FUNCTION__);
+        XBMC->Log(LOG_DEBUG, "%s Timer state is: CANCELLED", __FUNCTION__);
       }
     }
+
+    if (timer.state == PVR_TIMER_STATE_INVALID)
+      XBMC->Log(LOG_DEBUG, "%s Timer state is: INVALID", __FUNCTION__);
 
     PVR_TIMER tag;
     memset(&tag, 0, sizeof(PVR_TIMER));
@@ -578,7 +587,7 @@ PVR_ERROR Vu::GetTimers(PVR_HANDLE handle)
     m_iNumTimers++; 
     m_timers.push_back(timer);
 
-    XBMC->Log(LOG_INFO, "%s loaded Timer entry '%s'", __FUNCTION__, tag.strTitle);
+    XBMC->Log(LOG_INFO, "%s loaded Timer entry '%s', begin '%d', end '%d'", __FUNCTION__, tag.strTitle, tag.startTime, tag.endTime);
   }
 
   XBMC->Log(LOG_INFO, "%s Loaded %u Timer Entries", __FUNCTION__, m_iNumTimers);
@@ -781,9 +790,28 @@ PVR_ERROR Vu::DeleteRecording(const PVR_RECORDING &recinfo)
 
 PVR_ERROR Vu::UpdateTimer(const PVR_TIMER &timer)
 {
+
+  XBMC->Log(LOG_DEBUG, "%s timer channelid '%d'", __FUNCTION__, timer.iClientChannelUid);
+
+  CStdString strTmp;
+  CStdString strServiceReference = m_channels.at(timer.iClientChannelUid-1).strServiceReference.c_str();  
+
+  VuTimer &oldTimer = m_timers.at(timer.iClientIndex);
+  CStdString strOldServiceReference = m_channels.at(oldTimer.iChannelId-1).strServiceReference.c_str();  
+
+  int iDisabled = 0;
+  if (timer.state == PVR_TIMER_STATE_CANCELLED)
+    iDisabled = 1;
+
+  strTmp.Format("web/timerchange?sRef=%s&begin=%d&end=%d&name=%s&eventID=%d&description=%s&tags=&afterevent=3&eit=0&disabled=%d&justplay=0%repeated=%d&channelOld=%s&beginOld=%d&endOld=%d&deleteOldOnSave=1", strServiceReference.c_str(), timer.startTime, timer.endTime, URLEncodeInline(timer.strTitle), 0, URLEncodeInline(timer.strSummary), iDisabled, timer.iWeekdays, strOldServiceReference.c_str(), oldTimer.startTime, oldTimer.endTime  );
+
+  CStdString strResult;
+  if(!SendSimpleCommand(strTmp, strResult))
+    return PVR_ERROR_SERVER_ERROR;
+
   PVR->TriggerTimerUpdate();
 
-  return PVR_ERROR_NOT_IMPLEMENTED;
+  return PVR_ERROR_NO_ERROR;
 }
 
 bool Vu::GetInt(XMLNode xRootNode, const char* strTag, int& iIntValue)
