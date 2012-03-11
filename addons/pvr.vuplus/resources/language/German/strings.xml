@@ -11,6 +11,7 @@
     <string id="30010">Aktualisierungsintervall (in Minuten)</string>
     <string id="30011">Automatisches aufräen der Timerliste</string>
     <string id="30012">Webinterface Port</string>
+    <string id="30013">Umschalten auf SatBox (z.B. bei SingleTuner Receivern)</string>
 
     <!-- notifications -->
     <string id="30500">Verbindung '%s' unterbrochen</string>

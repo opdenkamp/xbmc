@@ -21,6 +21,7 @@ Vu::Vu()
   m_iNumTimers = 0; 
   m_iNumRecordings = 0;
   m_iNumChannelGroups = 0;
+  m_iCurrentChannel = -1;
 }
 
 // Curl callback
@@ -310,7 +311,10 @@ PVR_ERROR Vu::GetChannels(PVR_HANDLE handle, bool bRadio)
       xbmcChannel.iChannelNumber    = channel.iChannelNumber;
       xbmcChannel.strChannelName    = channel.strChannelName.c_str();
       xbmcChannel.strInputFormat    = ""; // unused
-      xbmcChannel.strStreamURL      = channel.strStreamURL.c_str();
+
+      CStdString strStream;
+      strStream.Format("pvr://stream/tv/%i.ts", channel.iUniqueId);
+      xbmcChannel.strStreamURL      = strStream.c_str(); //channel.strStreamURL.c_str();
       xbmcChannel.iEncryptionSystem = 0;
       
       xbmcChannel.strIconPath = channel.strIconPath.c_str();
@@ -950,4 +954,56 @@ PVR_ERROR Vu::GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL_GROUP 
     }
   }
   return PVR_ERROR_NO_ERROR;
+}
+
+int Vu::GetCurrentClientChannel(void) 
+{
+  return m_iCurrentChannel;
+}
+
+const char* Vu::GetLiveStreamURL(const PVR_CHANNEL &channelinfo)
+{
+  CStdString strStreamURL =  m_channels.at(channelinfo.iUniqueId-1).strStreamURL.c_str();
+  XBMC->Log(LOG_INFO, "%s URL: '%s'", __FUNCTION__, strStreamURL.c_str());
+  
+  SwitchChannel(channelinfo);
+
+  return strStreamURL;
+}
+
+bool Vu::OpenLiveStream(const PVR_CHANNEL &channelinfo)
+{
+  XBMC->Log(LOG_INFO, "%s channel '%u'", __FUNCTION__, channelinfo.iUniqueId);
+
+  if ((int)channelinfo.iUniqueId == m_iCurrentChannel)
+    return true;
+
+  return SwitchChannel(channelinfo);
+}
+
+void Vu::CloseLiveStream(void) 
+{
+  m_iCurrentChannel = -1;
+}
+
+bool Vu::SwitchChannel(const PVR_CHANNEL &channel)
+{
+  if ((int)channel.iUniqueId == m_iCurrentChannel)
+    return true;
+
+  if (!g_bZap)
+    return true;
+
+  // Zapping is set to true, so send the zapping command to the PVR box 
+  CStdString strServiceReference = m_channels.at(channel.iUniqueId-1).strServiceReference.c_str();
+
+  CStdString strTmp;
+  strTmp.Format("web/zap?sRef=%s", URLEncodeInline(strServiceReference));
+
+  CStdString strResult;
+  if(!SendSimpleCommand(strTmp, strResult))
+    return false;
+
+  return true;
+
 }

@@ -78,6 +78,7 @@ private:
   int m_iNumTimers;
   int m_iNumRecordings;
   int m_iNumChannelGroups;
+  int m_iCurrentChannel;
   std::vector<VuChannel> m_channels;
   std::vector<VuTimer> m_timers;
   std::vector<VuRecording> m_recordings;
@@ -117,6 +118,7 @@ public:
   int GetChannelsAmount(void);
   PVR_ERROR GetChannels(PVR_HANDLE handle, bool bRadio);
   PVR_ERROR GetEPGForChannel(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd);
+  int GetCurrentClientChannel(void);
   int GetTimersAmount(void);
   PVR_ERROR GetTimers(PVR_HANDLE handle);
   PVR_ERROR AddTimer(const PVR_TIMER &timer);
@@ -128,6 +130,11 @@ public:
   unsigned int GetNumChannelGroups(void);
   PVR_ERROR    GetChannelGroups(PVR_HANDLE handle);
   PVR_ERROR    GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL_GROUP &group);
+  const char* GetLiveStreamURL(const PVR_CHANNEL &channelinfo);
+  bool OpenLiveStream(const PVR_CHANNEL &channelinfo);
+  void CloseLiveStream();
+  bool SwitchChannel(const PVR_CHANNEL &channel);
+
 
   bool Open();
   void Action();

@@ -11,6 +11,7 @@
     <string id="30010">Update Interval in minutes</string>
     <string id="30011">Automatic Timerlist Cleanup</string>
     <string id="30012">Webinterface Port</string>
+    <string id="30013">Zap before channelswitch (i.e. for Single Tuner boxes)</string>
 
     <!-- notifications -->
     <string id="30500">Disconnected from '%s'</string>

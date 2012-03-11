@@ -48,6 +48,7 @@ std::string g_strClientPath           = "";
 std::string g_strIconPath             = "";
 bool        g_bShowTimersCompleted    = false;
 bool        g_bAutomaticTimerlistCleanup = false;
+bool        g_bZap                    = false;
 
 CHelper_libXBMC_addon *XBMC           = NULL;
 CHelper_libXBMC_pvr   *PVR            = NULL;
@@ -93,6 +94,10 @@ void ADDON_ReadSettings(void)
   if (!XBMC->GetSetting("showcompleted", &g_bShowTimersCompleted))
     g_bShowTimersCompleted = false;
   
+  /* read setting "zap" from settings.xml */
+  if (!XBMC->GetSetting("zap", &g_bZap))
+    g_bZap = false;
+
   /* read setting "timerlistcleanup" from settings.xml */
   if (!XBMC->GetSetting("timerlistcleanup", &g_bAutomaticTimerlistCleanup))
     g_bAutomaticTimerlistCleanup = false;
@@ -301,7 +306,7 @@ PVR_ERROR GetAddonCapabilities(PVR_ADDON_CAPABILITIES* pCapabilities)
   pCapabilities->bSupportsTimers          = true;
   pCapabilities->bSupportsChannelGroups   = true;
   pCapabilities->bSupportsChannelScan     = false;
-  pCapabilities->bHandlesInputStream      = false;
+  pCapabilities->bHandlesInputStream      = true;
   pCapabilities->bHandlesDemuxing         = false;
 
   return PVR_ERROR_NO_ERROR;
@@ -429,12 +434,18 @@ PVR_ERROR UpdateTimer(const PVR_TIMER &timer)
 
 int GetCurrentClientChannel(void)
 {
-  return -1;
+  if (!VuData || !VuData->IsConnected())
+    return PVR_ERROR_SERVER_ERROR;
+
+  return VuData->GetCurrentClientChannel();
 }
 
 bool SwitchChannel(const PVR_CHANNEL &channel)
 {
-  return false;
+  if (!VuData || !VuData->IsConnected())
+    return PVR_ERROR_SERVER_ERROR;
+
+  return VuData->SwitchChannel(channel);
 }
 
 int GetChannelGroupsAmount(void)
@@ -467,10 +478,28 @@ PVR_ERROR GetChannelGroupMembers(PVR_HANDLE handle, const PVR_CHANNEL_GROUP &gro
   return VuData->GetChannelGroupMembers(handle, group);
 }
 
+void CloseLiveStream(void) 
+{ 
+  VuData->CloseLiveStream();
+};
+
+bool OpenLiveStream(const PVR_CHANNEL &channel) 
+{ 
+  if (!VuData || !VuData->IsConnected())
+    return PVR_ERROR_SERVER_ERROR;
+
+  return VuData->OpenLiveStream(channel);
+}
+
+const char * GetLiveStreamURL(const PVR_CHANNEL &channel) 
+{ 
+  if (!VuData || !VuData->IsConnected())
+    return "";
+
+  return VuData->GetLiveStreamURL(channel);
+}
 
 /** UNUSED API FUNCTIONS */
-void CloseLiveStream(void) { return; };
-bool OpenLiveStream(const PVR_CHANNEL &channel) { return false; }
 PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS &signalStatus) { return PVR_ERROR_NO_ERROR; }
 PVR_ERROR GetStreamProperties(PVR_STREAM_PROPERTIES* pProperties) { return PVR_ERROR_NOT_IMPLEMENTED; } 
 void DemuxAbort(void) { return; }
@@ -494,5 +523,4 @@ int ReadLiveStream(unsigned char *pBuffer, unsigned int iBufferSize) { return 0;
 long long SeekLiveStream(long long iPosition, int iWhence /* = SEEK_SET */) { return -1; }
 long long PositionLiveStream(void) { return -1; }
 long long LengthLiveStream(void) { return -1; }
-const char * GetLiveStreamURL(const PVR_CHANNEL &channel) { return ""; }
 }
