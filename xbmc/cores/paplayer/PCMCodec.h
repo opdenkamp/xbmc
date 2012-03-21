@@ -1,6 +1,5 @@
-#pragma once
 /*
- *      Copyright (C) 2010 Team XBMC
+ *      Copyright (C) 2011-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,28 +19,22 @@
  *
  */
 
-#include <string>
-#include <ctime>
-#include <stdint.h>
+#pragma once
+#include "CachingCodec.h"
 
-using namespace std;
-
-class CFTPParse
+class PCMCodec : public CachingCodec
 {
 public:
-  CFTPParse();
-  int FTPParse(string str);
-  string getName();
-  int getFlagtrycwd();
-  int getFlagtryretr();
-  uint64_t getSize();
-  time_t getTime();
+  PCMCodec(void);
+  virtual ~PCMCodec(void);
+  virtual bool Init(const CStdString &strFile, unsigned int filecache);
+  virtual void DeInit();
+  virtual __int64 Seek(__int64 iSeekTime);
+  virtual int ReadPCM(BYTE *pBuffer, int size, int *actualsize);
+  virtual bool CanInit();
+  virtual void SetMimeParams(const CStdString& strMimeParams);
 private:
-  string m_name;            // not necessarily 0-terminated
-  int m_flagtrycwd;         // 0 if cwd is definitely pointless, 1 otherwise
-  int m_flagtryretr;        // 0 if retr is definitely pointless, 1 otherwise
-  uint64_t m_size;              // number of octets
-  time_t m_time;            // modification time
-  void setTime(string str); // Method used to set m_time from a string
-  int getDayOfWeek(int month, int date, int year); // Method to get day of week
+  int iBytesPerSecond;
 };
+
+

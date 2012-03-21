@@ -137,8 +137,11 @@ CHTSResult CHTSPData::ReadResult(htsmsg_t *m)
     retVal.message = message.msg;
   }
 
-  delete message.event;
-  m_queue.erase(seq);
+  {
+    CLockObject lock(m_mutex);
+    delete message.event;
+    m_queue.erase(seq);
+  }
 
   return retVal;
 }
@@ -283,7 +286,7 @@ PVR_ERROR CHTSPData::GetEpg(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_
         break;
       }
 
-    } while(iEnd > stop);
+    } while(iEnd > stop && event.id != 0);
   }
   else
   {
