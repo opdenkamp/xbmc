@@ -107,17 +107,12 @@ void CPVRRecordings::GetContents(const CStdString &strDirectory, CFileItemList *
     pFileItem->m_dateTime = current->RecordingTimeAsLocalTime();
     pFileItem->SetPath(current->m_strFileNameAndPath);
     CVideoDatabase db;
-    int iPlayCount=0;
     if (db.Open())
     {
         pFileItem->GetPVRRecordingInfoTag()->m_playCount=db.GetPlayCount(*pFileItem);
     }
-      
-     // set the watched overlay
     pFileItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, pFileItem->GetPVRRecordingInfoTag()->m_playCount > 0);
- 
     results->Add(pFileItem);
- 
   }
 }
 
@@ -143,9 +138,6 @@ void CPVRRecordings::GetSubDirectories(const CStdString &strBase, CFileItemList 
       pFileItem->SetLabel(strCurrent);
       pFileItem->SetLabelPreformated(true);
       results->Add(pFileItem);
-
-
- 
     }
   }
 
