@@ -54,6 +54,7 @@ CEpgContainer::CEpgContainer(void) :
   m_bPreventUpdates = false;
   m_updateEvent.Reset();
   m_bLoaded = false;
+  m_iLastEpgUpdate = 0;
 
   m_database.Open();
 }
@@ -423,6 +424,7 @@ bool CEpgContainer::UpdateEPG()
   /* set start and end time */
   time_t start;
   time_t end;
+  time_t iStarted;
   CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(start);
   end = start + m_iDisplayTime;
   start -= g_advancedSettings.m_iEpgLingerTime * 60;
@@ -448,6 +450,7 @@ bool CEpgContainer::UpdateEPG()
   /* load or update all EPG tables */
   CEpg *epg;
   unsigned int iCounter(0);
+  unsigned int iUpdateStarted = XbmcThreads::SystemClockMillis();
   for (map<unsigned int, CEpg *>::iterator it = m_epgs.begin(); it != m_epgs.end(); it++)
   {
     if (InterruptUpdate())
@@ -463,9 +466,17 @@ bool CEpgContainer::UpdateEPG()
     if (bShowProgress)
           UpdateProgressDialog(++iCounter, m_epgs.size(), epg->Name());
 
-    if (epg->Update(start, end, m_iUpdateTime))
+    CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(iStarted);
+    if (epg->Update(start, end, m_iLastEpgUpdate, m_iUpdateTime))
+    {
       ++iUpdatedTables;
+      m_iLastEpgUpdate = iStarted;
+    }
+
+    //we have to break it here because one request gives a bulk epg reply from client
+    break;
   }
+  CLog::Log(LOGDEBUG, "%s: EPG update took %d ms", __FUNCTION__, XbmcThreads::SystemClockMillis() - iUpdateStarted);
 
   if (!bInterrupted)
   {

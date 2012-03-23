@@ -275,6 +275,7 @@ namespace EPG
     bool         m_bLoaded;                /*!< true after epg data is initially loaded from the database */
     bool         m_bPreventUpdates;        /*!< true to prevent EPG updates */
     time_t       m_iLastEpgCleanup;        /*!< the time the EPG was cleaned up */
+    time_t       m_iLastEpgUpdate;         /*!< the time the EPG was last updated */
     time_t       m_iNextEpgUpdate;         /*!< the time the EPG will be updated */
     time_t       m_iNextEpgActiveTagCheck; /*!< the time the EPG will be checked for active tag updates */
     unsigned int m_iNextEpgId;             /*!< the next epg ID that will be given to a new table when the db isn't being used */

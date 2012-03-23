@@ -477,7 +477,7 @@ PVR_ERROR CallMenuHook(const PVR_MENUHOOK &menuhook)
 /*******************************************/
 /** PVR EPG Functions                     **/
 
-PVR_ERROR GetEPGForChannel(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd)
+PVR_ERROR GetEPGForChannel(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd, time_t iSince)
 {
   if (!g_client)
     return PVR_ERROR_SERVER_ERROR;
