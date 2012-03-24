@@ -160,13 +160,18 @@ void CEpgContainer::LoadFromDB(void)
     {
       UpdateProgressDialog(++iCounter, m_epgs.size(), it->second->Name());
       it->second->Load();
+      if (m_bStop)
+        break;
     }
 
     CloseProgressDialog();
   }
 
-  CSingleLock lock(m_critSection);
-  m_bLoaded = true;
+  if (!m_bStop)
+  {
+    CSingleLock lock(m_critSection);
+    m_bLoaded = true;
+  }
 }
 
 bool CEpgContainer::PersistAll(void)
@@ -191,33 +196,34 @@ void CEpgContainer::Process(void)
 
   bool bUpdateEpg(true);
 
-  CSingleLock lock(m_critSection);
   if (!m_bLoaded)
   {
     LoadFromDB();
     CheckPlayingEvents();
   }
-  lock.Leave();
 
   while (!m_bStop && !g_application.m_bStop)
   {
-    CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(iNow);
+    if (g_PVRManager.IsStarted())
     {
-      CSingleLock lock(m_critSection);
-      bUpdateEpg = (iNow >= m_iNextEpgUpdate);
+      CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(iNow);
+      {
+        CSingleLock lock(m_critSection);
+        bUpdateEpg = (iNow >= m_iNextEpgUpdate);
+      }
+
+      /* update the EPG */
+      if (!InterruptUpdate() && bUpdateEpg && UpdateEPG())
+        m_bIsInitialising = false;
+
+      /* clean up old entries */
+      if (!m_bStop && iNow >= m_iLastEpgCleanup)
+        RemoveOldEntries();
+
+      /* check for updated active tag */
+      if (!m_bStop)
+        CheckPlayingEvents();
     }
-
-    /* update the EPG */
-    if (!InterruptUpdate() && bUpdateEpg && UpdateEPG())
-      m_bIsInitialising = false;
-
-    /* clean up old entries */
-    if (!m_bStop && iNow >= m_iLastEpgCleanup)
-      RemoveOldEntries();
-
-    /* check for updated active tag */
-    if (!m_bStop)
-      CheckPlayingEvents();
 
     Sleep(1000);
   }
@@ -590,4 +596,10 @@ bool CEpgContainer::IsInitialising(void) const
 {
   CSingleLock lock(m_critSection);
   return m_bIsInitialising;
+}
+
+bool CEpgContainer::IsLoaded(void) const
+{
+  CSingleLock lock(m_critSection);
+  return m_bLoaded;
 }

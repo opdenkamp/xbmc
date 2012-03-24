@@ -186,43 +186,52 @@ void CPVRManager::SetState(ManagerState state)
 
 void CPVRManager::Process(void)
 {
-  g_EpgContainer.Stop();
-
-  /* load the pvr data from the db and clients if it's not already loaded */
-  if (!Load())
-  {
-    CLog::Log(LOGERROR, "PVRManager - %s - failed to load PVR data", __FUNCTION__);
-    return;
-  }
-
-  if (GetState() == ManagerStateStarting)
-    SetState(ManagerStateStarted);
-  else
-    return;
-
-  /* main loop */
-  CLog::Log(LOGDEBUG, "PVRManager - %s - entering main loop", __FUNCTION__);
-  g_EpgContainer.Start();
-
   bool bRestart(false);
-  while (GetState() == ManagerStateStarted && m_addons && m_addons->HasConnectedClients() && !bRestart)
+  while (GetState() == ManagerStateStarting || GetState() == ManagerStateStarted)
   {
-    /* continue last watched channel after first startup */
-    if (m_bFirstStart && g_guiSettings.GetInt("pvrplayback.startlast") != START_LAST_CHANNEL_OFF)
-      ContinueLastChannel();
-
-    /* execute the next pending jobs if there are any */
-    try
+    if (GetState() == ManagerStateStarting)
     {
-      ExecutePendingJobs();
-    }
-    catch (...)
-    {
-      CLog::Log(LOGERROR, "PVRManager - %s - an error occured while trying to execute the last update job, trying to recover", __FUNCTION__);
-      bRestart = true;
-    }
+      if (g_EpgContainer.IsLoaded())
+      {
+        if (!Load())
+        {
+          CLog::Log(LOGERROR, "PVRManager - %s - failed to load PVR data", __FUNCTION__);
+          return;
+        }
 
-    if (GetState() == ManagerStateStarted && !bRestart)
+        if (GetState() == ManagerStateStarting)
+        {
+          SetState(ManagerStateStarted);
+        }
+        else
+        {
+          return;
+        }
+      }
+    }
+    else
+    {
+      if (m_addons && m_addons->HasConnectedClients() && !bRestart)
+      {
+        /* continue last watched channel after first startup */
+        if (m_bFirstStart && g_guiSettings.GetInt("pvrplayback.startlast") != START_LAST_CHANNEL_OFF)
+          ContinueLastChannel();
+
+        /* execute the next pending jobs if there are any */
+        try
+        {
+          ExecutePendingJobs();
+        }
+        catch (...)
+        {
+          CLog::Log(LOGERROR, "PVRManager - %s - an error occured while trying to execute the last update job, trying to recover", __FUNCTION__);
+          bRestart = true;
+        }
+      }
+      else
+        break;
+    }
+    if (GetState() == ManagerStateStarting || (GetState() == ManagerStateStarted && !bRestart))
       m_triggerEvent.WaitMSec(1000);
   }
 

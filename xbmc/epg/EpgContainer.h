@@ -206,6 +206,11 @@ namespace EPG
     bool IsInitialising(void) const;
 
     /*!
+    * @return True when EPG data has been initially loaded from the database.
+    */
+    bool IsLoaded(void) const;
+
+    /*!
      * @brief Call Persist() on each table
      * @return True when they all were persisted, false otherwise.
      */
