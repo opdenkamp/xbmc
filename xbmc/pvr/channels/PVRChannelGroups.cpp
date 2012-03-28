@@ -217,18 +217,15 @@ bool CPVRChannelGroups::UpdateGroupsEntries(const CPVRChannelGroups &groups)
 {
   CSingleLock lock(m_critSection);
   /* go through groups list and check for deleted groups */
-  for (int iGroupPtr = size() - 1; iGroupPtr >= 0; iGroupPtr--)
+  for (int iGroupPtr = size() - 1; iGroupPtr > 0; iGroupPtr--)
   {
     CPVRChannelGroup existingGroup(*at(iGroupPtr));
-    if (!existingGroup.IsInternalGroup())
+    CPVRChannelGroup *group = (CPVRChannelGroup *) groups.GetByName(existingGroup.GroupName());
+    if (group == NULL)
     {
-      CPVRChannelGroup *group = (CPVRChannelGroup *) groups.GetByName(existingGroup.GroupName());
-      if (group == NULL)
-      {
-        CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - user defined group %s with ID '%u' does not exist on the client anymore. deleting",
-            __FUNCTION__, existingGroup.GroupName().c_str(), existingGroup.GroupID());
-        DeleteGroup(*at(iGroupPtr));
-      }
+      CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - user defined group %s with ID '%u' does not exist on the client anymore. deleting",
+          __FUNCTION__, existingGroup.GroupName().c_str(), existingGroup.GroupID());
+      DeleteGroup(*at(iGroupPtr));
     }
   }
   /* go through the groups list and check for new groups */
@@ -264,9 +261,15 @@ bool CPVRChannelGroups::LoadUserDefinedChannelGroups(void)
       __FUNCTION__, (int) (size() - iSize), m_bRadio ? "radio" : "TV");
 
   iSize = size();
-  GetGroupsFromClients();
-  CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - %d new user defined %s channel groups fetched from clients",
-      __FUNCTION__, (int) (size() - iSize), m_bRadio ? "radio" : "TV");
+  if (g_guiSettings.GetBool("pvrmanager.syncchannelgroups"))
+  {
+    GetGroupsFromClients();
+    CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - %d new user defined %s channel groups fetched from clients",
+        __FUNCTION__, (int) (size() - iSize), m_bRadio ? "radio" : "TV");
+  }
+  else
+    CLog::Log(LOGDEBUG, "PVRChannelGroups - %s - 'synchannelgroups' is disabled; skipping groups from clients",
+        __FUNCTION__);
 
   /* load group members */
   for (unsigned int iGroupPtr = 1; iGroupPtr < size(); iGroupPtr++)
@@ -313,7 +316,6 @@ bool CPVRChannelGroups::PersistAll(void)
 
 CPVRChannelGroupInternal *CPVRChannelGroups::GetGroupAll(void) const
 {
-  CSingleLock lock(m_critSection);
   if (size() > 0)
     return (CPVRChannelGroupInternal *) at(0);
   else
