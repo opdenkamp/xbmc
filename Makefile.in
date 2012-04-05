@@ -26,7 +26,6 @@ DIRECTORY_ARCHIVES=$(DVDPLAYER_ARCHIVES) \
                    lib/libXDAAP/libxdaap.a \
                    lib/libhts/libhts.a \
                    lib/libsquish/libsquish.a \
-                   lib/libTcpSocket/libTcpSocket.a \
                    lib/tinyXML/tinyxml.a \
                    lib/xbmc-dll-symbols/dll-symbols.a \
                    xbmc/addons/addons.a \
@@ -63,6 +62,8 @@ DIRECTORY_ARCHIVES=$(DVDPLAYER_ARCHIVES) \
                    xbmc/music/tags/musictags.a \
                    xbmc/music/windows/musicwindows.a \
                    xbmc/network/libscrobbler/scrobbler.a \
+                   xbmc/network/httprequesthandler/httprequesthandlers.a \
+                   xbmc/network/websocket/websocket.a \
                    xbmc/network/network.a \
                    xbmc/peripherals/bus/peripheral-bus.a \
                    xbmc/peripherals/devices/peripheral-devices.a \

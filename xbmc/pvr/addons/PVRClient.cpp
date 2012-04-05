@@ -85,25 +85,26 @@ void CPVRClient::ResetProperties(void)
 
 void CPVRClient::ResetAddonCapabilities(void)
 {
-  m_addonCapabilities.bSupportsChannelSettings = false;
-  m_addonCapabilities.bSupportsTimeshift       = false;
-  m_addonCapabilities.bSupportsEPG             = false;
-  m_addonCapabilities.bSupportsTV              = false;
-  m_addonCapabilities.bSupportsRadio           = false;
-  m_addonCapabilities.bSupportsRecordings      = false;
-  m_addonCapabilities.bSupportsTimers          = false;
-  m_addonCapabilities.bSupportsChannelGroups   = false;
-  m_addonCapabilities.bSupportsChannelScan     = false;
-  m_addonCapabilities.bHandlesInputStream      = false;
-  m_addonCapabilities.bHandlesDemuxing         = false;
+  m_addonCapabilities.bSupportsChannelSettings  = false;
+  m_addonCapabilities.bSupportsTimeshift        = false;
+  m_addonCapabilities.bSupportsEPG              = false;
+  m_addonCapabilities.bSupportsTV               = false;
+  m_addonCapabilities.bSupportsRadio            = false;
+  m_addonCapabilities.bSupportsRecordings       = false;
+  m_addonCapabilities.bSupportsTimers           = false;
+  m_addonCapabilities.bSupportsChannelGroups    = false;
+  m_addonCapabilities.bSupportsChannelScan      = false;
+  m_addonCapabilities.bHandlesInputStream       = false;
+  m_addonCapabilities.bHandlesDemuxing          = false;
+  m_addonCapabilities.bSupportsRecordingFolders = false;
 }
 
 bool CPVRClient::Create(int iClientId)
 {
   m_pInfo->iClientId = iClientId;
-  CStdString userpath     = _P(Profile());
+  CStdString userpath     = CSpecialProtocol::TranslatePath(Profile());
   m_pInfo->strUserPath    = userpath.c_str();
-  CStdString clientpath   = _P(Path());
+  CStdString clientpath   = CSpecialProtocol::TranslatePath(Path());
   m_pInfo->strClientPath  = clientpath.c_str();
 
   /* initialise the add-on */
