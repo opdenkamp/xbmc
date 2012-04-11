@@ -474,7 +474,7 @@ CDateTime CEpg::GetLastScanTime(void)
   return m_lastScanTime;
 }
 
-bool CEpg::Update(const time_t start, const time_t end, int iUpdateTime)
+bool CEpg::Update(const time_t start, const time_t end, const time_t since, int iUpdateTime)
 {
   bool bGrabSuccess(true);
   bool bUpdate(false);
@@ -498,7 +498,7 @@ bool CEpg::Update(const time_t start, const time_t end, int iUpdateTime)
   bUpdate = (iNow > iLastUpdate + iUpdateTime);
 
   if (bUpdate)
-    bGrabSuccess = LoadFromClients(start, end);
+    bGrabSuccess = LoadFromClients(start, end, since);
 
   if (bGrabSuccess)
   {
@@ -732,7 +732,7 @@ bool CEpg::FixOverlappingEvents(bool bUpdateDb /* = false */)
   return bReturn;
 }
 
-bool CEpg::UpdateFromScraper(time_t start, time_t end)
+bool CEpg::UpdateFromScraper(time_t start, time_t end, time_t since)
 {
   bool bGrabSuccess = false;
   if (ScraperName() == "client")
@@ -748,7 +748,7 @@ bool CEpg::UpdateFromScraper(time_t start, time_t end)
     {
       CLog::Log(LOGINFO, "%s - updating EPG for channel '%s' from client '%i'", __FUNCTION__, channel->ChannelName().c_str(), channel->ClientID());
       PVR_ERROR error;
-      g_PVRClients->GetEPGForChannel(*channel, this, start, end, &error);
+      g_PVRClients->GetEPGForChannel(*channel, this, start, end, since, &error);
       bGrabSuccess = error == PVR_ERROR_NO_ERROR;
     }
   }
@@ -875,20 +875,20 @@ bool CEpg::IsRemovableTag(const CEpgInfoTag *tag) const
   return (!tag || !tag->HasTimer());
 }
 
-bool CEpg::LoadFromClients(time_t start, time_t end)
+bool CEpg::LoadFromClients(time_t start, time_t end, time_t since)
 {
   bool bReturn(false);
   CPVRChannel *channel = Channel();
   if (channel)
   {
     CEpg tmpEpg(channel);
-    if (tmpEpg.UpdateFromScraper(start, end))
+    if (tmpEpg.UpdateFromScraper(start, end, since))
       bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
   }
   else
   {
     CEpg tmpEpg(m_iEpgID, m_strName, m_strScraperName);
-    if (tmpEpg.UpdateFromScraper(start, end))
+    if (tmpEpg.UpdateFromScraper(start, end, since))
       bReturn = UpdateEntries(tmpEpg, !g_guiSettings.GetBool("epg.ignoredbforclient"));
   }
 

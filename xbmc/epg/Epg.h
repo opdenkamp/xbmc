@@ -208,7 +208,7 @@ namespace EPG
      * @param iUpdateTime Update the table after the given amount of time has passed.
      * @return True if the update was successful, false otherwise.
      */
-    virtual bool Update(const time_t start, const time_t end, int iUpdateTime);
+    virtual bool Update(const time_t start, const time_t end, const time_t since, int iUpdateTime);
 
     /*!
      * @brief Get all EPG entries.
@@ -290,7 +290,7 @@ namespace EPG
      * @param end Get entries with an end date before this time.
      * @return True if the update was successful, false otherwise.
      */
-    virtual bool UpdateFromScraper(time_t start, time_t end);
+    virtual bool UpdateFromScraper(time_t start, time_t end, time_t since);
 
     /*!
      * @brief Persist all tags in this container.
@@ -317,7 +317,7 @@ namespace EPG
      * @param end Only get entries before this end time. Use 0 to get all entries after "begin". If both "begin" and "end" are 0, all entries will be updated.
      * @return True if the update was successful, false otherwise.
      */
-    virtual bool LoadFromClients(time_t start, time_t end);
+    virtual bool LoadFromClients(time_t start, time_t end, time_t since);
 
     /*!
      * @brief Update the contents of this table with the contents provided in "epg"

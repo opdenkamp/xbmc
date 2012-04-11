@@ -122,13 +122,21 @@ void CAddonCallbacksPVR::PVRTransferEpgEntry(void *addonData, const PVR_HANDLE h
     return;
   }
 
-  CEpg *xbmcEpg   = (CEpg*) handle->dataAddress;
+  CPVRClient* client     = (CPVRClient*) handle->callerAddress;
+  CPVRChannel *channel   = (CPVRChannel *) g_PVRChannelGroups->GetByUniqueID(epgentry->iClientChannelUid, client->GetClientID());
+
+  if (channel == NULL)
+  {
+    CLog::Log(LOGERROR, "CAddonCallbacksPVR - %s - cannot find channel %d on client %d",
+        __FUNCTION__, epgentry->iClientChannelUid, client->GetClientID());
+    return;
+  }
 
   EPG_TAG *epgentry2 = (EPG_TAG*) epgentry;
   bool bUpdateDatabase = handle->dataIdentifier == 1;
 
   /* transfer this entry to the epg */
-  xbmcEpg->UpdateEntry(epgentry2, bUpdateDatabase);
+  channel->GetEPG()->UpdateEntry(epgentry2, bUpdateDatabase);
 }
 
 void CAddonCallbacksPVR::PVRTransferChannelEntry(void *addonData, const PVR_HANDLE handle, const PVR_CHANNEL *channel)

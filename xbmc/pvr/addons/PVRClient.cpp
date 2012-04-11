@@ -366,7 +366,7 @@ void CPVRClient::CallMenuHook(const PVR_MENUHOOK &hook)
   }
 }
 
-PVR_ERROR CPVRClient::GetEPGForChannel(const CPVRChannel &channel, CEpg *epg, time_t start /* = 0 */, time_t end /* = 0 */, bool bSaveInDb /* = false*/)
+PVR_ERROR CPVRClient::GetEPGForChannel(const CPVRChannel &channel, CEpg *epg, time_t start /* = 0 */, time_t end /* = 0 */, time_t since /* = 0 */, bool bSaveInDb /* = false*/)
 {
   PVR_ERROR retVal = PVR_ERROR_UNKNOWN;
   if (!m_bReadyToUse)
@@ -387,7 +387,8 @@ PVR_ERROR CPVRClient::GetEPGForChannel(const CPVRChannel &channel, CEpg *epg, ti
     retVal = m_pStruct->GetEpg(&handle,
         addonChannel,
         start ? start - g_advancedSettings.m_iPVRTimeCorrection : 0,
-        end ? end - g_advancedSettings.m_iPVRTimeCorrection : 0);
+        end ? end - g_advancedSettings.m_iPVRTimeCorrection : 0,
+        since);
 
     LogError(retVal, __FUNCTION__);
   }

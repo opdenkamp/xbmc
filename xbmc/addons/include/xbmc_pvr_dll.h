@@ -94,7 +94,7 @@ extern "C"
    * @param iEnd The end time to use.
    * @return PVR_ERROR_NO_ERROR if the table has been fetched successfully.
    */
-  PVR_ERROR GetEPGForChannel(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd);
+  PVR_ERROR GetEPGForChannel(PVR_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd, time_t iSince);
 
   //@}
   /** @name PVR channel group methods */
