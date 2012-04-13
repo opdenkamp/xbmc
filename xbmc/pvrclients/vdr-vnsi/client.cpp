@@ -638,5 +638,7 @@ long long SeekLiveStream(long long iPosition, int iWhence /* = SEEK_SET */) { re
 long long PositionLiveStream(void) { return -1; }
 long long LengthLiveStream(void) { return -1; }
 const char * GetLiveStreamURL(const PVR_CHANNEL &channel) { return ""; }
+PVR_ERROR SetRecordingLastWatchedPosition(const PVR_RECORDING &recording, int lastwatchedposition) { return PVR_ERROR_NOT_IMPLEMENTED; }
+int GetRecordingLastWatchedPosition(const PVR_RECORDING &recording) { return -1; }
 
 }

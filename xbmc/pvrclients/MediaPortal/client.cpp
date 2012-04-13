@@ -723,6 +723,9 @@ void DemuxAbort(void) {}
 void DemuxReset(void) {}
 void DemuxFlush(void) {}
 
+PVR_ERROR SetRecordingLastWatchedPosition(const PVR_RECORDING &recording, int lastwatchedposition) { return PVR_ERROR_NOT_IMPLEMENTED; }
+int GetRecordingLastWatchedPosition(const PVR_RECORDING &recording) { return -1; }
+
 long long SeekRecordedStream(long long iPosition, int iWhence) { return -1; }
 long long PositionRecordedStream(void) { return -1; }
 long long LengthRecordedStream(void) { return -1; }
