@@ -201,6 +201,22 @@ extern "C"
    */
   PVR_ERROR RenameRecording(const PVR_RECORDING &recording);
 
+  /*!
+  * @brief Set the last watched position of a recording on the backend.
+  * @param recording The recording.
+  * @param position The last watched position in seconds
+  * @return PVR_ERROR_NO_ERROR if the position has been stored
+  successfully.
+  */
+  PVR_ERROR SetRecordingLastWatchedPosition(const PVR_RECORDING &recording, int lastwatchedposition);
+
+  /*!
+  * @brief Retrieve the last watched position of a recording on the backend.
+  * @param recording The recording.
+  * @return The last watched position in seconds or -1 on error
+  */
+  int GetRecordingLastWatchedPosition(const PVR_RECORDING &recording);
+
   //@}
   /** @name PVR timer methods */
   //@{
@@ -406,6 +422,8 @@ extern "C"
     pClient->GetRecordings           = GetRecordings;
     pClient->DeleteRecording         = DeleteRecording;
     pClient->RenameRecording         = RenameRecording;
+    pClient->SetRecordingLastWatchedPosition = SetRecordingLastWatchedPosition;
+    pClient->GetRecordingLastWatchedPosition = GetRecordingLastWatchedPosition;
 
     pClient->GetTimersAmount         = GetTimersAmount;
     pClient->GetTimers               = GetTimers;
