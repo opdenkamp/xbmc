@@ -806,7 +806,7 @@ bool CDVDInputStreamBluray::SeekChapter(int ch)
     return true;
 }
 
-int64_t CDVDInputStreamBluray::Seek(int64_t offset, int whence)
+__int64 CDVDInputStreamBluray::Seek(__int64 offset, int whence)
 {
 #if LIBBLURAY_BYTESEEK
   if(whence == SEEK_POSSIBLE)
@@ -841,7 +841,7 @@ int64_t CDVDInputStreamBluray::Seek(int64_t offset, int whence)
 #endif
 }
 
-int64_t CDVDInputStreamBluray::GetLength()
+__int64 CDVDInputStreamBluray::GetLength()
 {
   return m_dll->bd_get_title_size(m_bd);
 }

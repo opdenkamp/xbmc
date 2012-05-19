@@ -33,10 +33,10 @@ public:
   virtual bool    Open(const char* path, const std::string &content);
   virtual void    Close();
   virtual int     Read(BYTE* buf, int buf_size);
-  virtual int64_t Seek(int64_t offset, int whence);
+  virtual __int64 Seek(__int64 offset, int whence);
   virtual bool Pause(double dTime) { return false; };
   virtual bool    IsEOF();
-  virtual int64_t GetLength();
+  virtual __int64 GetLength();
 
 protected:
 

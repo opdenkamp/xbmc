@@ -133,7 +133,7 @@ int CDVDInputStreamStack::Read(BYTE* buf, int buf_size)
   return (int)ret;
 }
 
-int64_t CDVDInputStreamStack::Seek(int64_t offset, int whence)
+__int64 CDVDInputStreamStack::Seek(__int64 offset, int whence)
 {
   int64_t pos, len;
 
@@ -170,7 +170,7 @@ int64_t CDVDInputStreamStack::Seek(int64_t offset, int whence)
   return -1;
 }
 
-int64_t CDVDInputStreamStack::GetLength()
+__int64 CDVDInputStreamStack::GetLength()
 {
   return m_length;
 }
