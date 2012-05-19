@@ -68,11 +68,11 @@ public:
   virtual bool Open(const char* strFile, const std::string& content);
   virtual void Close();
   virtual int Read(BYTE* buf, int buf_size);
-  virtual int64_t Seek(int64_t offset, int whence);
+  virtual __int64 Seek(__int64 offset, int whence);
   virtual bool Pause(double dTime) { return false; };
   virtual int GetBlockSize() { return DVDSTREAM_BLOCK_SIZE_DVD; }
   virtual bool IsEOF() { return m_bEOF; }
-  virtual int64_t GetLength()             { return 0; }
+  virtual __int64 GetLength()             { return 0; }
   virtual ENextStream NextStream() ;
 
   void ActivateButton();

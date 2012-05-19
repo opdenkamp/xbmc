@@ -92,7 +92,7 @@ int CDVDInputStreamFile::Read(BYTE* buf, int buf_size)
   return (int)(ret & 0xFFFFFFFF);
 }
 
-int64_t CDVDInputStreamFile::Seek(int64_t offset, int whence)
+__int64 CDVDInputStreamFile::Seek(__int64 offset, int whence)
 {
   if(!m_pFile) return -1;
 
@@ -107,7 +107,7 @@ int64_t CDVDInputStreamFile::Seek(int64_t offset, int whence)
   return ret;
 }
 
-int64_t CDVDInputStreamFile::GetLength()
+__int64 CDVDInputStreamFile::GetLength()
 {
   if (m_pFile)
     return m_pFile->GetLength();

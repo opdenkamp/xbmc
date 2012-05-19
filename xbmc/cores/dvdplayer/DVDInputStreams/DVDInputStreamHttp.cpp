@@ -103,7 +103,7 @@ int CDVDInputStreamHttp::Read(BYTE* buf, int buf_size)
   return (int)(ret & 0xFFFFFFFF);
 }
 
-int64_t CDVDInputStreamHttp::Seek(int64_t offset, int whence)
+__int64 CDVDInputStreamHttp::Seek(__int64 offset, int whence)
 {
   if(!m_pFile)
     return -1;
@@ -124,7 +124,7 @@ CHttpHeader* CDVDInputStreamHttp::GetHttpHeader()
   else return NULL;
 }
 
-int64_t CDVDInputStreamHttp::GetLength()
+__int64 CDVDInputStreamHttp::GetLength()
 {
   if (m_pFile)
     return m_pFile->GetLength();
