@@ -3870,6 +3870,14 @@ msgstr "Acción del botón de apagado"
 msgid "Power off System"
 msgstr "Apagar el sistema"
 
+#: id:13017
+msgid "Inhibit idle shutdown"
+msgstr "Impedir apagado al estar inactivo"
+
+#: id:13018
+msgid "Allow idle shutdown"
+msgstr "Permitir apagado al estar inactivo"
+
 #: id:13020
 msgid "Is another session active, perhaps over ssh?"
 msgstr "Existe otra sesión activa, ¿tal vez sobre ssh?"
@@ -5833,6 +5841,10 @@ msgstr "Spline36 optimizado"
 msgid "Software Blend"
 msgstr "Mezcla Software"
 
+#: id:16325
+msgid "Auto - ION Optimized"
+msgstr "Auto - Optimizado para ION"
+
 #: id:16400
 msgid "Post-processing"
 msgstr "Post-procesamiento de vídeo"
@@ -5841,9 +5853,1430 @@ msgstr "Post-procesamiento de vídeo"
 msgid "Display sleep timeout"
 msgstr "Mostrar la cuenta atrás para el reposo"
 
+#: id:17997
+msgid "%i MByte"
+msgstr "%i MByte"
+
+#: id:17998
+msgid "%i hours"
+msgstr "%i horas"
+
+#: id:17999
+msgid "%i days"
+msgstr "%i días"
+
 #: id:19000
 msgid "Switch to channel"
 msgstr "Cambiar al canal"
+
+#: id:19001
+msgid "Separate the search words by using AND, OR and/or NOT."
+msgstr "Separar las palabras buscadas usando AND, OR y/o NOT."
+
+#: id:19002
+msgid "or use phrases to find an exact match, like \"The wizard of Oz\"."
+msgstr "o usar frases para encontrar una coincidencia exacta, como \"El mago de Oz\"."
+
+#: id:19003
+msgid "Find similar programme"
+msgstr "Buscar programa similar"
+
+#: id:19004
+msgid "Importing EPG from clients"
+msgstr "Importando EPG desde los clientes"
+
+#: id:19005
+msgid "PVR stream information"
+msgstr "Información del flujo PVR"
+
+#: id:19006
+msgid "Receiving device"
+msgstr "Recibiendo dispositivo"
+
+#: id:19007
+msgid "Device status"
+msgstr "Estado del dispositivo"
+
+#: id:19008
+msgid "Signal quality"
+msgstr "Calidad de señal"
+
+#: id:19009
+msgid "SNR"
+msgstr "SNR"
+
+#: id:19010
+msgid "BER"
+msgstr "BER"
+
+#: id:19011
+msgid "UNC"
+msgstr "UNC"
+
+#: id:19012
+msgid "PVR Backend"
+msgstr "Backend PVR"
+
+#: id:19013
+msgid "Free to air"
+msgstr "En abierto"
+
+#: id:19014
+msgctxt "Auto context with id 19014"
+msgid "Fixed"
+msgstr "Fijo"
+
+#: id:19015
+msgid "Encryption"
+msgstr "Cifrado"
+
+#: id:19016
+msgid "PVR Backend %i - %s"
+msgstr "Backend PVR %i - %s"
+
+#: id:19017
+msgid "TV recordings"
+msgstr "Grabaciones de TV"
+
+#: id:19018
+msgid "Default folder for PVR thumbnails"
+msgstr "Directorio por defecto para vistas en miniatura de PVR"
+
+#: id:19019
+msgid "Channels"
+msgstr "Canales"
+
+#: id:19020
+msgctxt "Auto context with id 19020"
+msgid "TV"
+msgstr "TV"
+
+#: id:19021
+msgid "Radio"
+msgstr "Radio"
+
+#: id:19022
+msgid "Hidden"
+msgstr "Oculto"
+
+#: id:19023
+msgid "TV channels"
+msgstr "Canales TV"
+
+#: id:19024
+msgid "Radio channels"
+msgstr "Canales Radio"
+
+#: id:19025
+msgid "Upcoming recordings"
+msgstr "Próximas grabaciones"
+
+#: id:19026
+msgid "Add timer..."
+msgstr "Añadir temporizador..."
+
+#: id:19027
+msgid "No search results"
+msgstr "Búsqueda sin resultados"
+
+#: id:19028
+msgid "No EPG entries"
+msgstr "Sin información de EPG"
+
+#: id:19029
+msgctxt "Auto context with id 19029"
+msgid "Channel"
+msgstr "Canal"
+
+#: id:19030
+msgid "Now"
+msgstr "Ahora"
+
+#: id:19031
+msgctxt "Auto context with id 19031"
+msgid "Next"
+msgstr "Siguiente"
+
+#: id:19032
+msgid "Timeline"
+msgstr "Timeline"
+
+#: id:19033
+msgid "Information"
+msgstr "Información"
+
+#: id:19034
+msgid "Already started recording on this channel"
+msgstr "Ya se está grabando este canal"
+
+#: id:19035
+msgid "This channel cannot be played. Check the log for details."
+msgstr "Este canal no se puede reproducir. Consulte el log para más detalles."
+
+#: id:19036
+msgid "This recording cannot be played. Check the log for details."
+msgstr "Esta grabación no se puede reproducir. Consulte el log para más detalles."
+
+#: id:19037
+msgid "Show signal quality"
+msgstr "Mostrar calidad de señal"
+
+#: id:19038
+msgid "Not supported by the PVR backend."
+msgstr "No soportado por el backend PVR."
+
+#: id:19039
+msgid "Are you sure you want to hide this channel?"
+msgstr "¿Está seguro de que desea ocultar este canal?"
+
+#: id:19040
+msgid "Timer"
+msgstr "Temporizadores"
+
+#: id:19041
+msgid "Are you sure you want to rename this recording?"
+msgstr "¿Está seguro de que quiere renombrar esta grabación?"
+
+#: id:19042
+msgid "Are you sure you want to rename this timer?"
+msgstr "¿Está seguro de que quiere renombrar este temporizador?"
+
+#: id:19043
+msgid "Recording"
+msgstr "Grabación"
+
+#: id:19044
+msgid "Please check your configuration or check the log for details."
+msgstr "Por favor, revise su configuración o consulte el log para más detalles."
+
+#: id:19045
+msgid "No PVR clients have been started yet. Wait for the PVR clients to start up or check the log for details."
+msgstr "No se ha iniciado ningún cliente PVR todavía. Espere a que se inicien los clientes PVR o consulte el log para más detalles."
+
+#: id:19046
+msgctxt "Auto context with id 19046"
+msgid "New channel"
+msgstr "Nuevo canal"
+
+#: id:19047
+msgid "Programme info"
+msgstr "Información de programa"
+
+#: id:19048
+msgctxt "Auto context with id 19048"
+msgid "Group management"
+msgstr "Gestión de grupos"
+
+#: id:19049
+msgid "Show channel"
+msgstr "Mostrar canal"
+
+#: id:19050
+msgid "Show visible channels"
+msgstr "Mostrar canales visibles"
+
+#: id:19051
+msgid "Show hidden channels"
+msgstr "Mostrar canales ocultos"
+
+#: id:19052
+msgid "Move channel to:"
+msgstr "Mover canal a:"
+
+#: id:19053
+msgid "Recording information"
+msgstr "Información de grabación"
+
+#: id:19054
+msgid "Hide channel"
+msgstr "Ocultar canal"
+
+#: id:19055
+msgid "No information available"
+msgstr "Sin información disponible"
+
+#: id:19056
+msgid "New timer"
+msgstr "Nuevo temporizador"
+
+#: id:19057
+msgid "Edit timer"
+msgstr "Editar temporizador"
+
+#: id:19058
+msgid "Timer enabled"
+msgstr "Temporizador habilitado"
+
+#: id:19059
+msgctxt "Auto context with id 19059"
+msgid "Stop recording"
+msgstr "Detener grabación"
+
+#: id:19060
+msgid "Delete timer"
+msgstr "Eliminar temporizador"
+
+#: id:19061
+msgid "Add timer"
+msgstr "Añadir temporizador"
+
+#: id:19062
+msgid "Sort by: Channel"
+msgstr "Ordenar por: Canal"
+
+#: id:19063
+msgid "Go to begin"
+msgstr "Ir a inicio"
+
+#: id:19064
+msgid "Go to end"
+msgstr "Ir a final"
+
+#: id:19065
+msgid "Default EPG window"
+msgstr "Vista de EPG por defecto"
+
+#: id:19066
+msgid "Loading recordings from clients"
+msgstr "Cargando grabaciones de los clientes"
+
+#: id:19067
+msgid "This event is already being recorded."
+msgstr "Este evento ya se está grabando."
+
+#: id:19068
+msgid "This recording could not be deleted. Check the log for details."
+msgstr "Esta grabación no se ha podido eliminar. Consulte el log para más detalles."
+
+#: id:19069
+msgctxt "Auto context with id 19069"
+msgid "EPG"
+msgstr "EPG"
+
+#: id:19070
+msgid "EPG scan timeout"
+msgstr "Timeout de escaneo EPG"
+
+#: id:19071
+msgid "EPG update interval"
+msgstr "Intervalo de actualización de EPG"
+
+#: id:19072
+msgid "Do not store the EPG in the database"
+msgstr "No almacenar la EPG en la base de datos"
+
+#: id:19073
+msgid "Delay channel switch"
+msgstr "Retrasar cambio de canal"
+
+#: id:19074
+msgid "Active:"
+msgstr "Activo:"
+
+#: id:19075
+msgid "Name:"
+msgstr "Nombre:"
+
+#: id:19076
+msgid "Folder:"
+msgstr "Carpeta:"
+
+#: id:19077
+msgid "Radio:"
+msgstr "Radio:"
+
+#: id:19078
+msgid "Channel:"
+msgstr "Canal:"
+
+#: id:19079
+msgid "Day:"
+msgstr "Día:"
+
+#: id:19080
+msgid "Begin:"
+msgstr "Inicio:"
+
+#: id:19081
+msgid "End:"
+msgstr "Fin:"
+
+#: id:19082
+msgid "Priority:"
+msgstr "Prioridad:"
+
+#: id:19083
+msgid "Lifetime (days):"
+msgstr "Tiempo de vida (días):"
+
+#: id:19084
+msgid "First day:"
+msgstr "Primer día:"
+
+#: id:19085
+msgid "Unknown channel %u"
+msgstr "Canal %u desconocido"
+
+#: id:19086
+msgid "Mo-__-__-__-__-__-__"
+msgstr "Lu-__-__-__-__-__-__"
+
+#: id:19087
+msgid "__-Tu-__-__-__-__-__"
+msgstr "__-Ma-__-__-__-__-__"
+
+#: id:19088
+msgid "__-__-We-__-__-__-__"
+msgstr "__-__-Mi-__-__-__-__"
+
+#: id:19089
+msgid "__-__-__-Th-__-__-__"
+msgstr "__-__-__-Ju-__-__-__"
+
+#: id:19090
+msgid "__-__-__-__-Fr-__-__"
+msgstr "__-__-__-__-Vi-__-__"
+
+#: id:19091
+msgid "__-__-__-__-__-Sa-__"
+msgstr "__-__-__-__-__-Sa-__"
+
+#: id:19092
+msgid "__-__-__-__-__-__-Su"
+msgstr "__-__-__-__-__-__-Do"
+
+#: id:19093
+msgid "Mo-Tu-We-Th-Fr-__-__"
+msgstr "Lu-Ma-Mi-Ju-Vi-__-__"
+
+#: id:19094
+msgid "Mo-Tu-We-Th-Fr-Sa-__"
+msgstr "Lu-Ma-Mi-Ju-Vi-Sa-__"
+
+#: id:19095
+msgid "Mo-Tu-We-Th-Fr-Sa-Su"
+msgstr "Lu-Ma-Mi-Ju-Vi-Sa-Do"
+
+#: id:19096
+msgid "__-__-__-__-__-Sa-Su"
+msgstr "__-__-__-__-__-Sa-Do"
+
+#: id:19097
+msgid "Enter the name for the recording"
+msgstr "Introduzca el nombre para la grabación"
+
+#: id:19098
+msgid "Warning"
+msgstr "Advertencia"
+
+#: id:19099
+msgid "Timer present"
+msgstr "Temporizador presente"
+
+#: id:19100
+msgid "Are you sure you want to delete this channel, including all timers on this channel?"
+msgstr "¿Está seguro de que quiere eliminar este canal, incluyendo todos sus temporizadores?"
+
+#: id:19101
+msgid "This channel is currently being used for playback."
+msgstr "Este canal está siendo reproducido ahora."
+
+#: id:19102
+msgid "Please switch to another channel."
+msgstr "Por favor, cambie a otro canal."
+
+#: id:19103
+msgctxt "Auto context with id 19103"
+msgid "Scan for missing icons"
+msgstr "Escanear por iconos ausentes"
+
+#: id:19104
+msgid "Enter the name of the folder for the recording"
+msgstr "Introduzca el nombre del directorio para la grabación"
+
+#: id:19105
+msgid "Size:"
+msgstr "Tamaño:"
+
+#: id:19106
+msgid "Next timer on"
+msgstr "Próximo temporizador activo"
+
+#: id:19107
+msgid "at"
+msgstr "a"
+
+#: id:19108
+msgid "Recordings not in sync. Check the log for details."
+msgstr "Grabaciones no sincronizadas. Consulte el log para más detalles."
+
+#: id:19109
+msgid "Couldn't save timer. Check the log for details."
+msgstr "No se ha podido guardar el temporizador. Consulte el log para más detalles."
+
+#: id:19110
+msgid "An unexpected error occurred. Try again later or check the log for details."
+msgstr "Ha ocurrido un error inesperado. Inténtelo de nuevo o consulte el log para más detalles."
+
+#: id:19111
+msgid "PVR backend error. Check the log for details."
+msgstr "Error del backend PVR. Consulte el log para más detalles."
+
+#: id:19112
+msgid "Timers not in sync. Check the log for details."
+msgstr "Temporizadores no sincronizados. Consulte el log para más detalles."
+
+#: id:19113
+msgctxt "Auto context with id 19113"
+msgid "Next"
+msgstr "Siguiente"
+
+#: id:19114
+msgid "Version"
+msgstr "Versión"
+
+#: id:19115
+msgid "Address"
+msgstr "Dirección"
+
+#: id:19116
+msgid "Disksize"
+msgstr "Capacidad"
+
+#: id:19117
+msgid "Search for channels"
+msgstr "Buscar canales"
+
+#: id:19118
+msgid "Cannot use PVR functions while searching."
+msgstr "No se pueden utilizar funciones PVR mientras durante la búsqueda."
+
+#: id:19119
+msgid "On which server you want to search?"
+msgstr "¿En qué servidor deseas buscar?"
+
+#: id:19120
+msgid "Client number"
+msgstr "Cliente número"
+
+#: id:19121
+msgid "Avoid repeats"
+msgstr "Evitar repeticiones"
+
+#: id:19122
+msgid "This timer is still recording. Are you sure you want to delete this timer?"
+msgstr "Este temporizador todavía está grabando. ¿Está seguro de que desea eliminarlo?"
+
+#: id:19123
+msgid "Free to air channels only"
+msgstr "Sólo canales en abierto"
+
+#: id:19124
+msgid "Ignore present timers"
+msgstr "Ignorar temporizadores presentes"
+
+#: id:19125
+msgid "Ignore present recordings"
+msgstr "Ignorar grabaciones presentes"
+
+#: id:19126
+msgid "Start time"
+msgstr "Hora de inicio"
+
+#: id:19127
+msgid "End time"
+msgstr "Hora de finalización"
+
+#: id:19128
+msgid "Start date"
+msgstr "Fecha de inicio"
+
+#: id:19129
+msgid "End date"
+msgstr "Fecha de finalización"
+
+#: id:19130
+msgid "Minimum duration"
+msgstr "Duración mínima"
+
+#: id:19131
+msgid "Maximum duration"
+msgstr "Duración máxima"
+
+#: id:19132
+msgid "Include unknown genres"
+msgstr "Incluir géneros desconocidos"
+
+#: id:19133
+msgid "Search string"
+msgstr "Cadena de búsqueda"
+
+#: id:19134
+msgid "Include description"
+msgstr "Incluir descripción"
+
+#: id:19135
+msgid "Case sensitive"
+msgstr "Distinguir mayúsculas/minúsculas"
+
+#: id:19136
+msgid "Channel unavailable"
+msgstr "Canal no disponible"
+
+#: id:19137
+msgctxt "Auto context with id 19137"
+msgid "No groups defined"
+msgstr "Sin grupos definidos"
+
+#: id:19138
+msgid "Please create a group first"
+msgstr "Por favor, cree un grupo primero"
+
+#: id:19139
+msgid "Name of the new group"
+msgstr "Nombre del nuevo grupo"
+
+#: id:19141
+msgid "Group"
+msgstr "Grupo"
+
+#: id:19142
+msgid "Search guide"
+msgstr "Guía de búsqueda"
+
+#: id:19143
+msgctxt "Auto context with id 19143"
+msgid "Group management"
+msgstr "Gestión de grupos"
+
+#: id:19144
+msgctxt "Auto context with id 19144"
+msgid "No groups defined"
+msgstr "Sin grupos definidos"
+
+#: id:19145
+msgid "Grouped"
+msgstr "Agrupados"
+
+#: id:19146
+msgid "Groups"
+msgstr "Grupos"
+
+#: id:19147
+msgid "The PVR backend does not support this action. Check the log for details."
+msgstr "El backend PVR no soporta esta acción. Consulte el log para más detalles."
+
+#: id:19148
+msgctxt "Auto context with id 19148"
+msgid "Channel"
+msgstr "Canal"
+
+#: id:19149
+msgid "Mo"
+msgstr "Lu"
+
+#: id:19150
+msgid "Tu"
+msgstr "Ma"
+
+#: id:19151
+msgid "We"
+msgstr "Mi"
+
+#: id:19152
+msgid "Th"
+msgstr "Ju"
+
+#: id:19153
+msgid "Fr"
+msgstr "Vi"
+
+#: id:19154
+msgid "Sa"
+msgstr "Sa"
+
+#: id:19155
+msgid "Su"
+msgstr "Do"
+
+#: id:19156
+msgctxt "Auto context with id 19156"
+msgid "from"
+msgstr "de"
+
+#: id:19157
+msgid "Next recording"
+msgstr "Siguiente grabación"
+
+#: id:19158
+msgid "Currently recording"
+msgstr "Actualmente grabando"
+
+#: id:19159
+msgctxt "Auto context with id 19159"
+msgid "from"
+msgstr "de"
+
+#: id:19160
+msgid "to"
+msgstr "a"
+
+#: id:19161
+msgctxt "Auto context with id 19161"
+msgid "On"
+msgstr "En"
+
+#: id:19162
+msgid "Recording active"
+msgstr "Grabación activa"
+
+#: id:19163
+msgctxt "Auto context with id 19163"
+msgid "Recordings"
+msgstr "Grabaciones"
+
+#: id:19164
+msgid "Cannot start recording. Check the log for details."
+msgstr "No se puede iniciar la grabación. Consulte el log para más detalles."
+
+#: id:19165
+msgid "Switch"
+msgstr "Cambiar"
+
+#: id:19166
+msgid "PVR information"
+msgstr "Información PVR"
+
+#: id:19167
+msgctxt "Auto context with id 19167"
+msgid "Scan for missing icons"
+msgstr "Escanear por iconos ausentes"
+
+#: id:19168
+msgid "Switch channel without pressing OK"
+msgstr "Cambiar de canal sin presionar OK"
+
+#: id:19169
+msgid "Hide video information box"
+msgstr "Ocultar la caja de información de vídeo"
+
+#: id:19170
+msgid "Timeout when starting playback"
+msgstr "Timeout al iniciar reproducción"
+
+#: id:19171
+msgid "Start playback minimized"
+msgstr "Iniciar reproducción minimizado"
+
+#: id:19172
+msgid "Instant recording duration"
+msgstr "Duración de la grabación inmediata"
+
+#: id:19173
+msgid "Default recording priority"
+msgstr "Prioridad de grabación por defecto"
+
+#: id:19174
+msgid "Default recording lifetime"
+msgstr "Tiempo de vida de las grabaciones por defecto"
+
+#: id:19175
+msgid "Margin at the start of a recording"
+msgstr "Margen al inicio de la grabación"
+
+#: id:19176
+msgid "Margin at the end of a recording"
+msgstr "Margen al final de la grabación"
+
+#: id:19177
+msgctxt "Auto context with id 19177"
+msgid "Playback"
+msgstr "Reproducción"
+
+#: id:19178
+msgid "Show channel information when switching channels"
+msgstr "Mostrar información de canal mientras se cambia"
+
+#: id:19179
+msgid "Automatically hide channel information"
+msgstr "Ocultar automáticamente la información de canal"
+
+#: id:19180
+msgctxt "Auto context with id 19180"
+msgid "TV"
+msgstr "TV"
+
+#: id:19181
+msgid "Menu/OSD"
+msgstr "Menú/OSD"
+
+#: id:19182
+msgid "Days to display in the EPG"
+msgstr "Días a mostrar de EPG"
+
+#: id:19184
+msgid "Channel information duration"
+msgstr "Duración de la información de canal"
+
+#: id:19185
+msgid "Reset the PVR database"
+msgstr "Reiniciar la base de datos de PVR"
+
+#: id:19186
+msgid "All data in the PVR database is being erased"
+msgstr "Se está borrando toda la información de la base de datos PVR"
+
+#: id:19187
+msgid "Reset the EPG database"
+msgstr "Reiniciar la base de datos de EPG"
+
+#: id:19188
+msgid "EPG is being reset"
+msgstr "La EPG se está reiniciando"
+
+#: id:19189
+msgid "Continue last channel on startup"
+msgstr "Continuar en el último canal al iniciar"
+
+#: id:19190
+msgid "Minimized"
+msgstr "Minimizado"
+
+#: id:19191
+msgid "PVR service"
+msgstr "Servicio PVR"
+
+#: id:19192
+msgid "None of the connected PVR backends supports scanning for channels."
+msgstr "Ninguno de los backends PVR permite escaneo de canales."
+
+#: id:19193
+msgid "The channel scan cannot be started. Check the log for details."
+msgstr "El escaneo de canales no se puede iniciar. Consulte el log para más detalles."
+
+#: id:19194
+msgid "Continue?"
+msgstr "¿Continuar?"
+
+#: id:19195
+msgid "Client actions"
+msgstr "Acciones del cliente"
+
+#: id:19196
+msgid "PVR client specific actions"
+msgstr "Acciones específicas del cliente PVR"
+
+#: id:19197
+msgid "Recording started on: %s"
+msgstr "Grabación iniciada en: %s"
+
+#: id:19198
+msgid "Recording finished on: %s"
+msgstr "Grabación finalizada en: %s"
+
+#: id:19199
+msgid "Channel manager"
+msgstr "Gestor de canales"
+
+#: id:19200
+msgid "EPG source:"
+msgstr "Fuente de EPG:"
+
+#: id:19201
+msgid "Channel name:"
+msgstr "Nombre del canal:"
+
+#: id:19202
+msgid "Channel icon:"
+msgstr "Icono del canal:"
+
+#: id:19203
+msgid "Edit channel"
+msgstr "Editar canal"
+
+#: id:19204
+msgctxt "Auto context with id 19204"
+msgid "New channel"
+msgstr "Nuevo canal"
+
+#: id:19205
+msgctxt "Auto context with id 19205"
+msgid "Group management"
+msgstr "Gestión de grupos"
+
+#: id:19206
+msgid "Activate EPG:"
+msgstr "Activar EPG:"
+
+#: id:19207
+msgid "Group:"
+msgstr "Grupo:"
+
+#: id:19208
+msgid "Enter the name of the new channel"
+msgstr "Introduzca el nombre del nuevo canal"
+
+#: id:19209
+msgid "XBMC virtual backend"
+msgstr "Backend virtual de XBMC"
+
+#: id:19210
+msgid "Client"
+msgstr "Cliente"
+
+#: id:19211
+msgid "Delete channel"
+msgstr "Eliminar canal"
+
+#: id:19212
+msgid "This list contains changes"
+msgstr "Esta lista contiene cambios"
+
+#: id:19213
+msgid "Select backend"
+msgstr "Seleccionar backend"
+
+#: id:19214
+msgid "Enter a valid URL for the new channel"
+msgstr "Introduzca una URL válida para el nuevo canal"
+
+#: id:19215
+msgid "The PVR backend does not support timers."
+msgstr "El backend PVR no soporta temporizadores."
+
+#: id:19216
+msgid "All radio channels"
+msgstr "Todos los canales de radio"
+
+#: id:19217
+msgid "All TV channels"
+msgstr "Todos los canales de TV"
+
+#: id:19218
+msgid "Visible"
+msgstr "Visible"
+
+#: id:19219
+msgid "Ungrouped channels"
+msgstr "Canales sin grupo"
+
+#: id:19220
+msgid "Channels in"
+msgstr "Canales en"
+
+#: id:19221
+msgid "Synchronise channel groups with backends"
+msgstr "Sincronizar grupos de canales con backends"
+
+#: id:19222
+msgctxt "Auto context with id 19222"
+msgid "EPG"
+msgstr "EPG"
+
+#: id:19223
+msgid "No PVR add-on could be enabled. Check your settings or the log for more info."
+msgstr "No se pudo activar ningún add-on PVR. Revise su configuración o consulte el log para más detalles."
+
+#: id:19224
+msgid "Recording aborted"
+msgstr "Grabación abortada"
+
+#: id:19225
+msgid "Recording scheduled"
+msgstr "Grabación programada"
+
+#: id:19226
+msgid "Recording started"
+msgstr "Grabación iniciada"
+
+#: id:19227
+msgid "Recording completed"
+msgstr "Grabación completada"
+
+#: id:19228
+msgid "Recording deleted"
+msgstr "Grabación eliminada"
+
+#: id:19229
+msgid "Close channel OSD after switching channels"
+msgstr "Cerrar OSD del canal al cambiar de canal"
+
+#: id:19230
+msgid "Prevent EPG updates while playing a TV stream"
+msgstr "Evitar actualizaciones de EPG mientras se reproduce un canal"
+
+#: id:19231
+msgid "Always use the channel order from the backend(s)"
+msgstr "Usar siempre el orden de canales de backend"
+
+#: id:19232
+msgid "Clear search results"
+msgstr "Limpiar resultados de búsqueda"
+
+#: id:19233
+msgid "Display a notification on timer updates"
+msgstr "Mostrar una notificación en las actualizaciones de temporizadores"
+
+#: id:19234
+msgid "Use backend channels numbers (only works with 1 enabled PVR addon)"
+msgstr "Usar los números de canal del backend (sólo funciona cuando hay 1 addon PVR activo)"
+
+#: id:19235
+msgid "PVR manager is starting up"
+msgstr "El Gestor PVR se está iniciando"
+
+#: id:19236
+msgid "importing channels"
+msgstr "importando canales"
+
+#: id:19237
+msgid "importing timers"
+msgstr "importando temporizadores"
+
+#: id:19238
+msgid "importing recordings"
+msgstr "importando grabaciones"
+
+#: id:19239
+msgid "starting background threads"
+msgstr "iniciando hilos en segundo plano"
+
+#: id:19240
+msgid "No PVR add-on enabled"
+msgstr "No hay ningún add-on PVR activo"
+
+#: id:19241
+msgid "The PVR manager has been enabled without any"
+msgstr "El gestor PVR se ha activado sin ningún"
+
+#: id:19242
+msgid "enabled PVR add-on. Enable at least one add-on"
+msgstr "add-on PVR activado. Active al menos un add-on"
+
+#: id:19243
+msgid "in order to use the PVR functionality."
+msgstr "para usar la funcionalidad PVR."
+
+#: id:19244
+msgid "Backend idle time"
+msgstr "Tiempo de inactividad de backend"
+
+#: id:19245
+msgid "Set wakup command (cmd [timestamp])"
+msgstr "Comando para despertar"
+
+#: id:19246
+msgid "Wakup before recording"
+msgstr "Despertar antes de grabar"
+
+#: id:19247
+msgid "Daily wakeup"
+msgstr "Despertar cada día"
+
+#: id:19248
+msgid "Daily wakeup time (HH:MM:SS)"
+msgstr "Hora para despertar cada día (HH:MM:SS)"
+
+#: id:19249
+msgid "Filter channels"
+msgstr "Filtrar canales"
+
+#: id:19250
+msgid "Loading EPG from database"
+msgstr "Cargando EPG de la base de datos"
+
+#: id:19251
+msgid "Update EPG information"
+msgstr "Actualizar información de EPG"
+
+#: id:19252
+msgid "Schedule EPG update for this channel?"
+msgstr "¿Programar una actualización de EPG para este canal?"
+
+#: id:19253
+msgid "EPG update scheduled for channel"
+msgstr "Actualización de EPG programada para el canal"
+
+#: id:19254
+msgid "EPG update failed for channel"
+msgstr "Actualización de EPG programada fallida para el canal"
+
+#: id:19255
+msgid "Start recording"
+msgstr "Iniciar grabación"
+
+#: id:19256
+msgctxt "Auto context with id 19256"
+msgid "Stop recording"
+msgstr "Detener grabación"
+
+#: id:19499
+msgid "Other/Unknown"
+msgstr "Otros/Desconocido"
+
+#: id:19500
+msgid "Movie/Drama"
+msgstr "Cine/Drama"
+
+#: id:19501
+msgctxt "Auto context with id 19501"
+msgid "Detective/Thriller"
+msgstr "Detectives/Suspense"
+
+#: id:19502
+msgctxt "Auto context with id 19502"
+msgid "Adventure/Western/War"
+msgstr "Aventuras/Oeste/Bélico"
+
+#: id:19503
+msgctxt "Auto context with id 19503"
+msgid "Science Fiction/Fantasy/Horror"
+msgstr "Ciencia Ficción/Fantasía/Terror"
+
+#: id:19504
+msgctxt "Auto context with id 19504"
+msgid "Comedy"
+msgstr "Comedia"
+
+#: id:19505
+msgctxt "Auto context with id 19505"
+msgid "Soap/Melodrama/Folkloric"
+msgstr "Telenovela/Melodrama/Folclórico"
+
+#: id:19506
+msgctxt "Auto context with id 19506"
+msgid "Romance"
+msgstr "Romance"
+
+#: id:19507
+msgid "Serious/Classical/Religious/Historical Movie/Drama"
+msgstr "Serio/Clásico/Religioso/Cine Histórico/Drama"
+
+#: id:19508
+msgid "Adult Movie/Drama"
+msgstr "Cine para adultos/Drama"
+
+#: id:19516
+msgid "News/Current Affairs"
+msgstr "Noticias/Temas de actualidad"
+
+#: id:19517
+msgid "News/Weather Report"
+msgstr "Noticias/Parte Meteorológico"
+
+#: id:19518
+msgid "News Magazine"
+msgstr "Revista Informativa"
+
+#: id:19519
+msgid "Documentary"
+msgstr "Documental"
+
+#: id:19520
+msgid "Discussion/Interview/Debate"
+msgstr "Discusión/Entrevistas/Debate"
+
+#: id:19532
+msgid "Show/Game Show"
+msgstr "Espectáculo/Concurso"
+
+#: id:19533
+msgid "Game Show/Quiz/Contest"
+msgstr "Concurso"
+
+#: id:19534
+msgid "Variety Show"
+msgstr "Espectáculo de variedades"
+
+#: id:19535
+msgid "Talk Show"
+msgstr "Programa de Entrevistas"
+
+#: id:19548
+msgid "Sports"
+msgstr "Deportes"
+
+#: id:19549
+msgid "Special Event"
+msgstr "Evento Especial"
+
+#: id:19550
+msgid "Sport Magazine"
+msgstr "Revista Deportiva"
+
+#: id:19551
+msgid "Football"
+msgstr "Fútbol"
+
+#: id:19552
+msgid "Tennis/Squash"
+msgstr "Tenis/Squash"
+
+#: id:19553
+msgid "Team Sports"
+msgstr "Deportes de Equipo"
+
+#: id:19554
+msgid "Athletics"
+msgstr "Atletismo"
+
+#: id:19555
+msgid "Motor Sport"
+msgstr "Deportes de Motor"
+
+#: id:19556
+msgid "Water Sport"
+msgstr "Deportes Acuáticos"
+
+#: id:19557
+msgid "Winter Sports"
+msgstr "Deportes de Invierno"
+
+#: id:19558
+msgid "Equestrian"
+msgstr "Equitación"
+
+#: id:19559
+msgid "Martial Sports"
+msgstr "Artes Marciales"
+
+#: id:19564
+msgid "Children's/Youth Programmes"
+msgstr "Infantil/Programas Juveniles"
+
+#: id:19565
+msgid "Pre-school Children's Programmes"
+msgstr "Programas para niños preescolares"
+
+#: id:19566
+msgid "Entertainment Programmes for 6 to 14"
+msgstr "Programas de entretenimiento de 6 a 14 años"
+
+#: id:19567
+msgid "Entertainment Programmes for 10 to 16"
+msgstr "Programas de entretenimiento de 10 a 16 años"
+
+#: id:19568
+msgid "Informational/Educational/School Programme"
+msgstr "Informativo/Educativo/Programa Escolar"
+
+#: id:19569
+msgid "Cartoons/Puppets"
+msgstr "Dibujos Animados/Marionetas"
+
+#: id:19580
+msgid "Music/Ballet/Dance"
+msgstr "Música/Ballet/Danza"
+
+#: id:19581
+msgid "Rock/Pop"
+msgstr "Rock/Pop"
+
+#: id:19582
+msgid "Serious/Classical Music"
+msgstr "Música Clásica"
+
+#: id:19583
+msgid "Folk/Traditional Music"
+msgstr "Música Folk/Tradicional"
+
+#: id:19584
+msgid "Musical/Opera"
+msgstr "Musical/Ópera"
+
+#: id:19585
+msgid "Ballet"
+msgstr "Ballet"
+
+#: id:19596
+msgid "Arts/Culture"
+msgstr "Arte/Cultura"
+
+#: id:19597
+msgid "Performing Arts"
+msgstr "Artes Escénicas"
+
+#: id:19598
+msgid "Fine Arts"
+msgstr "Bellas Artes"
+
+#: id:19599
+msgid "Religion"
+msgstr "Religión"
+
+#: id:19600
+msgid "Popular Culture/Traditional Arts"
+msgstr "Cultura Popular/Arte Tradicional"
+
+#: id:19601
+msgid "Literature"
+msgstr "Literatura"
+
+#: id:19602
+msgid "Film/Cinema"
+msgstr "Películas/Cine"
+
+#: id:19603
+msgid "Experimental Film/Video"
+msgstr "Cine experimental"
+
+#: id:19604
+msgid "Broadcasting/Press"
+msgstr "Transmisiones/Prensa"
+
+#: id:19605
+msgid "New Media"
+msgstr "Medios de Comunicación"
+
+#: id:19606
+msgid "Arts/Culture Magazines"
+msgstr "Revistas de Arte/Cultura"
+
+#: id:19607
+msgid "Fashion"
+msgstr "Moda"
+
+#: id:19612
+msgid "Social/Political/Economics"
+msgstr "Social/Política/Economía"
+
+#: id:19613
+msgid "Magazines/Reports/Documentary"
+msgstr "Revistas/Reportajes/Documentales"
+
+#: id:19614
+msgid "Economics/Social Advisory"
+msgstr "Consultoría Económica/Social"
+
+#: id:19615
+msgid "Remarkable People"
+msgstr "Gente Notable"
+
+#: id:19628
+msgid "Education/Science/Factual"
+msgstr "Educación/Ciencia/Factual"
+
+#: id:19629
+msgid "Nature/Animals/Environment"
+msgstr "Naturaleza/Animales/Medio Ambiente"
+
+#: id:19630
+msgid "Technology/Natural Sciences"
+msgstr "Tecnología/Ciencias Naturales"
+
+#: id:19631
+msgid "Medicine/Physiology/Psychology"
+msgstr "Medicina/Fisiología/Sicología"
+
+#: id:19632
+msgid "Foreign Countries/Expeditions"
+msgstr "Países Extranjeros/Expediciones"
+
+#: id:19633
+msgid "Social/Spiritual Sciences"
+msgstr "Ciencias Sociales/Espirituales"
+
+#: id:19634
+msgid "Further Education"
+msgstr "Educación para Adultos"
+
+#: id:19635
+msgid "Languages"
+msgstr "Idiomas"
+
+#: id:19644
+msgid "Leisure/Hobbies"
+msgstr "Tiempo Libre/Aficiones"
+
+#: id:19645
+msgid "Tourism/Travel"
+msgstr "Turismo/Viajes"
+
+#: id:19646
+msgid "Handicraft"
+msgstr "Artesanía"
+
+#: id:19647
+msgid "Motoring"
+msgstr "Automovilismo"
+
+#: id:19648
+msgid "Fitness & Health"
+msgstr "Salud"
+
+#: id:19649
+msgid "Cooking"
+msgstr "Cocina"
+
+#: id:19650
+msgid "Advertisement/Shopping"
+msgstr "Anuncios/Compras"
+
+#: id:19651
+msgid "Gardening"
+msgstr "Jardinería"
+
+#: id:19660
+msgid "Special Characteristics"
+msgstr "Características Especiales"
+
+#: id:19661
+msgid "Original Language"
+msgstr "Idioma Original"
+
+#: id:19662
+msgid "Black & White"
+msgstr "Blanco y Negro"
+
+#: id:19663
+msgid "Unpublished"
+msgstr "Inédito"
+
+#: id:19664
+msgid "Live Broadcast"
+msgstr "En directo"
+
+#: id:19676
+msgid "Drama"
+msgstr "Drama"
+
+#: id:19677
+msgctxt "Auto context with id 19677"
+msgid "Detective/Thriller"
+msgstr "Detectives/Suspense"
+
+#: id:19678
+msgctxt "Auto context with id 19678"
+msgid "Adventure/Western/War"
+msgstr "Aventuras/Oeste/Bélico"
+
+#: id:19679
+msgctxt "Auto context with id 19679"
+msgid "Science Fiction/Fantasy/Horror"
+msgstr "Ciencia Ficción/Fantasía/Terror"
+
+#: id:19680
+msgctxt "Auto context with id 19680"
+msgid "Comedy"
+msgstr "Comedia"
+
+#: id:19681
+msgctxt "Auto context with id 19681"
+msgid "Soap/Melodrama/Folkloric"
+msgstr "Telenovela/Melodrama/Folclórico"
+
+#: id:19682
+msgctxt "Auto context with id 19682"
+msgid "Romance"
+msgstr "Romance"
+
+#: id:19683
+msgid "Serious/ClassicalReligion/Historical"
+msgstr "Serio/Clásico/Religioso/Cine Histórico/Drama"
+
+#: id:19684
+msgid "Adult"
+msgstr "Adultos"
 
 #: id:20000
 msgid "Saved music folder"
@@ -8243,6 +9676,10 @@ msgctxt "Auto context with id 24018"
 msgid "Services"
 msgstr "Servicios"
 
+#: id:24019
+msgid "PVR clients"
+msgstr "Clientes PVR"
+
 #: id:24020
 msgid "Configure"
 msgstr "Configurar"
@@ -8258,7 +9695,7 @@ msgstr "Activar"
 
 #: id:24023
 msgid "Add-on disabled"
-msgstr "El add-on está desactivado"
+msgstr "Add-on desactivado"
 
 #: id:24027
 msgctxt "Auto context with id 24027"
@@ -8488,27 +9925,27 @@ msgstr "Notificaciones"
 
 #: id:25001
 msgid "Hide foreign"
-msgstr ""
+msgstr "Ocultar extranjeras"
 
 #: id:25002
 msgid "Select from all titles ..."
-msgstr ""
+msgstr "Seleccionar de todos los títulos..."
 
 #: id:25003
 msgid "Show bluray menus"
-msgstr ""
+msgstr "Mostrar menús de bluray"
 
 #: id:25004
 msgid "Play main title: %d"
-msgstr ""
+msgstr "Reproducir título principal: %d"
 
 #: id:25005
 msgid "Title: %d"
-msgstr ""
+msgstr "Título: %d"
 
 #: id:25006
 msgid "Select playback item"
-msgstr ""
+msgstr "Seleccionar elemento de reproducción"
 
 #: id:29800
 msgid "Library Mode"
@@ -8950,7 +10387,7 @@ msgstr "1 toque de dedo para Entrar"
 
 #: id:34408
 msgid "2 finger single tap or 1 finger long press for contextmenu"
-msgstr "Tocar con dos dedos para Menú Contextual"
+msgstr "Tocar con dos dedos o mantener pulsado un dedo para Menú Contextual"
 
 #: id:35000
 msgid "Peripherals"
@@ -9113,4 +10550,3 @@ msgstr "Fallo al establecer la nueva configuración. Por favor, revise su config
 #: id:36025
 msgid "Send 'inactive source' command when stopping XBMC"
 msgstr "Enviar comando 'fuente inactiva' al detener XBMC"
-
