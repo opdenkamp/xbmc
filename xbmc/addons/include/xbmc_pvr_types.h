@@ -132,6 +132,20 @@ extern "C" {
   } PVR_TIMER_STATE;
 
   /*!
+   * @brief PVR serie rules
+   */
+  typedef enum
+  {
+    PVR_SERIE_ON              = 0x1,  /*!< @brief record the serie (All episodes on all channels)*/
+    PVR_SERIE_SAME_CHANNEL    = 0x2,  /*!< @brief Filter out episodes not on this channel */
+    PVR_SERIE_SKIP_REPEAT     = 0x4,  /*!< @brief skip the repeat */
+    PVR_SERIE_SAME_WEEKDAY    = 0x8,  /*!< @brief Filter out show not on this week day */
+    PVR_SERIE_SAME_TIME       = 0x10, /*!< @brief Filter out show not at this time */
+    PVR_SERIE_ONCE_PER_WEEK   = 0x20, /*!< @brief Record only one matching show per week */
+    PVR_SERIE_ONCE_PER_DAY    = 0x40  /*!< @brief Record only one matching show per day */
+  } PVR_TIMER_SERIE; 
+
+  /*!
    * @brief Properties passed to the Create() method of an add-on.
    */
   typedef struct PVR_PROPERTIES
@@ -158,6 +172,7 @@ extern "C" {
     bool bHandlesInputStream;           /*!< @brief (optional) true if this add-on provides an input stream. false if XBMC handles the stream. */
     bool bHandlesDemuxing;              /*!< @brief (optional) true if this add-on demultiplexes packets. */
     bool bSupportsRecordingFolders;     /*!< @brief (optional) true if the backend supports timers / recordings in folders. */
+    DWORD dwSupportsRecordingRules;     /*!< @bried (optional) bitflag (PVR_TIMER_SERIE) on when supported. */   
   } ATTRIBUTE_PACKED PVR_ADDON_CAPABILITIES;
 
   /*!
@@ -291,6 +306,7 @@ extern "C" {
     unsigned int    iMarginEnd;        /*!< @brief (optional) if set, the backend ends the recording iMarginEnd minutes after endTime. */
     int             iGenreType;        /*!< @brief (optional) genre type */
     int             iGenreSubType;     /*!< @brief (optional) genre sub type */
+    int             iSerieRule;        /*!< @brief (optional) bitflag rules for recording series */
   } ATTRIBUTE_PACKED PVR_TIMER;
 
   /*!

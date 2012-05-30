@@ -7227,6 +7227,34 @@ msgstr ""
 msgid "Stop recording"
 msgstr ""
 
+#: id:19257
+msgid "Record a Serie"
+msgstr ""
+
+#: id:19258
+msgid "On this channel only"
+msgstr ""
+
+#: id:19259
+msgid "Skip repeat"
+msgstr ""
+
+#: id:19260
+msgid "On this week day only"
+msgstr ""
+
+#: id:19261
+msgid "At this time only"
+msgstr ""
+
+#: id:19262
+msgid "Maximum once a week"
+msgstr ""
+
+#: id:19263
+msgid "Maximum once a day"
+msgstr ""
+
 #: id:19499
 msgid "Other/Unknown"
 msgstr ""

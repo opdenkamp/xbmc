@@ -244,6 +244,7 @@ static const ActionMapping windows[] =
         {"pvrosddirector"           , WINDOW_DIALOG_PVR_OSD_DIRECTOR},
         {"pvrosdcutter"             , WINDOW_DIALOG_PVR_OSD_CUTTER},
         {"pvrosdteletext"           , WINDOW_DIALOG_OSD_TELETEXT},
+        {"pvrtimerserie"            , WINDOW_DIALOG_PVR_TIMER_SERIE},
 
         {"systeminfo"               , WINDOW_SYSTEM_INFORMATION},
         {"testpattern"              , WINDOW_TEST_PATTERN},

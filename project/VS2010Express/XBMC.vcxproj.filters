@@ -2110,9 +2110,6 @@
     <ClCompile Include="..\..\xbmc\addons\AddonCallbacksPVR.cpp">
       <Filter>addons</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\CacheCircular.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\lib\SlingboxLib\SlingboxLib.cpp">
       <Filter>libs\SlingboxLib</Filter>
     </ClCompile>
@@ -2760,6 +2757,9 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\network\httprequesthandler\HTTPImageHandler.cpp">
       <Filter>network\httprequesthandler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\pvr\dialogs\GUIDialogPVRTimerSerie.cpp">
+      <Filter>pvr\dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -5532,6 +5532,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\network\httprequesthandler\HTTPImageHandler.h">
       <Filter>network\httprequesthandler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\pvr\dialogs\GUIDialogPVRTimerSerie.h">
+      <Filter>pvr\dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
