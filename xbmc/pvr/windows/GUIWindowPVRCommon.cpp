@@ -31,6 +31,7 @@
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/dialogs/GUIDialogPVRGuideInfo.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
+#include "pvr/dialogs/GUIDialogPVRTimerSerie.h"
 #include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
 #include "epg/EpgInfoTag.h"
 #include "pvr/timers/PVRTimers.h"
@@ -700,6 +701,58 @@ bool CGUIWindowPVRCommon::PlayFile(CFileItem *item, bool bPlayMinimized /* = fal
   }
 
   return true;
+}
+
+bool CGUIWindowPVRCommon::RecordSerie(CFileItem *item)
+{
+  if (!item->HasEPGInfoTag())
+    return false;
+
+  CEpgInfoTag *tag = item->GetEPGInfoTag();
+  if (!tag || !tag->HasPVRChannel())
+    return false;
+
+  CPVRTimerInfoTag *timer = g_PVRTimers->GetMatch(item);
+  if (timer)
+  {
+    CGUIDialogOK::ShowAndGetInput(19033,19034,0,0);
+    return false;
+  }
+
+  const CPVRChannel *channel = tag->ChannelTag();
+  DWORD dwSupportedRules=g_PVRClients->GetAddonCapabilities(channel->ClientID()).dwSupportsRecordingRules;
+  CPVRTimerInfoTag *newtimer=NULL;
+
+  if(dwSupportedRules==PVR_SERIE_ON)
+  {
+    CGUIDialogYesNo* pDialog = (CGUIDialogYesNo*)g_windowManager.GetWindow(WINDOW_DIALOG_YES_NO);
+    if (!pDialog)
+      return false;
+    pDialog->SetHeading(19257);
+    pDialog->SetLine(0, tag->Title());
+    pDialog->DoModal();
+
+    if (!pDialog->IsConfirmed())
+      return false;
+    newtimer = CPVRTimerInfoTag::CreateFromEpg(*tag);
+  }
+  else
+  {
+    CGUIDialogPVRTimerSerie* pDialog = (CGUIDialogPVRTimerSerie*)g_windowManager.GetWindow(WINDOW_DIALOG_PVR_TIMER_SERIE);
+    if (!pDialog)
+      return false;
+    pDialog->SetProgInfo(item);
+    pDialog->DoModal();
+
+    if (!pDialog->IsConfirmed())
+      return false;
+    newtimer = CPVRTimerInfoTag::CreateFromEpg(*tag);
+    newtimer->SetSerieRules(pDialog->GetResult());
+  }
+
+  CFileItem *newTimerItem = new CFileItem(*newtimer);
+
+  return g_PVRTimers->AddTimer(*newTimerItem);
 }
 
 bool CGUIWindowPVRCommon::StartRecordFile(CFileItem *item)

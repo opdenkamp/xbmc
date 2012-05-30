@@ -49,6 +49,7 @@ namespace PVR
     virtual bool OnContextButtonClear(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUTTON button);
+    virtual bool OnContextButtonRecordSerie(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonStopRecord(CFileItem *item, CONTEXT_BUTTON button);
 
     virtual bool ActionShowSearch(CFileItem *item);

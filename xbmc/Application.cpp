@@ -278,6 +278,7 @@
 #include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
 #include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
+#include "pvr/dialogs/GUIDialogPVRTimerSerie.h"
 
 #include "epg/EpgContainer.h"
 
@@ -1257,6 +1258,7 @@ bool CApplication::Initialize()
   g_windowManager.Add(new CGUIDialogPVRDirectorOSD);         // window id = 611
   g_windowManager.Add(new CGUIDialogPVRCutterOSD);           // window id = 612
   g_windowManager.Add(new CGUIDialogTeletext);               // window id = 613
+  g_windowManager.Add(new CGUIDialogPVRTimerSerie);               // window id = 614
 
   g_windowManager.Add(new CGUIDialogSelect);             // window id = 2000
   g_windowManager.Add(new CGUIDialogMusicInfo);          // window id = 2001
@@ -3288,6 +3290,7 @@ bool CApplication::Cleanup()
     g_windowManager.Delete(WINDOW_DIALOG_PVR_OSD_DIRECTOR);
     g_windowManager.Delete(WINDOW_DIALOG_PVR_OSD_CUTTER);
     g_windowManager.Delete(WINDOW_DIALOG_OSD_TELETEXT);
+    g_windowManager.Delete(WINDOW_DIALOG_PVR_TIMER_SERIE);
 
     g_windowManager.Delete(WINDOW_DIALOG_TEXT_VIEWER);
     g_windowManager.Delete(WINDOW_DIALOG_PLAY_EJECT);

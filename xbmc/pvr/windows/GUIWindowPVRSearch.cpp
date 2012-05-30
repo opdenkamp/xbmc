@@ -59,6 +59,7 @@ void CGUIWindowPVRSearch::GetContextButtons(int itemNumber, CContextButtons &but
           buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* RECORD programme */
         else
           buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* Create a Timer */
+        buttons.Add(CONTEXT_BUTTON_START_RECORD_SERIE, 19257); 
       }
       else
       {
@@ -90,6 +91,7 @@ bool CGUIWindowPVRSearch::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       OnContextButtonInfo(pItem.get(), button) ||
       OnContextButtonStopRecord(pItem.get(), button) ||
       OnContextButtonStartRecord(pItem.get(), button) ||
+      OnContextButtonRecordSerie(pItem.get(), button) ||
       CGUIWindowPVRCommon::OnContextButton(itemNumber, button);
 }
 
@@ -218,6 +220,19 @@ bool CGUIWindowPVRSearch::OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON bu
     bReturn = true;
 
     ShowEPGInfo(item);
+  }
+
+  return bReturn;
+}
+
+bool CGUIWindowPVRSearch::OnContextButtonRecordSerie(CFileItem *item, CONTEXT_BUTTON button)
+{
+  bool bReturn = false;
+
+  if (button == CONTEXT_BUTTON_START_RECORD_SERIE)
+  {
+    RecordSerie(item);
+    bReturn = true;
   }
 
   return bReturn;
