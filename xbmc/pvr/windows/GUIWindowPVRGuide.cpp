@@ -92,6 +92,7 @@ void CGUIWindowPVRGuide::GetContextButtons(int itemNumber, CContextButtons &butt
         buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* record program */
       else
         buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* stop recording */
+      buttons.Add(CONTEXT_BUTTON_START_RECORD_SERIE, 19257);   
     }
     else
     {
@@ -126,6 +127,7 @@ bool CGUIWindowPVRGuide::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       OnContextButtonInfo(pItem.get(), button) ||
       OnContextButtonStartRecord(pItem.get(), button) ||
       OnContextButtonStopRecord(pItem.get(), button) ||
+      OnContextButtonRecordSerie(pItem.get(), button) ||
       OnContextButtonBegin(pItem.get(), button) ||
       OnContextButtonEnd(pItem.get(), button) ||
       CGUIWindowPVRCommon::OnContextButton(itemNumber, button);
@@ -412,6 +414,19 @@ bool CGUIWindowPVRGuide::OnContextButtonPlay(CFileItem *item, CONTEXT_BUTTON but
   if (button == CONTEXT_BUTTON_PLAY_ITEM)
   {
     bReturn = PlayEpgItem(item);
+  }
+
+  return bReturn;
+}
+
+bool CGUIWindowPVRGuide::OnContextButtonRecordSerie(CFileItem *item, CONTEXT_BUTTON button)
+{
+  bool bReturn = false;
+
+  if (button == CONTEXT_BUTTON_START_RECORD_SERIE)
+  {
+    RecordSerie(item);
+    bReturn = true;
   }
 
   return bReturn;

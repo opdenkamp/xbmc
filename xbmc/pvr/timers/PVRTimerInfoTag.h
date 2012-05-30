@@ -89,6 +89,7 @@ namespace PVR
     std::vector<std::string> m_genre;           /*!< @brief genre of the timer */
     int                   m_iGenreType;         /*!< @brief genre type of the timer */
     int                   m_iGenreSubType;      /*!< @brief genre subtype of the timer */
+    int                   m_iSerieRule;         /*!< @brief rules for the serie recording */
 
     CPVRTimerInfoTag(void);
     CPVRTimerInfoTag(const PVR_TIMER &timer, CPVRChannel *channel, unsigned int iClientId);
@@ -130,6 +131,7 @@ namespace PVR
     void SetStartFromUTC(CDateTime &start) { m_StartTime = start; }
     void SetStartFromLocalTime(CDateTime &start) { m_StartTime = start.GetAsUTCDateTime(); }
 
+    void SetSerieRules(int iSerieRule) {m_iSerieRule=iSerieRule;}
     const CDateTime &EndAsUTC(void) const { return m_StopTime; }
     const CDateTime &EndAsLocalTime(void) const;
     void SetEndFromUTC(CDateTime &end) { m_StopTime = end; }

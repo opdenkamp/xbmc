@@ -91,6 +91,7 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER &timer, CPVRChannel *channel,
   m_channel            = channel;
   m_bIsRadio           = channel && channel->IsRadio();
   m_state              = timer.state;
+  m_iSerieRule         = timer.iSerieRule;
   m_strFileNameAndPath.Format("pvr://client%i/timers/%i", m_iClientId, m_iClientIndex);
 
   UpdateEpgEvent();
@@ -150,6 +151,7 @@ CPVRTimerInfoTag &CPVRTimerInfoTag::operator=(const CPVRTimerInfoTag &orig)
   m_iMarginEnd         = orig.m_iMarginEnd;
   m_state              = orig.m_state;
   m_iChannelNumber     = orig.m_iChannelNumber;
+  m_iSerieRule         = orig.m_iSerieRule;
 
   return *this;
 }

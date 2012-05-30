@@ -97,6 +97,7 @@ void CPVRClient::ResetAddonCapabilities(void)
   m_addonCapabilities.bHandlesInputStream       = false;
   m_addonCapabilities.bHandlesDemuxing          = false;
   m_addonCapabilities.bSupportsRecordingFolders = false;
+  m_addonCapabilities.dwSupportsRecordingRules  = 0;
 }
 
 bool CPVRClient::Create(int iClientId)
@@ -222,6 +223,8 @@ inline void PVRWriteClientTimerInfo(const CPVRTimerInfoTag &xbmcTimer, PVR_TIMER
   addonTimer.iMarginEnd        = xbmcTimer.m_iMarginEnd;
   addonTimer.iGenreType        = xbmcTimer.m_iGenreType;
   addonTimer.iGenreSubType     = xbmcTimer.m_iGenreSubType;
+  addonTimer.iSerieRule        = xbmcTimer.m_iSerieRule;
+
 }
 
 /*!

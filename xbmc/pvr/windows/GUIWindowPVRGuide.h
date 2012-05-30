@@ -59,6 +59,7 @@ namespace PVR
     virtual bool OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonPlay(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUTTON button);
+    virtual bool OnContextButtonRecordSerie(CFileItem *item, CONTEXT_BUTTON button);
     virtual bool OnContextButtonStopRecord(CFileItem *item, CONTEXT_BUTTON button);
 
     virtual void UpdateButtons(void);
