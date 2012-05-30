@@ -56,12 +56,10 @@ void CGUIWindowPVRSearch::GetContextButtons(int itemNumber, CContextButtons &but
       if (!pItem->GetEPGInfoTag()->HasTimer())
       {
         if (pItem->GetEPGInfoTag()->StartAsLocalTime() < CDateTime::GetCurrentDateTime())
-        {
           buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* RECORD programme */
-          buttons.Add(CONTEXT_BUTTON_START_RECORD_SERIE, 19257); 
-        }
         else
           buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* Create a Timer */
+        buttons.Add(CONTEXT_BUTTON_START_RECORD_SERIE, 19257); 
       }
       else
       {
