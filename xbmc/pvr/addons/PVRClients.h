@@ -525,6 +525,7 @@ namespace PVR
     bool SupportsRecordingPlayCount(int iClientId) const;
     bool SupportsTimers(int iClientId) const;
     bool SupportsTV(int iClientId) const;
+    void GetSupportedRules(int iClientId, CTimerSeries &supportedSeries) const;
     bool HandlesDemuxing(int iClientId) const;
     bool HandlesInputStream(int iClientId) const;
 

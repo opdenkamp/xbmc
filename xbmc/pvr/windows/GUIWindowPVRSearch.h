@@ -50,7 +50,8 @@ namespace PVR
     bool OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUTTON button);
     bool OnContextButtonStopRecord(CFileItem *item, CONTEXT_BUTTON button);
-
+    bool OnContextButtonRecordSerie(CFileItem *item, CONTEXT_BUTTON button);
+    bool OnContextButtonRecordSeries(CFileItem *item, CONTEXT_BUTTON button);
     bool ActionShowSearch(CFileItem *item);
     void ShowSearchResults();
 

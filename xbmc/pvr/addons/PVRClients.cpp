@@ -1061,6 +1061,13 @@ bool CPVRClients::SupportsTV(int iClientId) const
   return GetConnectedClient(iClientId, client) && client->SupportsTV();
 }
 
+void CPVRClients::GetSupportedRules(int iClientId, CTimerSeries &supportedSeries) const
+{
+  PVR_CLIENT client;
+  if(GetConnectedClient(iClientId, client))
+    client->GetSupportedRules(supportedSeries);
+}
+
 bool CPVRClients::HandlesDemuxing(int iClientId) const
 {
   PVR_CLIENT client;
