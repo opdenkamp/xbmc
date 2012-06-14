@@ -358,6 +358,8 @@ extern "C" {
     PVR_ERROR    (__cdecl* GetRecordings)(PVR_HANDLE handle);
     PVR_ERROR    (__cdecl* DeleteRecording)(const PVR_RECORDING &recording);
     PVR_ERROR    (__cdecl* RenameRecording)(const PVR_RECORDING &recording);
+    PVR_ERROR    (__cdecl* SetRecordingLastPlayedPosition)(const PVR_RECORDING &recording, int lastplayedposition);
+    int          (__cdecl* GetRecordingLastPlayedPosition)(const PVR_RECORDING &recording);
     //@}
 
     /** @name PVR timer methods */

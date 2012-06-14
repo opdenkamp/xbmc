@@ -465,6 +465,22 @@ namespace PVR
     bool DeleteRecording(const CPVRRecording &recording, PVR_ERROR *error);
 
     /*!
+     * @brief Set the last watched position of a recording on the backend.
+     * @param recording The recording.
+     * @param position The last watched position in seconds
+     * @param error An error if it occured.
+     * @return True if the last played position was updated successfully, false otherwise
+    */
+    bool SetRecordingLastPlayedPosition(const CPVRRecording &recording, int lastplayedposition, PVR_ERROR *error);
+
+    /*!
+    * @brief Retrieve the last watched position of a recording on the backend.
+    * @param recording The recording.
+    * @return The last watched position in seconds
+    */
+    int GetRecordingLastPlayedPosition(const CPVRRecording &recording);
+
+    /*!
      * @brief Check whether there is an active recording on the current channel.
      * @return True if there is, false otherwise.
      */
