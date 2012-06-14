@@ -655,18 +655,16 @@ bool CGUIWindowPVRCommon::PlayRecording(CFileItem *item, bool bPlayMinimized /* 
 
 bool CGUIWindowPVRCommon::PlayFile(CFileItem *item, bool bPlayMinimized /* = false */)
 {
+  if (item->GetPath() == g_application.CurrentFile())
+  {
+    CGUIMessage msg(GUI_MSG_FULLSCREEN, 0, m_parent->GetID());
+    g_windowManager.SendMessage(msg);
+    return true;
+  }
+
   if (bPlayMinimized)
   {
-    if (item->GetPath() == g_application.CurrentFile())
-    {
-      CGUIMessage msg(GUI_MSG_FULLSCREEN, 0, m_parent->GetID());
-      g_windowManager.SendMessage(msg);
-      return true;
-    }
-    else
-    {
-      g_settings.m_bStartVideoWindowed = true;
-    }
+    g_settings.m_bStartVideoWindowed = true;
   }
 
   if (item->GetPath().Left(17) == "pvr://recordings/")
