@@ -158,6 +158,7 @@ extern "C" {
     bool bHandlesInputStream;           /*!< @brief (optional) true if this add-on provides an input stream. false if XBMC handles the stream. */
     bool bHandlesDemuxing;              /*!< @brief (optional) true if this add-on demultiplexes packets. */
     bool bSupportsRecordingFolders;     /*!< @brief (optional) true if the backend supports timers / recordings in folders. */
+    bool bSupportsLastPlayedPosition;   /*!< @brief (optional) true if the backend supports store/retrieve of last played position for recordings. */
   } ATTRIBUTE_PACKED PVR_ADDON_CAPABILITIES;
 
   /*!
