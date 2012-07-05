@@ -23,6 +23,7 @@
 #include "guilib/GUIDialog.h"
 #include "GUIViewControl.h"
 #include "utils/Observer.h"
+#include "utils/log.h"
 
 class CFileItemList;
 
