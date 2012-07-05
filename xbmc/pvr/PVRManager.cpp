@@ -63,7 +63,7 @@ CPVRManager::CPVRManager(void) :
     m_guiInfo(NULL),
     m_triggerEvent(true),
     m_currentFile(NULL),
-    m_database(new CPVRDatabase),
+    m_database(NULL),
     m_bFirstStart(true),
     m_loadingProgressDialog(NULL),
     m_managerState(ManagerStateStopped)
@@ -74,8 +74,6 @@ CPVRManager::CPVRManager(void) :
 CPVRManager::~CPVRManager(void)
 {
   Stop();
-  if (m_database->IsOpen())
-    m_database->Close();
   CLog::Log(LOGDEBUG,"PVRManager - destroyed");
 }
 
@@ -94,6 +92,7 @@ void CPVRManager::Cleanup(void)
   if (m_timers)        SAFE_DELETE(m_timers);
   if (m_recordings)    SAFE_DELETE(m_recordings);
   if (m_channelGroups) SAFE_DELETE(m_channelGroups);
+  if (m_database)      SAFE_DELETE(m_database);
   m_triggerEvent.Set();
 
   m_currentFile           = NULL;
@@ -139,6 +138,9 @@ void CPVRManager::Start(void)
   ResetProperties();
   SetState(ManagerStateStarting);
 
+  /* create and open database */
+  if (!m_database)
+    m_database = new CPVRDatabase;
   m_database->Open();
 
   /* create the supervisor thread to do all background activities */
@@ -171,6 +173,10 @@ void CPVRManager::Stop(void)
 
   /* executes the set wakeup command */
   SetWakeupCommand();
+
+  /* close database */
+  if (m_database->IsOpen())
+    m_database->Close();
 
   /* unload all data */
   Cleanup();
@@ -461,6 +467,9 @@ void CPVRManager::ResetDatabase(bool bShowProgress /* = true */)
     pDlgProgress->SetPercentage(20);
     pDlgProgress->Progress();
   }
+
+  if (!m_database)
+    m_database = new CPVRDatabase;
 
   if (m_database && m_database->Open())
   {
