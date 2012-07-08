@@ -81,7 +81,7 @@ bool CGUIDialogPVRChannelsOSD::OnMessage(CGUIMessage& message)
     break;
 
   case GUI_MSG_CLICKED:
-    {
+  {
       int iControl = message.GetSenderId();
 
       if (m_viewControl.HasControl(iControl))   // list/thumb control
@@ -104,6 +104,48 @@ bool CGUIDialogPVRChannelsOSD::OnMessage(CGUIMessage& message)
       }
     }
     break;
+  	case GUI_MSG_MOVE:
+  	{
+
+		int iAction = message.GetParam1();
+		CLog::Log(LOGDEBUG, "%s - GUI_MSG_MOVE: iAction is '%d'", __FUNCTION__, iAction);
+
+		if (iAction == ACTION_MOVE_RIGHT)
+		{
+			CPVRChannel channel;
+			g_PVRManager.GetCurrentChannel(channel);
+
+			const CPVRChannelGroup *group = g_PVRManager.GetPlayingGroup(channel.IsRadio());
+			CPVRChannelGroup *nextGroup = group->GetNextGroup();
+
+			CLog::Log(LOGDEBUG, "%s - switching group from %s to group %s", __FUNCTION__, group->GroupName().c_str(), nextGroup->GroupName().c_str());
+
+			g_PVRManager.SetPlayingGroup(nextGroup);
+
+			Clear();
+			Update();
+
+			return true;
+		}
+		else if (iAction == ACTION_MOVE_LEFT)
+		{
+			CPVRChannel channel;
+			g_PVRManager.GetCurrentChannel(channel);
+
+			CPVRChannelGroup *group = g_PVRManager.GetPlayingGroup(channel.IsRadio());
+			CPVRChannelGroup *previousGroup = group->GetPreviousGroup();
+
+			CLog::Log(LOGDEBUG, "%s - switching group from %s to group %s", __FUNCTION__, group->GroupName().c_str(), previousGroup->GroupName().c_str());
+
+			g_PVRManager.SetPlayingGroup(previousGroup);
+
+			Clear();
+			Update();
+
+			return true;
+		}
+  	}
+  	break;
   }
 
   return CGUIDialog::OnMessage(message);
@@ -124,6 +166,7 @@ void CGUIDialogPVRChannelsOSD::Update()
 
   CPVRChannel channel;
   g_PVRManager.GetCurrentChannel(channel);
+
   const CPVRChannelGroup *group = g_PVRManager.GetPlayingGroup(channel.IsRadio());
 
   if (group)
