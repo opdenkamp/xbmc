@@ -5789,7 +5789,7 @@ msgstr "PVR Backend %i - %s"
 
 msgctxt "#19017"
 msgid "TV recordings"
-msgstr "TV Aufnhamen"
+msgstr "TV Aufnahmen"
 
 msgctxt "#19018"
 msgid "Default folder for PVR thumbnails"
@@ -6614,7 +6614,7 @@ msgstr "Aufnahme abgebrochen"
 
 msgctxt "#19225"
 msgid "Recording scheduled"
-msgstr "Aufnhame geplant"
+msgstr "Aufnahme geplant"
 
 msgctxt "#19226"
 msgid "Recording started"
