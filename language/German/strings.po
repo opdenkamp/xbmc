@@ -6610,7 +6610,7 @@ msgstr "Aufnahme abgebrochen"
 
 msgctxt "#19225"
 msgid "Recording scheduled"
-msgstr "Aufnhame geplant"
+msgstr "Aufnahme geplant"
 
 msgctxt "#19226"
 msgid "Recording started"
