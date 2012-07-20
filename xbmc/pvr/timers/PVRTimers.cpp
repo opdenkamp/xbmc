@@ -183,8 +183,11 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
     }
   }
 
+  /* to collect timer with changed starting time */
+  vector<CPVRTimerInfoTag *> timersToMove;
+  
   /* check for deleted timers */
-  for (map<CDateTime, vector<CPVRTimerInfoTag *>* >::iterator it = m_tags.begin(); it != m_tags.end(); it != m_tags.end() ? it++ : it)
+  for (map<CDateTime, vector<CPVRTimerInfoTag *>* >::iterator it = m_tags.begin(); it != m_tags.end();)
   {
     vector<CPVRTimerInfoTag*> *entry = it->second;
     for (int iTagPtr = entry->size() - 1; iTagPtr >= 0; iTagPtr--)
@@ -192,7 +195,7 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
       CPVRTimerInfoTag *timer = entry->at(iTagPtr);
       if (!timer)
         continue;
-
+        
       if (timers->GetByClient(timer->m_iClientId, timer->m_iClientIndex) == NULL)
       {
         /* timer was not found */
@@ -209,12 +212,49 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
         delete entry->at(iTagPtr);
         entry->erase(entry->begin() + iTagPtr);
 
-        if (entry->size() == 0)
-          m_tags.erase(it++);
+        bChanged = true;
+        bAddedOrDeleted = true;
+      }
+      else if (timer->StartAsUTC() != it->first)
+      {
+        /* timer start has changed */
+        CLog::Log(LOGDEBUG,"PVRTimers - %s - changed start time timer %d on client %d",
+            __FUNCTION__, timer->m_iClientIndex, timer->m_iClientId);
+                    
+        /* remember timer */
+        timersToMove.push_back(entry->at(iTagPtr));
+        
+        /* remove timer for now, reinsert later */
+        entry->erase(entry->begin() + iTagPtr);
+
         bChanged = true;
         bAddedOrDeleted = true;
       }
     }
+    if (entry->size() == 0)
+      m_tags.erase(it++);
+    else
+      ++it;
+  }
+
+  /* reinsert timers with changed timer start */
+  for (unsigned int iTagPtr = 0; iTagPtr < timersToMove.size(); iTagPtr++)
+  {
+      CPVRTimerInfoTag *timer = timersToMove.at(iTagPtr);
+      
+      vector<CPVRTimerInfoTag *>* addEntry = NULL;
+      map<CDateTime, vector<CPVRTimerInfoTag *>* >::iterator itr = m_tags.find(timer->StartAsUTC());
+      if (itr == m_tags.end())
+      {
+        addEntry = new vector<CPVRTimerInfoTag *>;
+        m_tags.insert(make_pair(timer->StartAsUTC(), addEntry));
+      }
+      else
+      {
+        addEntry = itr->second;
+      }
+
+      addEntry->push_back(timer);
   }
 
   m_bIsUpdating = false;
@@ -236,7 +276,6 @@ bool CPVRTimers::UpdateEntries(CPVRTimers *timers)
       }
     }
   }
-
   return bChanged;
 }
 
@@ -336,23 +375,6 @@ int CPVRTimers::GetNumActiveTimers(void) const
   }
 
   return iReturn;
-}
-
-int CPVRTimers::GetActiveRecordings(vector<CPVRTimerInfoTag *> *tags) const
-{
-  int iInitialSize = tags->size();
-  CSingleLock lock(m_critSection);
-
-  for (map<CDateTime, vector<CPVRTimerInfoTag *>* >::const_iterator it = m_tags.begin(); it != m_tags.end(); it++)
-  {
-    for (unsigned int iTimerPtr = 0; iTimerPtr < it->second->size(); iTimerPtr++)
-    {
-      if (it->second->at(iTimerPtr)->IsRecording())
-        tags->push_back(it->second->at(iTimerPtr));
-    }
-  }
-
-  return tags->size() - iInitialSize;
 }
 
 int CPVRTimers::GetNumActiveRecordings(void) const
@@ -491,9 +513,6 @@ CPVRTimerInfoTag *CPVRTimers::InstantTimer(CPVRChannel *channel, bool bStartTime
   if (!channel)
     return NULL;
 
-  if (!g_PVRManager.CheckParentalLock(*channel))
-    return NULL;
-
   CEpgInfoTag epgTag;
   bool bHasEpgNow = channel->GetEPGNow(epgTag);
   CPVRTimerInfoTag *newTimer = bHasEpgNow ? CPVRTimerInfoTag::CreateFromEpg(epgTag) : NULL;
@@ -559,17 +578,11 @@ bool CPVRTimers::AddTimer(const CFileItem &item)
 
 bool CPVRTimers::AddTimer(CPVRTimerInfoTag &item)
 {
-  if (!item.m_channel)
-    return false;
-
   if (!g_PVRClients->GetAddonCapabilities(item.m_iClientId).bSupportsTimers)
   {
     CGUIDialogOK::ShowAndGetInput(19033,0,19215,0);
     return false;
   }
-
-  if (!g_PVRManager.CheckParentalLock(*item.m_channel))
-    return false;
 
   return item.AddToClient();
 }
@@ -682,10 +695,10 @@ CPVRTimerInfoTag *CPVRTimers::GetMatch(const CEpgInfoTag *Epg)
     {
       CPVRTimerInfoTag *timer = it->second->at(iTimerPtr);
 
-      const CPVRChannel *channel = Epg ? Epg->ChannelTag() : NULL;
-      if (!channel)
+      if (!Epg || !Epg->GetTable() || !Epg->GetTable()->Channel())
         continue;
 
+      const CPVRChannel *channel = Epg->GetTable()->Channel();
       if (timer->ChannelNumber() != channel->ChannelNumber()
           || timer->m_bIsRadio != channel->IsRadio())
         continue;
@@ -723,7 +736,7 @@ CDateTime CPVRTimers::GetNextEventTime(void) const
   const CDateTimeSpan prewakeup(0, 0, g_guiSettings.GetInt("pvrpowermanagement.prewakeup"), 0);
   const CDateTimeSpan idle(0, 0, g_guiSettings.GetInt("pvrpowermanagement.backendidletime"), 0);
 
-  CDateTime wakeuptime;
+  CDateTime retVal;
 
   /* Check next active time */
   CPVRTimerInfoTag timer;
@@ -732,9 +745,9 @@ CDateTime CPVRTimers::GetNextEventTime(void) const
     const CDateTime start = timer.StartAsUTC();
 
     if ((start - idle) > now) {
-      wakeuptime = start - prewakeup;
+      retVal = start - prewakeup;
     } else {
-      wakeuptime = now + idle;
+      retVal = now + idle;
     }
   }
 
@@ -755,10 +768,9 @@ CDateTime CPVRTimers::GetNextEventTime(void) const
       const CDateTimeSpan oneDay(1,0,0,0);
       dailywakeuptime += oneDay;
     }
-    if (dailywakeuptime < wakeuptime)
-      wakeuptime = dailywakeuptime;
+    if (dailywakeuptime < retVal)
+      retVal = dailywakeuptime;
   }
 
-  const CDateTime retVal(wakeuptime);
   return retVal;
 }
