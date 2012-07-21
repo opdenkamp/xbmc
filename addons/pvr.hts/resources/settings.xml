@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
+  <!-- Connection -->
+  <category label="30040">
     <setting id="host" type="text" label="30000" default="127.0.0.1" />
     <setting id="http_port" type="number" label="30001" default="9981" />
     <setting id="htsp_port" type="number" label="30002" default="9982" />
@@ -7,4 +9,13 @@
     <setting id="pass" type="text" label="30004" option="hidden" default="" />
     <setting id="connect_timeout" type="enum" label="30006" values="1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60" default="29" />
     <setting id="response_timeout" type="enum" label="30007" values="1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60" default="1" />
+  </category>
+
+  <!-- Transcoding -->
+  <category label="30041">
+    <setting id="transcode" type="bool" label="30008" default="false" />
+    <setting id="audio_codec" type="enum" label="30009" values="MPEG2 Audio|AAC" default="1"/>
+    <setting id="video_codec" type="enum" label="30010" values="MPEG2 Video|H264" default="1"/>
+    <setting id="video_res" type="enum" label="30011" values="288p|384p|480p|576p|720p|1080p" default="2"/>
+  </category>
 </settings>

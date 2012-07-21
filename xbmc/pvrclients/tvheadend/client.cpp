@@ -45,21 +45,34 @@ std::string g_strUsername             = "";
 std::string g_strPassword             = "";
 std::string g_strUserPath             = "";
 std::string g_strClientPath           = "";
+bool        g_bTranscode              = DEFAULT_TRANSCODE;
+std::string g_strAudioCodec           = "";
+std::string g_strVideoCodec           = "";
+int         g_iResolution             = DEFAULT_RESOLUTION;
 
 CHelper_libXBMC_addon *XBMC           = NULL;
 CHelper_libXBMC_pvr   *PVR            = NULL;
 CHTSPDemux *           HTSPDemuxer    = NULL;
 CHTSPData *            HTSPData       = NULL;
 
+#define VIDEO_CODEC_LIST_SIZE 2
+#define AUDIO_CODEC_LIST_SIZE 2
+#define RESOLUTION_LIST_SIZE 6
+
+static const char *pVideoCodecList[VIDEO_CODEC_LIST_SIZE] = {"MPEG2VIDEO", "H264"};
+static const char *pAudioCodecList[AUDIO_CODEC_LIST_SIZE] = {"MPEG2AUDIO", "AAC"};
+static const int   pResolutionList[RESOLUTION_LIST_SIZE]  = {288, 384, 480, 576, 720, 1080};
+
 extern "C" {
 
 void ADDON_ReadSettings(void)
 {
-  /* read setting "host" from settings.xml */
+  uint32_t iEnumIndex;
   char * buffer;
   buffer = (char*) malloc (1024);
   buffer[0] = 0; /* Set the end of string */
 
+  /* read setting "host" from settings.xml */
   if (XBMC->GetSetting("host", buffer))
     g_strHostname = buffer;
   else
@@ -96,6 +109,34 @@ void ADDON_ReadSettings(void)
   /* read setting "read_timeout" from settings.xml */
   if (!XBMC->GetSetting("response_timeout", &g_iResponseTimeout))
     g_iResponseTimeout = DEFAULT_RESPONSE_TIMEOUT;
+
+  /* read setting "transcode" from settings.xml */
+  if (!XBMC->GetSetting("transcode", &g_bTranscode))
+    g_bTranscode = DEFAULT_TRANSCODE;
+
+  /* read setting "audio_codec" from settings.xml */
+  if (!XBMC->GetSetting("audio_codec", &iEnumIndex))
+    g_strAudioCodec = "";
+  else if (iEnumIndex < AUDIO_CODEC_LIST_SIZE)
+    g_strAudioCodec = pAudioCodecList[iEnumIndex];
+  else
+    g_strAudioCodec = "";
+
+  /* read setting "video_codec" from settings.xml */
+  if (!XBMC->GetSetting("video_codec", &iEnumIndex))
+    g_strVideoCodec = "";
+  else if (iEnumIndex < VIDEO_CODEC_LIST_SIZE)
+    g_strVideoCodec = pVideoCodecList[iEnumIndex];
+  else
+    g_strVideoCodec = "";
+
+  /* read setting "video_res" from settings.xml */
+  if (!XBMC->GetSetting("video_res", &iEnumIndex))
+    g_iResolution = DEFAULT_RESOLUTION;
+  else if (iEnumIndex < RESOLUTION_LIST_SIZE)
+    g_iResolution = pResolutionList[iEnumIndex];
+  else
+    g_iResolution = DEFAULT_RESOLUTION;
 }
 
 ADDON_STATUS ADDON_Create(void* hdl, void* props)
@@ -263,6 +304,67 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
     {
       XBMC->Log(LOG_INFO, "%s - Changed Setting 'response_timeout' from %u to %u", __FUNCTION__, g_iResponseTimeout, iNewValue);
       g_iResponseTimeout = iNewValue;
+      return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "transcode")
+  {
+    bool bNewValue = *(bool*) settingValue;
+    if (g_bTranscode != bNewValue)
+    {
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'transcode' from %u to %u", __FUNCTION__, g_bTranscode, bNewValue);
+      g_bTranscode = bNewValue;
+      return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "audio_codec")
+  {
+    uint32_t iEnumIndex = *(uint32_t*) settingValue;
+    string tmp_sAudioCodec = g_strAudioCodec;
+
+    if (iEnumIndex < AUDIO_CODEC_LIST_SIZE)
+      tmp_sAudioCodec = pAudioCodecList[iEnumIndex];
+    else
+      tmp_sAudioCodec = "";
+
+    if (tmp_sAudioCodec != g_strAudioCodec)
+    {
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'audio_codec' from %s to %s", __FUNCTION__, tmp_sAudioCodec.c_str(), g_strAudioCodec.c_str());
+      g_strAudioCodec = tmp_sAudioCodec;
+      return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "video_codec")
+  {
+    uint32_t iEnumIndex = *(uint32_t*) settingValue;
+    string tmp_sVideoCodec = g_strVideoCodec;
+
+    if (iEnumIndex < VIDEO_CODEC_LIST_SIZE)
+      tmp_sVideoCodec = pVideoCodecList[iEnumIndex];
+    else
+      tmp_sVideoCodec = "";
+
+    if (tmp_sVideoCodec != g_strVideoCodec)
+    {
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'video_codec' from %s to %s", __FUNCTION__, tmp_sVideoCodec.c_str(), g_strVideoCodec.c_str());
+      g_strVideoCodec = tmp_sVideoCodec;
+      return ADDON_STATUS_OK;
+    }
+  }
+  else if (str == "video_res")
+  {
+    uint32_t iEnumIndex = *(uint32_t*) settingValue;
+    int iNewValue = g_iResolution;
+
+    if (iEnumIndex < RESOLUTION_LIST_SIZE)
+      iNewValue = pResolutionList[iEnumIndex];
+    else
+      iNewValue = DEFAULT_RESOLUTION;
+
+    if (g_iResolution != iNewValue)
+    {
+      XBMC->Log(LOG_INFO, "%s - Changed Setting 'video_res' from %u to %u", __FUNCTION__, g_iResolution, iNewValue);
+      g_iResolution = iNewValue;
       return ADDON_STATUS_OK;
     }
   }

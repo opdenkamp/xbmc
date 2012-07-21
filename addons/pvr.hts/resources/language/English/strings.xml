@@ -9,6 +9,15 @@
     <string id="30006">Connect timeout in seconds</string>
     <string id="30007">Response timeout in seconds</string>
 
+    <string id="30008">Enable transcoding</string>
+    <string id="30009">Audio codec</string>
+    <string id="30010">Video codec</string>
+    <string id="30011">Resolution</string>
+
+    <!-- category labels -->
+    <string id="30040">Connection</string>
+    <string id="30041">Transcoding</string>
+
     <!-- notifications -->
     <string id="30500">Disconnected from '%s'</string>
     <string id="30501">Reconnected to '%s'</string>
