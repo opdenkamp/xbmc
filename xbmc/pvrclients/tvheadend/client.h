@@ -28,6 +28,8 @@
 #define DEFAULT_HTSP_PORT        9982
 #define DEFAULT_CONNECT_TIMEOUT  30
 #define DEFAULT_RESPONSE_TIMEOUT 3
+#define DEFAULT_TRANSCODE        false
+#define DEFAULT_RESOLUTION       480
 
 extern bool                      m_bCreated;
 extern std::string               g_strHostname;
@@ -37,6 +39,10 @@ extern std::string               g_strUsername;
 extern std::string               g_strPassword;
 extern int                       g_iConnectTimeout;
 extern int                       g_iResponseTimeout;
+extern bool                      g_bTranscode;
+extern std::string               g_strAudioCodec;
+extern std::string               g_strVideoCodec;
+extern int                       g_iResolution;
 extern int                       g_iClientId;
 extern unsigned int              g_iPacketSequence;
 extern bool                      g_bShowTimerNotifications;
