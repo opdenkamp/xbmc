@@ -219,6 +219,7 @@ JSONRPC_STATUS CPlayerOperations::PlayPause(const CStdString &method, ITransport
         result["speed"] = 0;
       return OK;
 
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -279,6 +280,7 @@ JSONRPC_STATUS CPlayerOperations::SetSpeed(const CStdString &method, ITransportL
       return OK;
 
     case Picture:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -319,6 +321,7 @@ JSONRPC_STATUS CPlayerOperations::Seek(const CStdString &method, ITransportLayer
       return OK;
 
     case Picture:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -335,6 +338,7 @@ JSONRPC_STATUS CPlayerOperations::MoveLeft(const CStdString &method, ITransportL
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -351,6 +355,7 @@ JSONRPC_STATUS CPlayerOperations::MoveRight(const CStdString &method, ITransport
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -367,6 +372,7 @@ JSONRPC_STATUS CPlayerOperations::MoveDown(const CStdString &method, ITransportL
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -383,6 +389,7 @@ JSONRPC_STATUS CPlayerOperations::MoveUp(const CStdString &method, ITransportLay
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -399,6 +406,7 @@ JSONRPC_STATUS CPlayerOperations::ZoomOut(const CStdString &method, ITransportLa
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -415,6 +423,7 @@ JSONRPC_STATUS CPlayerOperations::ZoomIn(const CStdString &method, ITransportLay
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -431,6 +440,7 @@ JSONRPC_STATUS CPlayerOperations::Zoom(const CStdString &method, ITransportLayer
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -450,6 +460,7 @@ JSONRPC_STATUS CPlayerOperations::Rotate(const CStdString &method, ITransportLay
 
     case Video:
     case Audio:
+    case LiveTV:
     case None:
     default:
       return FailedToExecute;
@@ -643,6 +654,7 @@ JSONRPC_STATUS CPlayerOperations::Shuffle(const CStdString &method, ITransportLa
         return FailedToExecute;
       break;
 
+    case LiveTV:
     default:
       return FailedToExecute;
   }
@@ -660,6 +672,7 @@ JSONRPC_STATUS CPlayerOperations::UnShuffle(const CStdString &method, ITransport
       break;
 
     case Picture:
+    case LiveTV:
     default:
       return FailedToExecute;
   }
@@ -677,6 +690,7 @@ JSONRPC_STATUS CPlayerOperations::Repeat(const CStdString &method, ITransportLay
       break;
 
     case Picture:
+    case LiveTV:
     default:
       return FailedToExecute;
   }
