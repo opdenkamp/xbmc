@@ -569,6 +569,11 @@ JSONRPC_STATUS CPlayerOperations::GoPrevious(const CStdString &method, ITranspor
       SendSlideshowAction(ACTION_PREV_PICTURE);
       return ACK;
 
+    case LiveTV:
+      unsigned int newChannelNumber;
+      g_PVRManager.ChannelDown(&newChannelNumber);
+      return ACK;
+
     case None:
     default:
       return FailedToExecute;
@@ -586,6 +591,11 @@ JSONRPC_STATUS CPlayerOperations::GoNext(const CStdString &method, ITransportLay
 
     case Picture:
       SendSlideshowAction(ACTION_NEXT_PICTURE);
+      return ACK;
+
+    case LiveTV:
+      unsigned int newChannelNumber;
+      g_PVRManager.ChannelUp(&newChannelNumber);
       return ACK;
 
     case None:
