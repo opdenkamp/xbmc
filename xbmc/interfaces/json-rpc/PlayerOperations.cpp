@@ -34,9 +34,11 @@
 #include "video/VideoDatabase.h"
 #include "AudioLibrary.h"
 #include "GUIInfoManager.h"
+#include "pvr/PVRManager.h"
 
 using namespace JSONRPC;
 using namespace PLAYLIST;
+using namespace PVR;
 
 JSONRPC_STATUS CPlayerOperations::GetActivePlayers(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
@@ -822,9 +824,15 @@ PlayerType CPlayerOperations::GetPlayer(const CVariant &player)
 
   // Implicit order
   if (choosenPlayer & Video)
-    return Video;
+    if (g_PVRManager.IsPlayingTV())
+      return LiveTV;
+    else
+      return Video;
   else if (choosenPlayer & Audio)
-    return Audio;
+    if (g_PVRManager.IsPlayingRadio())
+      return LiveTV;
+    else
+      return Audio;
   else if (choosenPlayer & Picture)
     return Picture;
   else
