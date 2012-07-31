@@ -931,6 +931,10 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         result = "picture";
         break;
 
+      case LiveTV:
+        result = g_PVRManager.IsPlayingRadio() ? "audio" : "video";
+        break;
+
       default:
         return FailedToExecute;
     }
@@ -945,6 +949,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
 
       case Picture:
+      case LiveTV:
         result = false;
         break;
 
@@ -959,6 +964,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         result = g_application.IsPaused() ? 0 : g_application.GetPlaySpeed();
         break;
 
@@ -980,6 +986,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         MillisecondsToTimeObject((int)(g_application.GetTime() * 1000.0), result);
         break;
 
@@ -998,6 +1005,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         result = g_application.GetPercentage();
         break;
 
@@ -1019,6 +1027,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         MillisecondsToTimeObject((int)(g_application.GetTotalTime() * 1000.0), result);
         break;
 
@@ -1041,6 +1050,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         if (g_playlistPlayer.GetCurrentPlaylist() == playlist)
           result = g_playlistPlayer.GetCurrentSong();
         else
@@ -1081,6 +1091,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
 
       case Picture:
+      case LiveTV:
       default:
         result = "off";
         break;
@@ -1104,6 +1115,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
           result = -1;
         break;
 
+      case LiveTV:
       default:
         result = -1;
         break;
@@ -1122,6 +1134,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
 
       case Picture:
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1137,6 +1150,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
 
       case Picture:
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1152,6 +1166,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
 
       case Video:
       case Audio:
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1167,6 +1182,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
 
       case Video:
       case Audio:
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1197,6 +1213,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         result = true;
         break;
 
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1212,6 +1229,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
 
       case Picture:
+      case LiveTV:
       default:
         result = false;
         break;
@@ -1223,6 +1241,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     {
       case Video:
       case Audio:
+      case LiveTV:
         if (g_application.m_pPlayer)
         {
           result = CVariant(CVariant::VariantTypeObject);
@@ -1257,6 +1276,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
+      case LiveTV:
         if (g_application.m_pPlayer)
         {
           for (int index = 0; index < g_application.m_pPlayer->GetAudioStreamCount(); index++)
@@ -1286,6 +1306,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
+      case LiveTV:
         if (g_application.m_pPlayer)
           result = g_application.m_pPlayer->GetSubtitleVisible();
         break;
@@ -1302,6 +1323,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
+      case LiveTV:
         if (g_application.m_pPlayer)
         {
           result = CVariant(CVariant::VariantTypeObject);
@@ -1334,6 +1356,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
     switch (player)
     {
       case Video:
+      case LiveTV:
         if (g_application.m_pPlayer)
         {
           for (int index = 0; index < g_application.m_pPlayer->GetSubtitleCount(); index++)
