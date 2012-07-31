@@ -232,6 +232,7 @@ JSONRPC_STATUS CPlayerOperations::Stop(const CStdString &method, ITransportLayer
   {
     case Video:
     case Audio:
+    case LiveTV:
       CApplicationMessenger::Get().SendAction(CAction(ACTION_STOP));
       return ACK;
 
