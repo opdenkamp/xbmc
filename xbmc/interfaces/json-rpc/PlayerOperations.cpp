@@ -809,9 +809,9 @@ int CPlayerOperations::GetActivePlayers()
 {
   int activePlayers = 0;
 
-  if (g_application.IsPlayingVideo())
+  if (g_application.IsPlayingVideo() || g_PVRManager.IsPlayingTV())
     activePlayers |= Video;
-  if (g_application.IsPlayingAudio())
+  if (g_application.IsPlayingAudio() || g_PVRManager.IsPlayingRadio())
     activePlayers |= Audio;
   if (g_windowManager.IsWindowActive(WINDOW_SLIDESHOW))
     activePlayers |= Picture;
