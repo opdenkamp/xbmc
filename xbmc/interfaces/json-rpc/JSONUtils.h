@@ -27,6 +27,7 @@
 #include "interfaces/IAnnouncer.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/JSONVariantParser.h"
+#include "XBDateTime.h"
 
 namespace JSONRPC
 {
@@ -67,6 +68,16 @@ namespace JSONRPC
       time = (time -m) / 60;
 
       result["hours"] = time;
+    }
+
+    static void DateTimeToDateTimeObject(CDateTime &time, CVariant &result)
+    {
+      result["second"] = time.GetSecond();
+      result["minute"] = time.GetMinute();
+      result["hour"] = time.GetHour();
+      result["day"] = time.GetDay();
+      result["month"] = time.GetMonth();
+      result["year"] = time.GetYear();
     }
 
   protected:

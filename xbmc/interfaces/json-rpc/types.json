@@ -33,6 +33,17 @@
     },
     "additionalProperties": false
   },
+  "Global.DateTime": {
+    "extends": "Global.Time",
+    "properties": {
+      "year": { "type": "integer", "required": true },
+  	  "month": { "type": "integer", "required": true, "minimum": 1, "maximum": 12 },
+      "day": { "type": "integer", "required": true, "minimum": 1, "maximum": 31 },
+      "hour": { "type": "integer", "required": true, "minimum": 0, "maximum": 23 },
+      "minute": { "type": "integer", "required": true, "minimum": 0, "maximum": 59 },
+      "second": { "type": "integer", "required": true, "minimum": 0, "maximum": 59 },
+    }
+  },
   "Global.IncrementDecrement": {
     "type": "string",
     "enum": [ "increment", "decrement" ]
@@ -694,7 +705,7 @@
                 "runtime", "set", "showlink", "streamdetails", "top250", "votes",
                 "firstaired", "season", "episode", "showtitle", "thumbnail", "file",
                 "resume", "artistid", "albumid", "tvshowid", "setid", "watchedepisodes",
-                "disc", "tag" ]
+                "disc", "tag", "starttime", "endtime", "channel" ]
     }
   },
   "List.Item.All": {
@@ -735,7 +746,16 @@
       "tvshowid": { "$ref": "Library.Id" },
       "watchedepisodes": { "type": "integer" },
       "disc": { "type": "integer" },
-      "tag": { "$ref": "Array.String" }
+      "tag": { "$ref": "Array.String" },
+      "starttime": { "type": "Global.DateTime" },
+      "endtime": { "type": "Global.DateTime" },
+      "channel": { "type": "object",
+        "properties": {
+          "id": { "type": "int" },
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": [ "radio", "tv" ] }
+        }
+      }
     }
   },
   "List.Fields.Files": {
