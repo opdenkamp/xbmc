@@ -146,6 +146,21 @@ CPVRChannel &CPVRChannel::operator=(const CPVRChannel &channel)
   return *this;
 }
 
+void CPVRChannel::Serialize(CVariant& value)
+{
+  value["isradio"] = m_bIsRadio;
+  value["name"]  = m_strChannelName;
+  value["number"] = m_iCachedChannelNumber;
+  value["epgid"] = m_iEpgId;
+  CEpgInfoTag epgNow;
+  if (GetEPGNow(epgNow))
+  {
+    time_t starttime;
+    epgNow.StartAsUTC().GetAsUTCDateTime().GetAsTime(starttime);
+    value["currentepgstarttime"] = starttime;
+  }
+}
+
 /********** XBMC related channel methods **********/
 
 bool CPVRChannel::Delete(void)

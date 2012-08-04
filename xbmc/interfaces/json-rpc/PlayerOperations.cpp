@@ -100,6 +100,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const CStdString &method, ITransportLa
   {
     case Video:
     case Audio:
+    case LiveTV:
     {
       if (g_application.CurrentFileItem().GetLabel().empty())
       {
@@ -112,7 +113,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const CStdString &method, ITransportLa
             tmpItem.SetPath(g_application.CurrentFileItem().GetPath());
           }
         }
-        else
+        else if (player == Audio)
         {
           if (!CAudioLibrary::FillFileItem(g_application.CurrentFile(), tmpItem))
           {
