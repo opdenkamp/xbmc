@@ -212,7 +212,7 @@ namespace JSONRPC
                 "\"totaltime\", \"playlistid\", \"position\", \"repeat\", \"shuffled\","
                 "\"canseek\", \"canchangespeed\", \"canmove\", \"canzoom\", \"canrotate\","
                 "\"canshuffle\", \"canrepeat\", \"currentaudiostream\", \"audiostreams\","
-                "\"subtitleenabled\", \"currentsubtitle\", \"subtitles\" ]"
+                "\"subtitleenabled\", \"currentsubtitle\", \"subtitles\", \"islive\" ]"
     "}",
     "\"Player.Property.Value\": {"
       "\"type\": \"object\","
@@ -238,7 +238,8 @@ namespace JSONRPC
         "\"audiostreams\": { \"type\": \"array\", \"items\": { \"$ref\": \"Player.Audio.Stream\" } },"
         "\"subtitleenabled\": { \"type\": \"boolean\" },"
         "\"currentsubtitle\": { \"$ref\": \"Player.Subtitle\" },"
-        "\"subtitles\": { \"type\": \"array\", \"items\": { \"$ref\": \"Player.Subtitle\" } }"
+        "\"subtitles\": { \"type\": \"array\", \"items\": { \"$ref\": \"Player.Subtitle\" } },"
+        "\"islive\": { \"type\": \"boolean\" }"
       "}"
     "}",
     "\"Player.Notifications.Item.Type\": {"

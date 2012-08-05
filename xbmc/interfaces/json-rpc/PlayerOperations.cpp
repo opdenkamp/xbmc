@@ -1382,6 +1382,21 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         break;
     }
   }
+  else if (property.Equals("islive"))
+  {
+    switch (player)
+    {
+      case LiveTV:
+        result = true;
+        break;
+      case Video:
+      case Audio:
+      case Picture:
+      default:
+        result = false;
+        break;
+    }
+  }
   else
     return InvalidParams;
 
