@@ -5938,7 +5938,7 @@ msgstr "Verstecke Kanal"
 
 msgctxt "#19055"
 msgid "No information available"
-msgstr "Es sind keine Informationen verfügbar"
+msgstr "Keine Informationen vorhanden"
 
 msgctxt "#19056"
 msgid "New timer"
@@ -6780,6 +6780,10 @@ msgstr "Kindersicherung"
 msgctxt "#19267"
 msgid "Parental locked:"
 msgstr "Kindersicherung:"
+
+msgctxt "#19268"
+msgid "Do not show 'no information available' labels"
+msgstr "Verstecke EPG-Label 'Keine Informationen vorhanden'"
 
 msgctxt "#20000"
 msgid "Saved music folder"
