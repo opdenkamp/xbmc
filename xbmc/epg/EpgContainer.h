@@ -108,13 +108,7 @@ namespace EPG
      */
     virtual void Notify(const Observable &obs, const CStdString& msg);
 
-    /*!
-     * @brief Update an entry in this container.
-     * @param tag The table to update.
-     * @param bUpdateDatabase If set to true, this table will be persisted in the database.
-     * @return The updated epg table or NULL if it couldn't be found.
-     */
-    virtual bool UpdateEntry(const CEpg &entry, bool bUpdateDatabase = false);
+    CEpg *CreateChannelEpg(PVR::CPVRChannelPtr channel);
 
     /*!
      * @brief Get all EPG tables and apply a filter.
@@ -224,8 +218,6 @@ namespace EPG
 
     bool PersistTables(void);
 
-    void ClearTimerTag(int iEpgId, const CDateTime &startTime);
-
   protected:
     /*!
      * @brief Load the EPG settings.
@@ -267,6 +259,8 @@ namespace EPG
      * @brief Load all tables from the database
      */
     void LoadFromDB(void);
+
+    void InsertFromDatabase(int iEpgID, const CStdString &strName, const CStdString &strScraperName);
 
     CEpgDatabase m_database;           /*!< the EPG database */
 

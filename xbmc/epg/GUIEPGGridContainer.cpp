@@ -31,7 +31,7 @@
 #include "threads/SystemClock.h"
 #include "GUIInfoManager.h"
 
-#include "epg/EpgInfoTag.h"
+#include "epg/Epg.h"
 #include "pvr/channels/PVRChannel.h"
 
 #include "GUIEPGGridContainer.h"
@@ -650,11 +650,9 @@ bool CGUIEPGGridContainer::OnAction(const CAction &action)
     break;
 
   default:
-
     if (action.GetID())
-    {
       return OnClick(action.GetID());
-    }
+    break;
   }
 
   return false;
@@ -687,7 +685,7 @@ bool CGUIEPGGridContainer::OnMessage(CGUIMessage& message)
         int iCurrentChannelNumber = tag->PVRChannelNumber();
         if (iCurrentChannelNumber != iLastChannelNumber)
         {
-          const CPVRChannel *channel = tag->ChannelTag();
+          CPVRChannelPtr channel = tag->ChannelTag();
           if (!channel)
             continue;
 

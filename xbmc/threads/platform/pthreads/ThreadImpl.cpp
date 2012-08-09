@@ -20,7 +20,11 @@
  */
 
 #include <limits.h>
+#if defined(TARGET_ANDROID)
+#include <unistd.h>
+#else
 #include <sys/syscall.h>
+#endif
 #include <sys/resource.h>
 #include <string.h>
 #ifdef __FreeBSD__
@@ -38,8 +42,10 @@ void CThread::SpawnThread(unsigned stacksize)
 {
   pthread_attr_t attr;
   pthread_attr_init(&attr);
+#if !defined(TARGET_ANDROID) // http://code.google.com/p/android/issues/detail?id=7808
   if (stacksize > PTHREAD_STACK_MIN)
     pthread_attr_setstacksize(&attr, stacksize);
+#endif
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   if (pthread_create(&m_ThreadId, &attr, (void*(*)(void*))staticThread, this) != 0)
   {
@@ -60,6 +66,8 @@ void CThread::SetThreadInfo()
 #else
   m_ThreadOpaque.LwpId = pthread_getthreadid_np();
 #endif
+#elif defined(TARGET_ANDROID)
+  m_ThreadOpaque.LwpId = gettid();
 #else
   m_ThreadOpaque.LwpId = syscall(SYS_gettid);
 #endif
@@ -70,10 +78,29 @@ void CThread::SetThreadInfo()
 #endif
 #endif
     
-  // start thread with nice level of appication
-  int appNice = getpriority(PRIO_PROCESS, getpid());
-  if (setpriority(PRIO_PROCESS, m_ThreadOpaque.LwpId, appNice) != 0)
-    if (logger) logger->Log(LOGERROR, "%s: error %s", __FUNCTION__, strerror(errno));
+#ifdef RLIMIT_NICE
+  // get user max prio
+  struct rlimit limit;
+  int userMaxPrio;
+  if (getrlimit(RLIMIT_NICE, &limit) == 0)
+  {
+    userMaxPrio = limit.rlim_cur - 20;
+    if (userMaxPrio < 0)
+      userMaxPrio = 0;
+  }
+  else
+    userMaxPrio = 0;
+
+  // if the user does not have an entry in limits.conf the following
+  // call will fail
+  if (userMaxPrio > 0)
+  {
+    // start thread with nice level of appication
+    int appNice = getpriority(PRIO_PROCESS, getpid());
+    if (setpriority(PRIO_PROCESS, m_ThreadOpaque.LwpId, appNice) != 0)
+      if (logger) logger->Log(LOGERROR, "%s: error %s", __FUNCTION__, strerror(errno));
+  }
+#endif
 }
 
 ThreadIdentifier CThread::GetCurrentThreadId()
@@ -129,6 +156,9 @@ bool CThread::SetPriority(const int iPriority)
     if (getrlimit(RLIMIT_NICE, &limit) == 0)
     {
       userMaxPrio = limit.rlim_cur - 20;
+      // is a user has no entry in limits.conf rlim_cur is zero
+      if (userMaxPrio < 0)
+        userMaxPrio = 0;
     }
     else
       userMaxPrio = 0;

@@ -20,7 +20,7 @@
  */
 
 #include "GUIDialogMediaSource.h"
-#include "GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "GUIDialogFileBrowser.h"
 #include "video/windows/GUIWindowVideoBase.h"
 #include "video/dialogs/GUIDialogVideoScan.h"
@@ -36,6 +36,12 @@
 #include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "PasswordManager.h"
+#include "URL.h"
+
+#if defined(TARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
+#include "filesystem/File.h"
+#endif
 
 using namespace std;
 using namespace XFILE;
@@ -222,8 +228,21 @@ void CGUIDialogMediaSource::OnPathBrowse(int item)
     m_bNameChanged=true;
 
   if (m_type == "music")
-  { // add the music playlist location
+  {
     CMediaSource share1;
+#if defined(TARGET_ANDROID)
+    // add the default android music directory
+    std::string path;
+    if (CXBMCApp::GetExternalStorage(path, "music") && !path.empty() && CFile::Exists(path))
+    {
+      share1.strPath = path;
+      share1.strName = g_localizeStrings.Get(20240);
+      share1.m_ignore = true;
+      extraShares.push_back(share1);
+    }
+#endif
+
+    // add the music playlist location
     share1.strPath = "special://musicplaylists/";
     share1.strName = g_localizeStrings.Get(20011);
     share1.m_ignore = true;
@@ -248,8 +267,21 @@ void CGUIDialogMediaSource::OnPathBrowse(int item)
     }
  }
   else if (m_type == "video")
-  { // add the music playlist location
+  {
     CMediaSource share1;
+#if defined(TARGET_ANDROID)
+    // add the default android video directory
+    std::string path;
+    if (CXBMCApp::GetExternalStorage(path, "videos") && !path.empty() && CFile::Exists(path))
+    {
+      share1.strPath = path;
+      share1.strName = g_localizeStrings.Get(20241);
+      share1.m_ignore = true;
+      extraShares.push_back(share1);
+    }
+#endif
+
+    // add the video playlist location
     share1.m_ignore = true;
     share1.strPath = "special://videoplaylists/";
     share1.strName = g_localizeStrings.Get(20012);
@@ -278,6 +310,27 @@ void CGUIDialogMediaSource::OnPathBrowse(int item)
   else if (m_type == "pictures")
   {
     CMediaSource share1;
+#if defined(TARGET_ANDROID)
+    // add the default android music directory
+    std::string path;
+    if (CXBMCApp::GetExternalStorage(path, "pictures") && !path.empty() &&  CFile::Exists(path))
+    {
+      share1.strPath = path;
+      share1.strName = g_localizeStrings.Get(20242);
+      share1.m_ignore = true;
+      extraShares.push_back(share1);
+    }
+
+    path.clear();
+    if (CXBMCApp::GetExternalStorage(path, "photos") && !path.empty() &&  CFile::Exists(path))
+    {
+      share1.strPath = path;
+      share1.strName = g_localizeStrings.Get(20243);
+      share1.m_ignore = true;
+      extraShares.push_back(share1);
+    }
+#endif
+
     share1.m_ignore = true;
     if (g_guiSettings.GetString("debug.screenshotpath",false)!= "")
     {
@@ -313,7 +366,7 @@ void CGUIDialogMediaSource::OnPath(int item)
     m_bNameChanged=true;
 
   CStdString path(m_paths->Get(item)->GetPath());
-  CGUIDialogKeyboard::ShowAndGetInput(path, g_localizeStrings.Get(1021), false);
+  CGUIKeyboardFactory::ShowAndGetInput(path, g_localizeStrings.Get(1021), false);
   URIUtils::AddSlashAtEnd(path);
   m_paths->Get(item)->SetPath(path);
 

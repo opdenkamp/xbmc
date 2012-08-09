@@ -47,6 +47,7 @@
 #include "utils/Variant.h"
 #include "ThumbLoader.h"
 #include "TextureCache.h"
+#include "URL.h"
 
 using namespace std;
 using namespace XFILE;
@@ -1105,7 +1106,7 @@ namespace VIDEO
       m_database.SetPlayCount(*pItem, movieDetails.m_playCount, movieDetails.m_lastPlayed);
 
     if ((g_advancedSettings.m_bVideoLibraryImportResumePoint || libraryImport) &&
-        movieDetails.m_resumePoint.timeInSeconds > 0.0f && movieDetails.m_resumePoint.totalTimeInSeconds > 0.0f)
+        movieDetails.m_resumePoint.IsSet())
       m_database.AddBookMarkToFile(pItem->GetPath(), movieDetails.m_resumePoint, CBookmark::RESUME);
 
     m_database.Close();

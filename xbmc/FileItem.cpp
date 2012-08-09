@@ -26,18 +26,16 @@
 #include "Util.h"
 #include "playlists/PlayListFactory.h"
 #include "utils/Crc32.h"
-#include "filesystem/DirectoryCache.h"
+#include "filesystem/Directory.h"
 #include "filesystem/StackDirectory.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/MultiPathDirectory.h"
 #include "filesystem/MusicDatabaseDirectory.h"
 #include "filesystem/VideoDatabaseDirectory.h"
-#include "filesystem/DirectoryFactory.h"
 #include "music/tags/MusicInfoTagLoaderFactory.h"
 #include "CueDocument.h"
 #include "video/VideoDatabase.h"
 #include "music/MusicDatabase.h"
-#include "SortFileItem.h"
 #include "utils/TuxBoxUtil.h"
 #include "epg/Epg.h"
 #include "pvr/channels/PVRChannel.h"
@@ -60,7 +58,6 @@
 #include "utils/Variant.h"
 #include "music/karaoke/karaokelyricsfactory.h"
 #include "utils/Mime.h"
-#include "utils/CharsetConverter.h"
 
 using namespace std;
 using namespace XFILE;
@@ -257,11 +254,11 @@ CFileItem::CFileItem(const CPVRTimerInfoTag& timer)
 
   Reset();
 
-  m_strPath = timer.m_strFileNameAndPath;
+  m_strPath = timer.Path();
   m_bIsFolder = false;
   *GetPVRTimerInfoTag() = timer;
-  SetLabel(timer.m_strTitle);
-  m_strLabel2 = timer.m_strSummary;
+  SetLabel(timer.Title());
+  m_strLabel2 = timer.Summary();
   m_dateTime = timer.StartAsLocalTime();
 
   if (!timer.ChannelIcon().IsEmpty())
@@ -931,6 +928,7 @@ bool CFileItem::IsFileFolder() const
   return (
     IsSmartPlayList() ||
    (IsPlayList() && g_advancedSettings.m_playlistAsFolders) ||
+    IsAPK() ||
     IsZIP() ||
     IsRAR() ||
     IsRSS() ||
@@ -1013,6 +1011,11 @@ bool CFileItem::IsRAR() const
   return URIUtils::IsRAR(m_strPath);
 }
 
+bool CFileItem::IsAPK() const
+{
+  return URIUtils::IsAPK(m_strPath);
+}
+
 bool CFileItem::IsZIP() const
 {
   return URIUtils::IsZIP(m_strPath);
@@ -1035,6 +1038,11 @@ bool CFileItem::IsRSS() const
 
   return URIUtils::GetExtension(m_strPath).Equals(".rss")
       || GetMimeType() == "application/rss+xml";
+}
+
+bool CFileItem::IsAndroidApp() const
+{
+  return URIUtils::IsAndroidApp(m_strPath);
 }
 
 bool CFileItem::IsStack() const
@@ -1533,8 +1541,7 @@ void CFileItemList::SetFastLookup(bool fastLookup)
     for (unsigned int i=0; i < m_items.size(); i++)
     {
       CFileItemPtr pItem = m_items[i];
-      CStdString path(pItem->GetPath()); path.ToLower();
-      m_map.insert(MAPFILEITEMSPAIR(path, pItem));
+      m_map.insert(MAPFILEITEMSPAIR(pItem->GetPath(), pItem));
     }
   }
   if (!fastLookup && m_fastLookup)
@@ -1546,15 +1553,14 @@ bool CFileItemList::Contains(const CStdString& fileName) const
 {
   CSingleLock lock(m_lock);
 
-  // checks case insensitive
-  CStdString checkPath(fileName); checkPath.ToLower();
   if (m_fastLookup)
-    return m_map.find(checkPath) != m_map.end();
+    return m_map.find(fileName) != m_map.end();
+
   // slow method...
   for (unsigned int i = 0; i < m_items.size(); i++)
   {
     const CFileItemPtr pItem = m_items[i];
-    if (pItem->GetPath().Equals(checkPath))
+    if (pItem->GetPath().Equals(fileName))
       return true;
   }
   return false;
@@ -1595,9 +1601,7 @@ void CFileItemList::Add(const CFileItemPtr &pItem)
   m_items.push_back(pItem);
   if (m_fastLookup)
   {
-    CStdString path(pItem->GetPath()); 
-    path.ToLower();
-    m_map.insert(MAPFILEITEMSPAIR(path, pItem));
+    m_map.insert(MAPFILEITEMSPAIR(pItem->GetPath(), pItem));
   }
 }
 
@@ -1615,8 +1619,7 @@ void CFileItemList::AddFront(const CFileItemPtr &pItem, int itemPosition)
   }
   if (m_fastLookup)
   {
-    CStdString path(pItem->GetPath()); path.ToLower();
-    m_map.insert(MAPFILEITEMSPAIR(path, pItem));
+    m_map.insert(MAPFILEITEMSPAIR(pItem->GetPath(), pItem));
   }
 }
 
@@ -1631,8 +1634,7 @@ void CFileItemList::Remove(CFileItem* pItem)
       m_items.erase(it);
       if (m_fastLookup)
       {
-        CStdString path(pItem->GetPath()); path.ToLower();
-        m_map.erase(path);
+        m_map.erase(pItem->GetPath());
       }
       break;
     }
@@ -1648,8 +1650,7 @@ void CFileItemList::Remove(int iItem)
     CFileItemPtr pItem = *(m_items.begin() + iItem);
     if (m_fastLookup)
     {
-      CStdString path(pItem->GetPath()); path.ToLower();
-      m_map.erase(path);
+      m_map.erase(pItem->GetPath());
     }
     m_items.erase(m_items.begin() + iItem);
   }
@@ -1727,11 +1728,9 @@ CFileItemPtr CFileItemList::Get(const CStdString& strPath)
 {
   CSingleLock lock(m_lock);
 
-  CStdString pathToCheck(strPath); pathToCheck.ToLower();
-
   if (m_fastLookup)
   {
-    IMAPFILEITEMS it=m_map.find(pathToCheck);
+    IMAPFILEITEMS it=m_map.find(strPath);
     if (it != m_map.end())
       return it->second;
 
@@ -1741,7 +1740,7 @@ CFileItemPtr CFileItemList::Get(const CStdString& strPath)
   for (unsigned int i = 0; i < m_items.size(); i++)
   {
     CFileItemPtr pItem = m_items[i];
-    if (pItem->GetPath().Equals(pathToCheck))
+    if (pItem->GetPath().Equals(strPath))
       return pItem;
   }
 
@@ -1751,12 +1750,10 @@ CFileItemPtr CFileItemList::Get(const CStdString& strPath)
 const CFileItemPtr CFileItemList::Get(const CStdString& strPath) const
 {
   CSingleLock lock(m_lock);
-  
-  CStdString pathToCheck(strPath); pathToCheck.ToLower();
-   
+
   if (m_fastLookup)
   {
-    map<CStdString, CFileItemPtr>::const_iterator it=m_map.find(pathToCheck);
+    map<CStdString, CFileItemPtr>::const_iterator it=m_map.find(strPath);
     if (it != m_map.end())
       return it->second;
 
@@ -1766,7 +1763,7 @@ const CFileItemPtr CFileItemList::Get(const CStdString& strPath) const
   for (unsigned int i = 0; i < m_items.size(); i++)
   {
     CFileItemPtr pItem = m_items[i];
-    if (pItem->GetPath().Equals(pathToCheck))
+    if (pItem->GetPath().Equals(strPath))
       return pItem;
   }
 

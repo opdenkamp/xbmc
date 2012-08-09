@@ -19,6 +19,7 @@
 */
 
 #include "File.h"
+#include "IFile.h"
 #include "FileFactory.h"
 #include "Application.h"
 #include "DirectoryCache.h"
@@ -28,6 +29,7 @@
 #include "utils/URIUtils.h"
 #include "utils/BitstreamStats.h"
 #include "Util.h"
+#include "URL.h"
 
 #include "commons/Exception.h"
 
@@ -82,7 +84,7 @@ bool CFile::Cache(const CStdString& strFileName, const CStdString& strDest, XFIL
 
   // special case for zips - ignore caching
   CURL url(strFileName);
-  if (URIUtils::IsInZIP(strFileName))
+  if (URIUtils::IsInZIP(strFileName) || URIUtils::IsInAPK(strFileName))
     url.SetOptions("?cache=no");
   if (file.Open(url.Get(), READ_TRUNCATED))
   {
@@ -215,6 +217,8 @@ bool CFile::Open(const CStdString& strFileName, unsigned int flags)
   {
     bool bPathInCache;
     CURL url2(strFileName);
+    if (url2.GetProtocol() == "apk")
+      url2.SetOptions("");
     if (url2.GetProtocol() == "zip")
       url2.SetOptions("");
     if (!g_directoryCache.FileExists(url2.Get(), bPathInCache) )
@@ -393,6 +397,13 @@ bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
 int CFile::Stat(struct __stat64 *buffer)
 {
   return m_pFile->Stat(buffer);
+}
+
+bool CFile::SkipNext()
+{
+  if (m_pFile)
+    return m_pFile->SkipNext();
+  return false;
 }
 
 int CFile::Stat(const CStdString& strFileName, struct __stat64* buffer)
@@ -763,6 +774,13 @@ int CFile::IoControl(EIoControl request, void* param)
   }
 
   return result;
+}
+
+int CFile::GetChunkSize()
+{
+  if (m_pFile)
+    return m_pFile->GetChunkSize();
+  return 0;
 }
 //*********************************************************************************************
 //*************** Stream IO for CFile objects *************************************************

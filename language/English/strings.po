@@ -3158,39 +3158,7 @@ msgctxt "#1235"
 msgid "Programs & pictures & video"
 msgstr ""
 
-#empty strings from id 1236 to 1249
-
-msgctxt "#1250"
-msgid "Auto-detection"
-msgstr ""
-
-msgctxt "#1251"
-msgid "Auto-detect system"
-msgstr ""
-
-msgctxt "#1252"
-msgid "Nickname"
-msgstr ""
-
-#empty string with id 1253
-
-msgctxt "#1254"
-msgid "Ask to connect"
-msgstr ""
-
-msgctxt "#1255"
-msgid "Send FTP user and password"
-msgstr ""
-
-msgctxt "#1256"
-msgid "Ping interval"
-msgstr ""
-
-msgctxt "#1257"
-msgid "Would you like to connect to the auto-detected system?"
-msgstr ""
-
-#empty string with id 1258
+#empty strings from id 1236 to 1258
 
 msgctxt "#1259"
 msgid "Zeroconf"
@@ -7136,6 +7104,10 @@ msgctxt "#19268"
 msgid "Do not show 'no information available' labels"
 msgstr ""
 
+msgctxt "#19269"
+msgid "Do not show 'connection lost' warnings"
+msgstr ""
+
 msgctxt "#19499"
 msgid "Other/Unknown"
 msgstr ""
@@ -8261,7 +8233,29 @@ msgid "Downloading artist info failed"
 msgstr ""
 
 #string id's 20200 thru 20211 are reserved for speedstrings (LocalizeStrings.cpp)
-#empty strings from id 20200 to 20249
+#empty strings from id 20200 to 20239
+
+msgctxt "#20240"
+msgid "Android music"
+msgstr ""
+
+msgctxt "#20241"
+msgid "Android videos"
+msgstr ""
+
+msgctxt "#20242"
+msgid "Android pictures"
+msgstr ""
+
+msgctxt "#20243"
+msgid "Android photos"
+msgstr ""
+
+msgctxt "#20244"
+msgid "Android Apps"
+msgstr ""
+
+#empty strings from id 20245 to 20249
 
 msgctxt "#20250"
 msgid "Party on! (videos)"
@@ -9347,7 +9341,11 @@ msgctxt "#21455"
 msgid "Cache filled before reaching required amount for continous playback"
 msgstr ""
 
-#empty strings from id 21456 to 21459
+msgctxt "#21456"
+msgid "External storage"
+msgstr ""
+
+#empty strings from id 21457 to 21459
 
 msgctxt "#21460"
 msgid "Subtitle location"
@@ -10967,5 +10965,9 @@ msgstr ""
 
 msgctxt "#36032"
 msgid "The port is busy. Only one program can access the CEC adapter"
+msgstr ""
+
+msgctxt "#36033"
+msgid "Pause playback when switching to another source"
 msgstr ""
 

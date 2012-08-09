@@ -30,6 +30,7 @@
 #include "utils/URIUtils.h"
 #include "sqlitedataset.h"
 #include "DatabaseManager.h"
+#include "DbUrl.h"
 
 #ifdef HAS_MYSQL
 #include "mysqldataset.h"
@@ -39,6 +40,65 @@ using namespace AUTOPTR;
 using namespace dbiplus;
 
 #define MAX_COMPRESS_COUNT 20
+
+void CDatabase::Filter::AppendField(const std::string &strField)
+{
+  if (strField.empty())
+    return;
+
+  if (fields.empty() || fields == "*")
+    fields = strField;
+  else
+    fields += ", " + strField;
+}
+
+void CDatabase::Filter::AppendJoin(const std::string &strJoin)
+{
+  if (strJoin.empty())
+    return;
+
+  if (join.empty())
+    join = strJoin;
+  else
+    join += " " + strJoin;
+}
+
+void CDatabase::Filter::AppendWhere(const std::string &strWhere, bool combineWithAnd /* = true */)
+{
+  if (strWhere.empty())
+    return;
+
+  if (where.empty())
+    where = strWhere;
+  else
+  {
+    where = "(" + where + ") ";
+    where += combineWithAnd ? "AND" : "OR";
+    where += " (" + strWhere + ")";
+  }
+}
+
+void CDatabase::Filter::AppendOrder(const std::string &strOrder)
+{
+  if (strOrder.empty())
+    return;
+
+  if (order.empty())
+    order = strOrder;
+  else
+    order += ", " + strOrder;
+}
+
+void CDatabase::Filter::AppendGroup(const std::string &strGroup)
+{
+  if (strGroup.empty())
+    return;
+
+  if (group.empty())
+    group = strGroup;
+  else
+    group += ", " + strGroup;
+}
 
 CDatabase::CDatabase(void)
 {
@@ -622,3 +682,30 @@ bool CDatabase::UpdateVersionNumber()
   return true;
 }
 
+bool CDatabase::BuildSQL(const CStdString &strQuery, const Filter &filter, CStdString &strSQL)
+{
+  strSQL = strQuery;
+
+  if (!filter.join.empty())
+    strSQL += filter.join;
+  if (!filter.where.empty())
+    strSQL += " WHERE " + filter.where;
+  if (!filter.group.empty())
+    strSQL += " GROUP BY " + filter.group;
+  if (!filter.order.empty())
+    strSQL += " ORDER BY " + filter.order;
+  if (!filter.limit.empty())
+    strSQL += " LIMIT " + filter.limit;
+
+  return true;
+}
+
+bool CDatabase::BuildSQL(const CStdString &strBaseDir, const CStdString &strQuery, Filter &filter, CStdString &strSQL, CDbUrl &dbUrl)
+{
+  // parse the base path to get additional filters
+  dbUrl.Reset();
+  if (!dbUrl.FromString(strBaseDir) || !GetFilter(dbUrl, filter))
+    return false;
+
+  return BuildSQL(strQuery, filter, strSQL);
+}

@@ -41,6 +41,7 @@
 #include "dialogs/GUIDialogProgress.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
+#include "URL.h"
 
 #include "dialogs/GUIDialogSmartPlaylistEditor.h"
 #include "addons/GUIDialogAddonSettings.h"
@@ -58,11 +59,14 @@
 #include "utils/log.h"
 #include "utils/FileUtils.h"
 #include "guilib/GUIEditControl.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #ifdef HAS_PYTHON
 #include "interfaces/python/XBPython.h"
 #endif
 #include "interfaces/Builtins.h"
+#if defined(TARGET_ANDROID)
+#include "xbmc/android/activity/XBMCApp.h"
+#endif
 
 #define CONTROL_BTNVIEWASICONS     2
 #define CONTROL_BTNSORTBY          3
@@ -278,7 +282,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         if (GetProperty("filter").empty())
         {
           CStdString filter = GetProperty("filter").asString();
-          CGUIDialogKeyboard::ShowAndGetFilter(filter, false);
+          CGUIKeyboardFactory::ShowAndGetFilter(filter, false);
           SetProperty("filter", filter);
         }
         else
@@ -853,6 +857,7 @@ void CGUIMediaWindow::OnPrepareFileItems(CFileItemList &items)
 // to modify the fileitems. Eg. to modify the item label
 void CGUIMediaWindow::OnFinalizeFileItems(CFileItemList &items)
 {
+  m_unfilteredItems->SetPath(items.GetPath()); // use the original path - it'll likely be relied on for other things later.
   m_unfilteredItems->Append(items);
   
   CStdString filter(GetProperty("filter").asString());
@@ -947,6 +952,14 @@ bool CGUIMediaWindow::OnClick(int iItem)
   {
     return XFILE::CPluginDirectory::RunScriptWithParams(pItem->GetPath());
   }
+#if defined(TARGET_ANDROID)
+  else if (pItem->IsAndroidApp())
+  {
+    CStdString appName = URIUtils::GetFileName(pItem->GetPath());
+    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s",appName.c_str());
+    return CXBMCApp::StartActivity(appName);
+  }
+#endif
   else
   {
     m_iSelectedItem = m_viewControl.GetSelectedItem();
@@ -1523,7 +1536,7 @@ void CGUIMediaWindow::OnFilterItems(const CStdString &filter)
   
   m_viewControl.Clear();
   
-  CFileItemList items;
+  CFileItemList items(m_unfilteredItems->GetPath()); // use the original path - it'll likely be relied on for other things later.
   items.Append(*m_unfilteredItems);
   if (GetFilteredItems(filter, items))
   {
@@ -1546,7 +1559,7 @@ bool CGUIMediaWindow::GetFilteredItems(const CStdString &filter, CFileItemList &
   if (trimmedFilter.IsEmpty())
     return true;
 
-  CFileItemList filteredItems;
+  CFileItemList filteredItems(items.GetPath()); // use the original path - it'll likely be relied on for other things later.
   bool numericMatch = StringUtils::IsNaturalNumber(trimmedFilter);
   for (int i = 0; i < items.Size(); i++)
   {

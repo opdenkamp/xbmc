@@ -24,7 +24,7 @@
 #include "FileItem.h"
 #include "GUIDialogPVRGroupManager.h"
 #include "dialogs/GUIDialogFileBrowser.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "dialogs/GUIDialogSelect.h"
@@ -431,7 +431,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonEditChannel(CGUIMessage &message)
   if (pItem->GetProperty("Virtual").asBoolean())
   {
     CStdString strURL = pItem->GetProperty("StreamURL").asString();
-    if (CGUIDialogKeyboard::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
+    if (CGUIKeyboardFactory::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
       pItem->SetProperty("StreamURL", strURL);
     return true;
   }
@@ -460,7 +460,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonDeleteChannel(CGUIMessage &messag
   {
     if (pItem->GetProperty("Virtual").asBoolean())
     {
-      pItem->GetPVRChannelInfoTag()->SetVirtual(true, true);
+      pItem->GetPVRChannelInfoTag()->SetVirtual(true);
       m_channelItems->Remove(m_iSelected);
       m_viewControl.SetItems(*m_channelItems);
       Renumber();
@@ -502,7 +502,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel(CGUIMessage &message)
     if (clientID == XBMC_VIRTUAL_CLIENTID)
     {
       CStdString strURL = "";
-      if (CGUIDialogKeyboard::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
+      if (CGUIKeyboardFactory::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
       {
         if (!strURL.IsEmpty())
         {
@@ -512,8 +512,8 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel(CGUIMessage &message)
           newchannel->SetVirtual(true);
           newchannel->SetStreamURL(strURL);
           newchannel->SetClientID(XBMC_VIRTUAL_CLIENTID);
-          g_PVRChannelGroups->GetGroupAll(m_bIsRadio)->AddToGroup(*newchannel);
-          newchannel->Persist();
+          if (g_PVRChannelGroups->CreateChannel(*newchannel))
+            g_PVRChannelGroups->GetGroupAll(m_bIsRadio)->Persist();
 
           CFileItemPtr channel(new CFileItem(newchannel));
           if (channel)
@@ -668,7 +668,7 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
   else if (button == CONTEXT_BUTTON_EDIT_SOURCE)
   {
     CStdString strURL = pItem->GetProperty("StreamURL").asString();
-    if (CGUIDialogKeyboard::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
+    if (CGUIKeyboardFactory::ShowAndGetInput(strURL, g_localizeStrings.Get(19214), false))
       pItem->SetProperty("StreamURL", strURL);
   }
   return true;
@@ -715,7 +715,7 @@ void CGUIDialogPVRChannelManager::Update()
   CPVRChannelGroupPtr channels = g_PVRChannelGroups->GetGroupAll(m_bIsRadio);
 
   // No channels available, nothing to do.
-  if(!channels->IsValid())
+  if(!channels)
     return;
 
   for (int iChannelPtr = 0; iChannelPtr < channels->Size(); iChannelPtr++)
@@ -773,7 +773,7 @@ void CGUIDialogPVRChannelManager::Clear(void)
 
 bool CGUIDialogPVRChannelManager::PersistChannel(CFileItemPtr pItem, CPVRChannelGroupPtr group, unsigned int *iChannelNumber)
 {
-  if (!pItem || !pItem->HasPVRChannelInfoTag() || !group->IsValid())
+  if (!pItem || !pItem->HasPVRChannelInfoTag() || !group)
     return false;
 
   /* get values from the form */
@@ -807,7 +807,7 @@ void CGUIDialogPVRChannelManager::SaveList(void)
   /* persist all channels */
   unsigned int iNextChannelNumber(0);
   CPVRChannelGroupPtr group = g_PVRChannelGroups->GetGroupAll(m_bIsRadio);
-  if (!group->IsValid())
+  if (!group)
     return;
   for (int iListPtr = 0; iListPtr < m_channelItems->Size(); iListPtr++)
   {

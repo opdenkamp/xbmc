@@ -24,7 +24,6 @@
 #include "utils/URIUtils.h"
 #include "PlayListPlayer.h"
 #include "GUIPassword.h"
-#include "dialogs/GUIDialogFileBrowser.h"
 #include "settings/GUIDialogContentSettings.h"
 #include "filesystem/MusicDatabaseDirectory.h"
 #include "filesystem/VideoDatabaseDirectory.h"
@@ -36,7 +35,7 @@
 #include "music/tags/MusicInfoTag.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogOK.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIEditControl.h"
 #include "GUIUserMessages.h"
@@ -51,6 +50,7 @@
 #include "utils/StringUtils.h"
 #include "TextureCache.h"
 #include "Util.h"
+#include "URL.h"
 
 using namespace std;
 using namespace XFILE;
@@ -164,7 +164,7 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
           return true;
         }
         CStdString search(GetProperty("search").asString());
-        CGUIDialogKeyboard::ShowAndGetFilter(search, true);
+        CGUIKeyboardFactory::ShowAndGetFilter(search, true);
         SetProperty("search", search);
         return true;
       }
@@ -255,7 +255,7 @@ bool CGUIWindowMusicNav::OnClick(int iItem)
     else
     {
       CStdString search(GetProperty("search").asString());
-      CGUIDialogKeyboard::ShowAndGetFilter(search, true);
+      CGUIKeyboardFactory::ShowAndGetFilter(search, true);
       SetProperty("search", search);
     }
     return true;

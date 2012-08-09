@@ -26,7 +26,7 @@
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogYesNo.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIInfoManager.h"
 #include "pvr/PVRManager.h"
@@ -53,7 +53,6 @@ CGUIWindowPVRChannels::CGUIWindowPVRChannels(CGUIWindowPVR *parent, bool bRadio)
   CThread("PVR Channel Window")
 {
   m_bRadio              = bRadio;
-  m_selectedGroup       = CPVRChannelGroupPtr(new CPVRChannelGroup);
   m_bShowHiddenChannels = false;
   m_bThreadCreated      = false;
 }
@@ -143,7 +142,7 @@ bool CGUIWindowPVRChannels::OnContextButton(int itemNumber, CONTEXT_BUTTON butto
 
 CPVRChannelGroupPtr CGUIWindowPVRChannels::SelectedGroup(void)
 {
-  if (!m_selectedGroup->IsValid())
+  if (!m_selectedGroup)
     SetSelectedGroup(g_PVRManager.GetPlayingGroup(m_bRadio));
 
   return m_selectedGroup;
@@ -151,10 +150,10 @@ CPVRChannelGroupPtr CGUIWindowPVRChannels::SelectedGroup(void)
 
 void CGUIWindowPVRChannels::SetSelectedGroup(CPVRChannelGroupPtr group)
 {
-  if (!group->IsValid())
+  if (!group)
     return;
 
-  if (m_selectedGroup->IsValid())
+  if (m_selectedGroup)
     m_selectedGroup->UnregisterObserver(this);
   m_selectedGroup = group;
   m_selectedGroup->RegisterObserver(this);
@@ -183,7 +182,7 @@ CPVRChannelGroupPtr CGUIWindowPVRChannels::SelectNextGroup(void)
 {
   CPVRChannelGroupPtr currentGroup = SelectedGroup();
   CPVRChannelGroupPtr nextGroup = currentGroup->GetNextGroup();
-  while (nextGroup->IsValid() && *nextGroup != *currentGroup && nextGroup->Size() == 0)
+  while (nextGroup && *nextGroup != *currentGroup && nextGroup->Size() == 0)
     nextGroup = nextGroup->GetNextGroup();
 
   /* always update so users can reset the list */
@@ -203,9 +202,6 @@ void CGUIWindowPVRChannels::UpdateData(bool bUpdateSelectedFile /* = true */)
       __FUNCTION__, GetName(), m_iControlList);
   m_bUpdateRequired = false;
 
-  g_EpgContainer.RegisterObserver(this);
-  g_PVRTimers->RegisterObserver(this);
-
   /* lock the graphics context while updating */
   CSingleLock graphicsLock(g_graphicsContext);
 
@@ -215,7 +211,7 @@ void CGUIWindowPVRChannels::UpdateData(bool bUpdateSelectedFile /* = true */)
   m_parent->m_viewControl.SetCurrentView(m_iControlList);
 
   CPVRChannelGroupPtr currentGroup = g_PVRManager.GetPlayingGroup(m_bRadio);
-  if (!currentGroup->IsValid())
+  if (!currentGroup)
     return;
 
   CStdString strPath;
@@ -379,7 +375,7 @@ bool CGUIWindowPVRChannels::OnContextButtonLock(CFileItem *item, CONTEXT_BUTTON 
       return bReturn;
 
     CPVRChannelGroupPtr group = g_PVRChannelGroups->GetGroupAll(m_bRadio);
-    if (!group->IsValid())
+    if (!group)
       return bReturn;
 
     group->ToggleChannelLocked(*item);
@@ -501,6 +497,7 @@ bool CGUIWindowPVRChannels::OnContextButtonSetThumb(CFileItem *item, CONTEXT_BUT
         strThumb = "";
 
       channel->SetIconPath(strThumb, true);
+      channel->Persist();
       UpdateData();
     }
 
@@ -531,7 +528,7 @@ bool CGUIWindowPVRChannels::OnContextButtonFilter(CFileItem *item, CONTEXT_BUTTO
   if (button == CONTEXT_BUTTON_FILTER)
   {
     CStdString filter = m_parent->GetProperty("filter").asString();
-    CGUIDialogKeyboard::ShowAndGetFilter(filter, false);
+    CGUIKeyboardFactory::ShowAndGetFilter(filter, false);
     m_parent->OnFilterItems(filter);
 
     bReturn = true;

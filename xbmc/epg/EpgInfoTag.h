@@ -23,18 +23,19 @@
 
 #include "addons/include/xbmc_pvr_types.h"
 #include "XBDateTime.h"
-#include "Epg.h"
 #include "utils/StringUtils.h"
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/timers/PVRTimerInfoTag.h"
 
-namespace PVR
-{
-  class CPVRTimerInfoTag;
-}
+#include <boost/shared_ptr.hpp>
 
 /** an EPG info tag */
 namespace EPG
 {
   class CEpg;
+
+  class CEpgInfoTag;
+  typedef boost::shared_ptr<EPG::CEpgInfoTag> CEpgInfoTagPtr;
 
   class CEpgInfoTag
   {
@@ -43,10 +44,12 @@ namespace EPG
     friend class PVR::CPVRTimerInfoTag;
 
   public:
+    CEpgInfoTag(void);
+
     /*!
      * @brief Create a new empty event without a unique ID.
      */
-    CEpgInfoTag(CEpg *epg = NULL, PVR::CPVRChannel *pvrChannel = NULL, const CStdString &strTableName = StringUtils::EmptyString, const CStdString &strIconPath = StringUtils::EmptyString);
+    CEpgInfoTag(CEpg *epg, PVR::CPVRChannelPtr pvrChannel, const CStdString &strTableName = StringUtils::EmptyString, const CStdString &strIconPath = StringUtils::EmptyString);
 
     /*!
      * @brief Create a new EPG infotag with 'data' as content.
@@ -59,10 +62,6 @@ namespace EPG
      * @param tag The tag's content.
      */
     CEpgInfoTag(const CEpgInfoTag &tag);
-
-    /*!
-     * @brief Destroy this instance.
-     */
     virtual ~CEpgInfoTag();
 
     bool operator ==(const CEpgInfoTag& right) const;
@@ -73,344 +72,345 @@ namespace EPG
      * @brief Check whether this tag has changed and unsaved values.
      * @return True if it has unsaved values, false otherwise.
      */
-    virtual bool Changed(void) const;
+    bool Changed(void) const;
 
     /*!
      * @brief Check if this event is currently active.
      * @return True if it's active, false otherwise.
      */
-    virtual bool IsActive(void) const;
+    bool IsActive(void) const;
 
     /*!
      * @return True when this event has already passed, false otherwise.
      */
-    virtual bool WasActive(void) const;
+    bool WasActive(void) const;
 
     /*!
      * @return True when this event is in the future, false otherwise.
      */
-    virtual bool InTheFuture(void) const;
+    bool InTheFuture(void) const;
 
     /*!
      * @return The current progress of this tag.
      */
-    virtual float ProgressPercentage(void) const;
+    float ProgressPercentage(void) const;
 
     /*!
      * @brief Get a pointer to the next event. Set by CEpg in a call to Sort()
      * @return A pointer to the next event or NULL if it's not set.
      */
-    virtual const CEpgInfoTag *GetNextEvent(void) const;
+    CEpgInfoTagPtr GetNextEvent(void) const;
 
     /*!
      * @brief Get a pointer to the previous event. Set by CEpg in a call to Sort()
      * @return A pointer to the previous event or NULL if it's not set.
      */
-    virtual const CEpgInfoTag *GetPreviousEvent(void) const;
+    CEpgInfoTagPtr GetPreviousEvent(void) const;
 
     /*!
      * @brief The table this event belongs to
      * @return The table this event belongs to
      */
-    virtual const CEpg *GetTable() const;
+    const CEpg *GetTable() const;
 
-    virtual const int EpgID(void) const;
+    const int EpgID(void) const;
 
     /*!
      * @brief Change the unique broadcast ID of this event.
      * @param iUniqueBroadcastId The new unique broadcast ID.
      */
-    virtual void SetUniqueBroadcastID(int iUniqueBroadcastID);
+    void SetUniqueBroadcastID(int iUniqueBroadcastID);
 
     /*!
      * @brief Get the unique broadcast ID.
      * @return The unique broadcast ID.
      */
-    virtual int UniqueBroadcastID(void) const;
+    int UniqueBroadcastID(void) const;
 
     /*!
      * @brief Change the event's database ID.
      * @param iId The new database ID.
      */
-    virtual void SetBroadcastId(int iId);
+    void SetBroadcastId(int iId);
 
     /*!
      * @brief Get the event's database ID.
      * @return The database ID.
      */
-    virtual int BroadcastId(void) const;
+    int BroadcastId(void) const;
 
     /*!
      * @brief Get the event's start time.
      * @return The new start time.
      */
-    virtual CDateTime StartAsUTC(void) const;
-    virtual CDateTime StartAsLocalTime(void) const;
+    CDateTime StartAsUTC(void) const;
+    CDateTime StartAsLocalTime(void) const;
 
     /*!
      * @brief Change the event's start time.
      * @param start The new start time.
      */
-    virtual void SetStartFromUTC(const CDateTime &start);
+    void SetStartFromUTC(const CDateTime &start);
     void SetStartFromLocalTime(const CDateTime &start);
 
     /*!
      * @brief Get the event's end time.
      * @return The new start time.
      */
-    virtual CDateTime EndAsUTC(void) const;
-    virtual CDateTime EndAsLocalTime(void) const;
+    CDateTime EndAsUTC(void) const;
+    CDateTime EndAsLocalTime(void) const;
 
     /*!
      * @brief Change the event's end time.
      * @param end The new end time.
      */
-    virtual void SetEndFromUTC(const CDateTime &end);
-    virtual void SetEndFromLocalTime(const CDateTime &end);
+    void SetEndFromUTC(const CDateTime &end);
+    void SetEndFromLocalTime(const CDateTime &end);
 
     /*!
      * @brief Get the duration of this event in seconds.
      * @return The duration in seconds.
      */
-    virtual int GetDuration(void) const;
+    int GetDuration(void) const;
 
     /*!
      * @brief Change the title of this event.
      * @param strTitle The new title.
      */
-    virtual void SetTitle(const CStdString &strTitle);
+    void SetTitle(const CStdString &strTitle);
 
     /*!
      * @brief Get the title of this event.
      * @param bOverrideParental True to override parental control, false check it.
      * @return The title.
      */
-    virtual CStdString Title(bool bOverrideParental = false) const;
+    CStdString Title(bool bOverrideParental = false) const;
 
     /*!
      * @brief Change the plot outline of this event.
      * @param strPlotOutline The new plot outline.
      */
-    virtual void SetPlotOutline(const CStdString &strPlotOutline);
+    void SetPlotOutline(const CStdString &strPlotOutline);
 
     /*!
      * @brief Get the plot outline of this event.
      * @param bOverrideParental True to override parental control, false check it.
      * @return The plot outline.
      */
-    virtual CStdString PlotOutline(bool bOverrideParental = false) const;
+    CStdString PlotOutline(bool bOverrideParental = false) const;
 
     /*!
      * @brief Change the plot of this event.
      * @param strPlot The new plot.
      */
-    virtual void SetPlot(const CStdString &strPlot);
+    void SetPlot(const CStdString &strPlot);
 
     /*!
      * @brief Get the plot of this event.
      * @param bOverrideParental True to override parental control, false check it.
      * @return The plot.
      */
-    virtual CStdString Plot(bool bOverrideParental = false) const;
+    CStdString Plot(bool bOverrideParental = false) const;
 
     /*!
      * @brief Change the genre of this event.
      * @param iID The genre type ID.
      * @param iSubID The genre subtype ID.
      */
-    virtual void SetGenre(int iID, int iSubID, const char* strGenre);
+    void SetGenre(int iID, int iSubID, const char* strGenre);
 
     /*!
      * @brief Get the genre type ID of this event.
      * @return The genre type ID.
      */
-    virtual int GenreType(void) const;
+    int GenreType(void) const;
 
     /*!
      * @brief Get the genre subtype ID of this event.
      * @return The genre subtype ID.
      */
-    virtual int GenreSubType(void) const;
+    int GenreSubType(void) const;
 
     /*!
      * @brief Get the genre as human readable string.
      * @return The genre.
      */
-    virtual const std::vector<std::string> Genre(void) const;
+    const std::vector<std::string> Genre(void) const;
 
     /*!
      * @brief Change the first air date of this event.
      * @param firstAired The new first air date.
      */
-    virtual void SetFirstAiredFromUTC(const CDateTime &firstAired);
-    virtual void SetFirstAiredFromLocalTime(const CDateTime &firstAired);
+    void SetFirstAiredFromUTC(const CDateTime &firstAired);
+    void SetFirstAiredFromLocalTime(const CDateTime &firstAired);
 
     /*!
      * @brief Get the first air date of this event.
      * @return The first air date.
      */
-    virtual CDateTime FirstAiredAsUTC(void) const;
-    virtual CDateTime FirstAiredAsLocalTime(void) const;
+    CDateTime FirstAiredAsUTC(void) const;
+    CDateTime FirstAiredAsLocalTime(void) const;
 
     /*!
      * @brief Change the parental rating of this event.
      * @param iParentalRating The new parental rating.
      */
-    virtual void SetParentalRating(int iParentalRating);
+    void SetParentalRating(int iParentalRating);
 
     /*!
      * @brief Get the parental rating of this event.
      * @return The parental rating.
      */
-    virtual int ParentalRating(void) const;
+    int ParentalRating(void) const;
 
     /*!
      * @brief Change the star rating of this event.
      * @param iStarRating The new star rating.
      */
-    virtual void SetStarRating(int iStarRating);
+    void SetStarRating(int iStarRating);
 
     /*!
      * @brief Get the star rating of this event.
      * @return The star rating.
      */
-    virtual int StarRating(void) const;
+    int StarRating(void) const;
 
     /*!
      * @brief Change the value of notify on start.
      * @param bNotify The new value.
      */
-    virtual void SetNotify(bool bNotify);
+    void SetNotify(bool bNotify);
 
     /*!
      * @brief Notify on start if true.
      * @return Notify on start.
      */
-    virtual bool Notify(void) const;
+    bool Notify(void) const;
 
     /*!
      * @brief Change the series number of this event.
      * @param iSeriesNum The new series number.
      */
-    virtual void SetSeriesNum(int iSeriesNum);
+    void SetSeriesNum(int iSeriesNum);
 
     /*!
      * @brief The series number of this event.
      * @return The series number.
      */
-    virtual int SeriesNum(void) const;
+    int SeriesNum(void) const;
 
     /*!
      * @brief Change the episode number of this event.
      * @param iEpisodeNum The new episode number.
      */
-    virtual void SetEpisodeNum(int iEpisodeNum);
+    void SetEpisodeNum(int iEpisodeNum);
 
     /*!
      * @brief The episode number of this event.
      * @return The episode number.
      */
-    virtual int EpisodeNum(void) const;
+    int EpisodeNum(void) const;
 
     /*!
      * @brief Change the episode part number of this event.
      * @param iEpisodePart The new episode part number.
      */
-    virtual void SetEpisodePart(int iEpisodePart);
+    void SetEpisodePart(int iEpisodePart);
 
     /*!
      * @brief The episode part number of this event.
      * @return The episode part number.
      */
-    virtual int EpisodePart(void) const;
+    int EpisodePart(void) const;
 
     /*!
      * @brief Change the episode name of this event.
      * @param strEpisodeName The new episode name.
      */
-    virtual void SetEpisodeName(const CStdString &strEpisodeName);
+    void SetEpisodeName(const CStdString &strEpisodeName);
 
     /*!
      * @brief The episode name of this event.
      * @return The episode name.
      */
-    virtual CStdString EpisodeName(void) const;
+    CStdString EpisodeName(void) const;
 
     /*!
      * @brief Change the path to the icon for this event.
      * @param strIconPath The new path.
      */
-    virtual void SetIcon(const CStdString &strIconPath);
+    void SetIcon(const CStdString &strIconPath);
 
     /*!
      * @brief Get the path to the icon for this event.
      * @return The path to the icon
      */
-    virtual CStdString Icon(void) const;
+    CStdString Icon(void) const;
 
     /*!
      * @brief Change the path to this event.
      * @param strFileNameAndPath The new path.
      */
-    virtual void SetPath(const CStdString &strFileNameAndPath);
+    void SetPath(const CStdString &strFileNameAndPath);
 
     /*!
      * @brief The path to this event.
      * @return The path.
      */
-    virtual CStdString Path(void) const;
+    CStdString Path(void) const;
 
     /*!
      * @brief Set a timer for this event or NULL to clear it.
      * @param newTimer The new timer value.
      */
-    virtual void SetTimer(PVR::CPVRTimerInfoTag *newTimer);
+    void SetTimer(PVR::CPVRTimerInfoTagPtr newTimer);
+    void ClearTimer(void);
 
     /*!
      * @brief Check whether this event has an active timer tag.
      * @return True if it has an active timer tag, false if not.
      */
-    virtual bool HasTimer(void) const;
+    bool HasTimer(void) const;
 
     /*!
      * @brief Get a pointer to the timer for event or NULL if there is none.
      * @return A pointer to the timer for event or NULL if there is none.
      */
-    virtual PVR::CPVRTimerInfoTag *Timer(void) const;
+    PVR::CPVRTimerInfoTagPtr Timer(void) const;
 
     /*!
      * @brief Change the channel tag of this epg tag
      * @param channel The new channel
      */
-    virtual void SetPVRChannel(PVR::CPVRChannel *channel);
+    void SetPVRChannel(PVR::CPVRChannelPtr channel);
 
     /*!
      * @return True if this tag has a PVR channel set.
      */
-    virtual bool HasPVRChannel(void) const;
+    bool HasPVRChannel(void) const;
 
-    virtual int PVRChannelNumber(void) const;
+    int PVRChannelNumber(void) const;
 
-    virtual CStdString PVRChannelName(void) const;
+    CStdString PVRChannelName(void) const;
 
     /*!
      * @brief Get the channel that plays this event.
      * @return a pointer to the channel.
      */
-    virtual const PVR::CPVRChannel *ChannelTag(void) const;
+    const PVR::CPVRChannelPtr ChannelTag(void) const;
 
     /*!
      * @brief Persist this tag in the database.
      * @param bSingleUpdate True if this is a single update, false if more updates will follow.
      * @return True if the tag was persisted correctly, false otherwise.
      */
-    virtual bool Persist(bool bSingleUpdate = true);
+    bool Persist(bool bSingleUpdate = true);
 
     /*!
      * @brief Update the information in this tag with the info in the given tag.
      * @param tag The new info.
      */
-    virtual void Update(const EPG_TAG &tag);
+    void Update(const EPG_TAG &tag);
 
     /*!
      * @brief Update the information in this tag with the info in the given tag.
@@ -418,47 +418,40 @@ namespace EPG
      * @param bUpdateBroadcastId If set to false, the tag BroadcastId (locally unique) will not be chacked/updated
      * @return True if something changed, false otherwise.
      */
-    virtual bool Update(const CEpgInfoTag &tag, bool bUpdateBroadcastId = true);
+    bool Update(const CEpgInfoTag &tag, bool bUpdateBroadcastId = true);
   protected:
     /*!
      * @brief Hook that is called when the start date changed.
      */
-    virtual void UpdatePath(void);
+    void UpdatePath(void);
 
-    /*!
-     * @brief Called by the CPVRTimerInfoTag destructor
-     */
-    virtual void OnTimerDeleted(void);
+    bool                     m_bNotify;            /*!< notify on start */
+    bool                     m_bChanged;           /*!< keep track of changes to this entry */
 
-    bool                   m_bNotify;            /*!< notify on start */
-    bool                   m_bChanged;           /*!< keep track of changes to this entry */
-
-    int                    m_iBroadcastId;       /*!< database ID */
-    int                    m_iGenreType;         /*!< genre type */
-    int                    m_iGenreSubType;      /*!< genre subtype */
-    int                    m_iParentalRating;    /*!< parental rating */
-    int                    m_iStarRating;        /*!< star rating */
-    int                    m_iSeriesNumber;      /*!< series number */
-    int                    m_iEpisodeNumber;     /*!< episode number */
-    int                    m_iEpisodePart;       /*!< episode part number */
-    int                    m_iUniqueBroadcastID; /*!< unique broadcast ID */
-    CStdString             m_strTitle;           /*!< title */
-    CStdString             m_strPlotOutline;     /*!< plot outline */
-    CStdString             m_strPlot;            /*!< plot */
+    int                      m_iBroadcastId;       /*!< database ID */
+    int                      m_iGenreType;         /*!< genre type */
+    int                      m_iGenreSubType;      /*!< genre subtype */
+    int                      m_iParentalRating;    /*!< parental rating */
+    int                      m_iStarRating;        /*!< star rating */
+    int                      m_iSeriesNumber;      /*!< series number */
+    int                      m_iEpisodeNumber;     /*!< episode number */
+    int                      m_iEpisodePart;       /*!< episode part number */
+    int                      m_iUniqueBroadcastID; /*!< unique broadcast ID */
+    CStdString               m_strTitle;           /*!< title */
+    CStdString               m_strPlotOutline;     /*!< plot outline */
+    CStdString               m_strPlot;            /*!< plot */
     std::vector<std::string> m_genre;            /*!< genre */
-    CStdString             m_strEpisodeName;     /*!< episode name */
-    CStdString             m_strIconPath;        /*!< the path to the icon */
-    CStdString             m_strFileNameAndPath; /*!< the filename and path */
-    CDateTime              m_startTime;          /*!< event start time */
-    CDateTime              m_endTime;            /*!< event end time */
-    CDateTime              m_firstAired;         /*!< first airdate */
+    CStdString               m_strEpisodeName;     /*!< episode name */
+    CStdString               m_strIconPath;        /*!< the path to the icon */
+    CStdString               m_strFileNameAndPath; /*!< the filename and path */
+    CDateTime                m_startTime;          /*!< event start time */
+    CDateTime                m_endTime;            /*!< event end time */
+    CDateTime                m_firstAired;         /*!< first airdate */
 
-    CDateTime              m_timerStart;         /*!< the start time of the timer (if any) */
-    int                    m_iTimerId;           /*!< the id of the timer (if any) */
-    CEpg *                 m_epg;                /*!< the schedule that this event belongs to */
+    PVR::CPVRTimerInfoTagPtr m_timer;
+    CEpg *                   m_epg;                /*!< the schedule that this event belongs to */
 
-    PVR::CPVRChannel *     m_pvrChannel;
-    CStdString             m_strTableName;       /*!< the name of the EPG table (or PVR channel, if it's a PVR epg table */
+    PVR::CPVRChannelPtr    m_pvrChannel;
     CCriticalSection       m_critSection;
   };
 }

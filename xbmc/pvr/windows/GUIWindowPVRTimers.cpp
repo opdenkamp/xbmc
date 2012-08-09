@@ -21,7 +21,7 @@
 
 #include "GUIWindowPVRTimers.h"
 
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIWindowManager.h"
@@ -101,8 +101,6 @@ void CGUIWindowPVRTimers::UpdateData(bool bUpdateSelectedFile /* = true */)
   CSingleLock lock(m_critSection);
   CLog::Log(LOGDEBUG, "CGUIWindowPVRTimers - %s - update window '%s'. set view to %d", __FUNCTION__, GetName(), m_iControlList);
   m_bUpdateRequired = false;
-
-  g_PVRTimers->RegisterObserver(this);
 
   /* lock the graphics context while updating */
   CSingleLock graphicsLock(g_graphicsContext);
@@ -260,7 +258,7 @@ bool CGUIWindowPVRTimers::OnContextButtonRename(CFileItem *item, CONTEXT_BUTTON 
     CPVRTimerInfoTag *timer = item->GetPVRTimerInfoTag();
 
     CStdString strNewName(timer->m_strTitle);
-    if (CGUIDialogKeyboard::ShowAndGetInput(strNewName, g_localizeStrings.Get(19042), false))
+    if (CGUIKeyboardFactory::ShowAndGetInput(strNewName, g_localizeStrings.Get(19042), false))
       g_PVRTimers->RenameTimer(*item, strNewName);
   }
 

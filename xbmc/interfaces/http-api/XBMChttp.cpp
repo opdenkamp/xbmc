@@ -21,6 +21,7 @@
 #include "Util.h"
 #include "PlayListPlayer.h"
 #include "playlists/PlayList.h"
+#include "filesystem/CurlFile.h" 
 #include "filesystem/HDDirectory.h" 
 #include "filesystem/CDDADirectory.h"
 #include "filesystem/SpecialProtocol.h"
@@ -52,6 +53,7 @@
 #include "utils/log.h"
 #include "TextureCache.h"
 #include "ThumbLoader.h"
+#include "URL.h"
 
 #ifdef _WIN32
 extern "C" FILE *fopen_utf8(const char *_Filename, const char *_Mode);
@@ -1031,12 +1033,11 @@ int CXbmcHttp::xbmcAddToPlayListFromDB(int numParas, CStdString paras[])
   if (type.Equals("songs"))
   {
     playList = PLAYLIST_MUSIC;
-    where = " where " + where;
 
     CMusicDatabase musicdatabase;
     if (!musicdatabase.Open())
       return SetResponse(openTag+ "Error: Could not open music database");
-    musicdatabase.GetSongsByWhere("", where, filelist);
+    musicdatabase.GetSongsByWhere("musicdb://4/", where, filelist);
     musicdatabase.Close();
   }
   else if (type.Equals("movies") || 
@@ -2393,7 +2394,7 @@ int CXbmcHttp::xbmcSetFile(int numParas, CStdString paras[])
 
 int CXbmcHttp::xbmcCopyFile(int numParas, CStdString paras[])
 //parameter = srcFilename ; destFilename
-// both file names are relative to the XBox not the calling client
+// both file names are relative to the server, not the calling client
 {
   if (numParas<2)
     return SetResponse(openTag+"Error:Missing parameter");
@@ -3001,8 +3002,8 @@ int CXbmcHttp::xbmcHelp()
 {
   CStdString output;
   output="<p><b>XBMC HTTP API Commands</b></p><p>There are two alternative but equivalent syntax forms:</p>";
-  output+="<p><b>Syntax 1: http://xbox/xbmcCmds/xbmcHttp?command=</b>command<b>&ampparameter=</b>first_parameter<b>;</b>second_parameter<b>;...</b></p>";
-  output+="<p><b>Syntax 2: http://xbox/xbmcCmds/xbmcHttp?command=</b>command<b>(</b>first_parameter<b>;</b>second_parameter<b>;...</b><b>)</b></p>";
+  output+="<p><b>Syntax 1: http://xbmc-host/xbmcCmds/xbmcHttp?command=</b>command<b>&ampparameter=</b>first_parameter<b>;</b>second_parameter<b>;...</b></p>";
+  output+="<p><b>Syntax 2: http://xbmc-host/xbmcCmds/xbmcHttp?command=</b>command<b>(</b>first_parameter<b>;</b>second_parameter<b>;...</b><b>)</b></p>";
   output+="<p>Note the use of the semi colon to separate multiple parameters.</p><p>The commands are case insensitive.</p>";
   output+= "<p>The full documentation can be found here: <a  href=\"http://wiki.xbmc.org/index.php?title=WebServerHTTP-API\">http://wiki.xbmc.org/index.php?title=WebServerHTTP-API</a></p>";
   return SetResponse(output);

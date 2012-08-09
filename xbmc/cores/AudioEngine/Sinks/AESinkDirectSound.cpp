@@ -588,13 +588,13 @@ void CAESinkDirectSound::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
     IAudioClient *pClient;
     hr = pDevice->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&pClient);
     if (FAILED(hr))
-      {
-        CLog::Log(LOGERROR, __FUNCTION__": Activate device failed (%s)", WASAPIErrToStr(hr));
-      }
+    {
+      CLog::Log(LOGERROR, __FUNCTION__": Activate device failed (%s)", WASAPIErrToStr(hr));
+    }
 
     //hr = pClient->GetMixFormat(&pwfxex);
     hr = pProperty->GetValue(PKEY_AudioEngine_DeviceFormat, &varName);
-    if (SUCCEEDED(hr))
+    if (SUCCEEDED(hr) && varName.blob.cbSize > 0)
     {
       WAVEFORMATEX* smpwfxex = (WAVEFORMATEX*)varName.blob.pBlobData;
       deviceInfo.m_channels = layoutsByChCount[std::min(smpwfxex->nChannels, (WORD) 2)];
@@ -604,7 +604,7 @@ void CAESinkDirectSound::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
     }
     else
     {
-      CLog::Log(LOGERROR, __FUNCTION__": GetMixFormat failed (%s)", WASAPIErrToStr(hr));
+      CLog::Log(LOGERROR, __FUNCTION__": Getting DeviceFormat failed (%s)", WASAPIErrToStr(hr));
     }
     pClient->Release();
 
@@ -644,8 +644,9 @@ void CAESinkDirectSound::CheckPlayStatus()
   if (!(status & DSBSTATUS_PLAYING) && m_CacheLen != 0) // If we have some data, see if we can start playback
   {
     HRESULT hr = m_pBuffer->Play(0, 0, DSBPLAY_LOOPING);
-    dserr2str(hr);
     CLog::Log(LOGDEBUG,__FUNCTION__ ": Resuming Playback");
+    if (FAILED(hr))
+      CLog::Log(LOGERROR, __FUNCTION__": Failed to play the DirectSound buffer: %s", dserr2str(hr));
   }
 }
 

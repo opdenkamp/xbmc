@@ -70,7 +70,7 @@ void CGUIWindowPVRGuide::Notify(const Observable &obs, const CStdString& msg)
     m_bUpdateRequired = true;
 
     /* update the current window if the EPG timeline view is visible */
-    if (IsVisible() && m_iGuideView == GUIDE_VIEW_TIMELINE)
+    if (IsFocused() && m_iGuideView == GUIDE_VIEW_TIMELINE)
       UpdateData(false);
   }
   else if (msg.Equals("epg-now"))
@@ -88,23 +88,20 @@ void CGUIWindowPVRGuide::GetContextButtons(int itemNumber, CContextButtons &butt
     return;
   CFileItemPtr pItem = m_parent->m_vecItems->Get(itemNumber);
 
-  if (pItem->GetEPGInfoTag()->EndAsLocalTime() > CDateTime::GetCurrentDateTime())
+  CFileItemPtr timer = g_PVRTimers->GetTimerForEpgTag(pItem.get());
+  if (timer && timer->HasPVRTimerInfoTag())
   {
-    CFileItemPtr timer = g_PVRTimers->GetMatch(pItem->GetEPGInfoTag());
-    if (!timer || !timer->HasPVRTimerInfoTag())
-    {
-      if (pItem->GetEPGInfoTag()->StartAsLocalTime() < CDateTime::GetCurrentDateTime())
-        buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* record program */
-      else
-        buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* stop recording */
-    }
+    if (timer->GetPVRTimerInfoTag()->IsRecording())
+      buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19059);  /* stop recording */
     else
-    {
-      if (pItem->GetEPGInfoTag()->StartAsLocalTime() < CDateTime::GetCurrentDateTime())
-        buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19059);
-      else
-        buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19060);
-    }
+      buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19060);  /* delete timer */
+  }
+  else if (pItem->GetEPGInfoTag()->EndAsLocalTime() > CDateTime::GetCurrentDateTime())
+  {
+    if (pItem->GetEPGInfoTag()->StartAsLocalTime() < CDateTime::GetCurrentDateTime())
+      buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* record */
+    else
+      buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* add timer */
   }
 
   buttons.Add(CONTEXT_BUTTON_INFO, 19047);              /* epg info */
@@ -424,8 +421,9 @@ bool CGUIWindowPVRGuide::OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON but
 
 bool CGUIWindowPVRGuide::PlayEpgItem(CFileItem *item)
 {
-  const CPVRChannel *channel = !item || !item->HasEPGInfoTag() || !item->GetEPGInfoTag()->HasPVRChannel() ?
-      NULL : item->GetEPGInfoTag()->ChannelTag();
+  CPVRChannelPtr channel;
+  if (item && item->HasEPGInfoTag() && item->GetEPGInfoTag()->HasPVRChannel())
+    channel = item->GetEPGInfoTag()->ChannelTag();
   if (!channel)
     return false;
 

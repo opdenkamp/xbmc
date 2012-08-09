@@ -83,9 +83,12 @@ template<class TheDll, typename TheStruct, typename TheProps>
 CAddonDll<TheDll, TheStruct, TheProps>::CAddonDll(const cp_extension_t *ext)
   : CAddon(ext)
 {
-  if (ext)
+  // if library attribute isn't present, look for a system-dependent one
+  if (ext && m_strLibName.IsEmpty())
   {
-#if defined(_LINUX) && !defined(TARGET_DARWIN)
+#if defined(TARGET_ANDROID)
+  m_strLibName = CAddonMgr::Get().GetExtValue(ext->configuration, "@library_android");
+#elif defined(_LINUX) && !defined(TARGET_DARWIN)
     m_strLibName = CAddonMgr::Get().GetExtValue(ext->configuration, "@library_linux");
 #elif defined(_WIN32) && defined(HAS_SDL_OPENGL)
     m_strLibName = CAddonMgr::Get().GetExtValue(ext->configuration, "@library_wingl");
@@ -150,6 +153,15 @@ bool CAddonDll<TheDll, TheStruct, TheProps>::LoadDll()
   }
 
   /* Check if lib being loaded exists, else check in XBMC binary location */
+#if defined(TARGET_ANDROID)
+  // Android libs MUST live in this path, else multi-arch will break.
+  // The usual soname requirements apply. no subdirs, and filename is ^lib.*\.so$
+  if (!CFile::Exists(strFileName))
+  {
+    CStdString tempbin = getenv("XBMC_ANDROID_LIBS");
+    strFileName = tempbin + "/" + m_strLibName;
+  }
+#endif
   if (!CFile::Exists(strFileName))
   {
     CStdString temp = CSpecialProtocol::TranslatePath("special://xbmc/");
@@ -245,13 +257,16 @@ void CAddonDll<TheDll, TheStruct, TheProps>::Stop()
       }
       CAddon::SaveSettings();
     }
-    if (m_pDll) m_pDll->Stop();
+    if (m_pDll)
+    {
+      m_pDll->Stop();
+      CLog::Log(LOGINFO, "ADDON: Dll Stopped - %s", Name().c_str());
+    }
   }
   catch (std::exception &e)
   {
     HandleException(e, "m_pDll->Stop");
   }
-  CLog::Log(LOGINFO, "ADDON: Dll Stopped - %s", Name().c_str());
 }
 
 template<class TheDll, typename TheStruct, typename TheProps>
@@ -274,10 +289,13 @@ void CAddonDll<TheDll, TheStruct, TheProps>::Destroy()
   m_pHelpers = NULL;
   free(m_pStruct);
   m_pStruct = NULL;
-  delete m_pDll;
-  m_pDll = NULL;
+  if (m_pDll)
+  {
+    delete m_pDll;
+    m_pDll = NULL;
+    CLog::Log(LOGINFO, "ADDON: Dll Destroyed - %s", Name().c_str());
+  }
   m_initialized = false;
-  CLog::Log(LOGINFO, "ADDON: Dll Destroyed - %s", Name().c_str());
 }
 
 template<class TheDll, typename TheStruct, typename TheProps>

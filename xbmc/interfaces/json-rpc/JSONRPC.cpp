@@ -61,7 +61,7 @@ void CJSONRPC::Initialize()
     CJSONServiceDescription::AddNotification(JSONRPC_SERVICE_NOTIFICATIONS[index]);
   
   m_initialized = true;
-  CLog::Log(LOGINFO, "JSONRPC: Sucessfully initialized");
+  CLog::Log(LOGINFO, "JSONRPC: Successfully initialized");
 }
 
 JSONRPC_STATUS CJSONRPC::Introspect(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant& parameterObject, CVariant &result)
@@ -131,6 +131,9 @@ JSONRPC_STATUS CJSONRPC::SetConfiguration(const CStdString &method, ITransportLa
     if ((notifications["Application"].isNull() && (oldFlags & Other)) ||
         (notifications["Application"].isBoolean() && notifications["Application"].asBoolean()))
       flags |= Application;
+    if ((notifications["Input"].isNull() && (oldFlags & Input)) ||
+        (notifications["Input"].isBoolean() && notifications["Input"].asBoolean()))
+      flags |= Input;
     if ((notifications["Other"].isNull() && (oldFlags & Other)) ||
         (notifications["Other"].isBoolean() && notifications["Other"].asBoolean()))
       flags |= Other;

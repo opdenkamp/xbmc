@@ -228,7 +228,7 @@ CStdString CXBMCRenderManager::GetVSyncState()
   return state;
 }
 
-bool CXBMCRenderManager::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format)
+bool CXBMCRenderManager::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation)
 {
   /* make sure any queued frame was fully presented */
   double timeout = m_presenttime + 0.1;
@@ -248,7 +248,7 @@ bool CXBMCRenderManager::Configure(unsigned int width, unsigned int height, unsi
     return false;
   }
 
-  bool result = m_pRenderer->Configure(width, height, d_width, d_height, fps, flags, format, extended_format);
+  bool result = m_pRenderer->Configure(width, height, d_width, d_height, fps, flags, format, extended_format, orientation);
   if(result)
   {
     if( flags & CONF_FLAGS_FULLSCREEN )
@@ -646,6 +646,12 @@ float CXBMCRenderManager::GetMaximumFPS()
     fps = 1000.0f;
 
   return fps;
+}
+
+void CXBMCRenderManager::RegisterRenderUpdateCallBack(const void *ctx, RenderUpdateCallBackFn fn)
+{
+  if (m_pRenderer)
+    m_pRenderer->RegisterRenderUpdateCallBack(ctx, fn);
 }
 
 void CXBMCRenderManager::Render(bool clear, DWORD flags, DWORD alpha)

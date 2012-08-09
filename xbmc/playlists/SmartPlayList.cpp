@@ -26,7 +26,10 @@
 #include "filesystem/File.h"
 #include "utils/CharsetConverter.h"
 #include "utils/DatabaseUtils.h"
+#include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
 #include "utils/URIUtils.h"
+#include "utils/Variant.h"
 #include "utils/XMLUtils.h"
 #include "video/VideoDatabase.h"
 #include "Util.h"
@@ -147,8 +150,17 @@ bool CSmartPlaylistRule::Load(TiXmlElement *element, const CStdString &encoding 
   // <value> tags containing a string
   const char *field = element->Attribute("field");
   const char *oper = element->Attribute("operator");
+  if (field == NULL || oper == NULL)
+    return false;
+
+  m_field = TranslateField(field);
+  m_operator = TranslateOperator(oper);
+
+  if (m_operator == OPERATOR_TRUE || m_operator == OPERATOR_FALSE)
+    return true;
+
   TiXmlNode *parameter = element->FirstChild();
-  if (field == NULL || oper == NULL || parameter == NULL)
+  if (parameter == NULL)
     return false;
 
   if (parameter->Type() == TiXmlNode::TINYXML_TEXT)
@@ -186,14 +198,45 @@ bool CSmartPlaylistRule::Load(TiXmlElement *element, const CStdString &encoding 
   else
     return false;
 
-  m_field = TranslateField(field);
-  m_operator = TranslateOperator(oper);
+  return true;
+}
+
+bool CSmartPlaylistRule::Load(const CVariant &obj)
+{
+  if (!obj.isObject() ||
+      !obj.isMember("field") || !obj["field"].isString() ||
+      !obj.isMember("operator") || !obj["operator"].isString())
+    return false;
+
+  m_field = TranslateField(obj["field"].asString().c_str());
+  m_operator = TranslateOperator(obj["operator"].asString().c_str());
+
+  if (m_operator == OPERATOR_TRUE || m_operator == OPERATOR_FALSE)
+    return true;
+
+   if (!obj.isMember("value") || (!obj["value"].isString() && !obj["value"].isArray()))
+     return false;
+
+  const CVariant &value = obj["value"];
+  if (value.isString() && !value.asString().empty())
+    m_parameter.push_back(value.asString());
+  else if (value.isArray())
+  {
+    for (CVariant::const_iterator_array val = value.begin_array(); val != value.end_array(); val++)
+    {
+      if (val->isString() && !val->asString().empty())
+        m_parameter.push_back(val->asString());
+    }
+  }
+  else
+    return false;
+
   return true;
 }
 
 bool CSmartPlaylistRule::Save(TiXmlNode *parent) const
 {
-  if (parent == NULL || m_parameter.empty())
+  if (parent == NULL || (m_parameter.empty() && m_operator != OPERATOR_TRUE && m_operator != OPERATOR_FALSE))
     return false;
 
   TiXmlElement rule("rule");
@@ -210,6 +253,23 @@ bool CSmartPlaylistRule::Save(TiXmlNode *parent) const
 
   parent->InsertEndChild(rule);
 
+  return true;
+}
+
+bool CSmartPlaylistRule::Save(CVariant &obj) const
+{
+  if (obj.isNull() || (m_parameter.empty() && m_operator != OPERATOR_TRUE && m_operator != OPERATOR_FALSE))
+    return false;
+
+  CVariant rule(CVariant::VariantTypeObject);
+  rule["field"] = TranslateField(m_field);
+  rule["operator"] = TranslateOperator(m_operator);
+
+  rule["value"] = CVariant(CVariant::VariantTypeArray);
+  for (vector<CStdString>::const_iterator it = m_parameter.begin(); it != m_parameter.end(); it++)
+    rule["value"].push_back(*it);
+
+  obj.push_back(rule);
   return true;
 }
 
@@ -575,7 +635,7 @@ CStdString CSmartPlaylistRule::GetVideoResolutionQuery(const CStdString &paramet
   return retVal;
 }
 
-CStdString CSmartPlaylistRule::GetWhereClause(CDatabase &db, const CStdString& strType) const
+CStdString CSmartPlaylistRule::GetWhereClause(const CDatabase &db, const CStdString& strType) const
 {
   SEARCH_OPERATOR op = m_operator;
   if ((strType == "tvshows" || strType == "episodes") && m_field == FieldYear)
@@ -627,9 +687,22 @@ CStdString CSmartPlaylistRule::GetWhereClause(CDatabase &db, const CStdString& s
     }
   }
 
-  // FieldInProgress does not have any values in m_parameter, it works on the operator
-  if (m_field == FieldInProgress && (strType == "movies" || strType == "episodes"))
-    return "idFile " + negate + " in (select idFile from bookmark where type = 1)";
+  // boolean operators don't have any values in m_parameter, they work on the operator
+  if (m_operator == OPERATOR_FALSE || m_operator == OPERATOR_TRUE)
+  {
+    if (strType == "movies")
+    {
+      if (m_field == FieldInProgress)
+        return "movieview.idFile " + negate + " in (select idFile from bookmark where type = 1)";
+      else if (m_field == FieldTrailer)
+        return negate + GetField(m_field, strType) + "!= ''";
+    }
+    else if (strType == "episodes")
+    {
+      if (m_field == FieldInProgress)
+        return "episodeview.idFile " + negate + " IN (select idFile from bookmark where type = 1)";
+    }
+  }
 
   // now the query parameter
   CStdString wholeQuery;
@@ -710,8 +783,6 @@ CStdString CSmartPlaylistRule::GetWhereClause(CDatabase &db, const CStdString& s
         query = GetField(FieldId, strType) + negate + " IN (SELECT idMovie FROM studiolinkmovie JOIN studio ON studio.idStudio=studiolinkmovie.idStudio WHERE studio.strStudio" + parameter + ")";
       else if (m_field == FieldCountry)
         query = GetField(FieldId, strType) + negate + " IN (SELECT idMovie FROM countrylinkmovie JOIN country ON country.idCountry=countrylinkmovie.idCountry WHERE country.strCountry" + parameter + ")";
-      else if (m_field == FieldTrailer)
-        query = negate + GetField(m_field, strType) + "!= ''";
       else if ((m_field == FieldLastPlayed || m_field == FieldDateAdded) && (m_operator == OPERATOR_LESS_THAN || m_operator == OPERATOR_BEFORE || m_operator == OPERATOR_NOT_IN_THE_LAST))
         query = GetField(m_field, strType) + " IS NULL OR " + GetField(m_field, strType) + parameter;
       else if (m_field == FieldInProgress)
@@ -842,6 +913,18 @@ TiXmlElement *CSmartPlaylist::OpenAndReadName(const CStdString &path)
   m_xmlDoc.Clear();
   file >> m_xmlDoc;
 
+  TiXmlElement *root = readName();
+  if (m_playlistName.empty())
+  {
+    m_playlistName = CUtil::GetTitleFromPath(path);
+    if (URIUtils::GetExtension(m_playlistName) == ".xsp")
+      URIUtils::RemoveExtension(m_playlistName);
+  }
+  return root;
+}
+
+TiXmlElement* CSmartPlaylist::readName()
+{
   if (m_xmlDoc.Error())
   {
     CLog::Log(LOGERROR, "Error loading Smart playlist (failed to parse xml: %s)", m_xmlDoc.ErrorDesc());
@@ -851,7 +934,7 @@ TiXmlElement *CSmartPlaylist::OpenAndReadName(const CStdString &path)
   TiXmlElement *root = m_xmlDoc.RootElement();
   if (!root || strcmpi(root->Value(),"smartplaylist") != 0)
   {
-    CLog::Log(LOGERROR, "Error loading Smart playlist %s", path.c_str());
+    CLog::Log(LOGERROR, "Error loading Smart playlist");
     return NULL;
   }
   // load the playlist type
@@ -868,18 +951,86 @@ TiXmlElement *CSmartPlaylist::OpenAndReadName(const CStdString &path)
   TiXmlHandle name = ((TiXmlHandle)root->FirstChild("name")).FirstChild();
   if (name.Node())
     m_playlistName = name.Node()->Value();
-  else
-  {
-    m_playlistName = CUtil::GetTitleFromPath(path);
-    if (URIUtils::GetExtension(m_playlistName) == ".xsp")
-      URIUtils::RemoveExtension(m_playlistName);
-  }
+
   return root;
+}
+
+TiXmlElement *CSmartPlaylist::readNameFromXml(const CStdString &xml)
+{
+  if (xml.empty())
+  {
+    CLog::Log(LOGERROR, "Error loading empty Smart playlist");
+    return NULL;
+  }
+
+  m_xmlDoc.Clear();
+  if (!m_xmlDoc.Parse(xml))
+  {
+    CLog::Log(LOGERROR, "Error loading Smart playlist (failed to parse xml: %s)", m_xmlDoc.ErrorDesc());
+    return NULL;
+  }
+
+  return readName();
 }
 
 bool CSmartPlaylist::Load(const CStdString &path)
 {
-  TiXmlElement *root = OpenAndReadName(path);
+  return load(OpenAndReadName(path));
+}
+
+bool CSmartPlaylist::Load(const CVariant &obj)
+{
+  if (!obj.isObject() ||
+      !obj.isMember("match") || !obj["match"].isString() ||
+      !obj.isMember("rules") || !obj["rules"].isArray())
+    return false;
+
+  // load the playlist type
+  if (obj.isMember("type") && obj["type"].isString())
+    m_playlistType = obj["type"].asString();
+  // backward compatibility:
+  if (m_playlistType == "music")
+    m_playlistType = "songs";
+  if (m_playlistType == "video")
+    m_playlistType = "musicvideos";
+
+  // load the playlist name
+  if (obj.isMember("name") && obj["name"].isString())
+    m_playlistName = obj["name"].asString();
+
+  m_matchAllRules = strcmpi(obj["match"].asString().c_str(), "all") == 0;
+
+  // now the rules
+  for (CVariant::const_iterator_array it = obj["rules"].begin_array(); it != obj["rules"].end_array(); it++)
+  {
+    CSmartPlaylistRule rule;
+    if (rule.Load(*it))
+      m_playlistRules.push_back(rule);
+  }
+
+  // now any limits
+  if (obj.isMember("limit") && (obj["limit"].isInteger() || obj["limit"].isUnsignedInteger()) && obj["limit"].asUnsignedInteger() > 0)
+    m_limit = (unsigned int)obj["limit"].asUnsignedInteger();
+
+  // and order
+  if (obj.isMember("order") && obj["order"].isMember("method") && obj["order"]["method"].isString())
+  {
+    if (obj["order"].isMember("direction") && obj["order"]["direction"].isString())
+      m_orderAscending = strcmpi(obj["order"]["direction"].asString().c_str(), "ascending") == 0;
+
+    m_orderField = CSmartPlaylistRule::TranslateOrder(obj["order"]["method"].asString().c_str());
+  }
+
+  return true;
+}
+
+bool CSmartPlaylist::LoadFromXml(const CStdString &xml)
+{
+  return load(readNameFromXml(xml));
+}
+
+bool CSmartPlaylist::load(TiXmlElement *root)
+{
   if (!root)
     return false;
 
@@ -905,8 +1056,8 @@ bool CSmartPlaylist::LoadFromXML(TiXmlElement *root, const CStdString &encoding)
   while (ruleElement)
   {
     CSmartPlaylistRule rule;
-    rule.Load(ruleElement, encoding);
-    m_playlistRules.push_back(rule);
+    if (rule.Load(ruleElement, encoding))
+      m_playlistRules.push_back(rule);
 
     ruleElement = ruleElement->NextSiblingElement("rule");
   }
@@ -930,7 +1081,16 @@ bool CSmartPlaylist::LoadFromXML(TiXmlElement *root, const CStdString &encoding)
   return true;
 }
 
-bool CSmartPlaylist::Save(const CStdString &path)
+bool CSmartPlaylist::LoadFromJson(const CStdString &json)
+{
+  if (json.empty())
+    return false;
+
+  CVariant obj = CJSONVariantParser::Parse((const unsigned char *)json.c_str(), json.size());
+  return Load(obj);
+}
+
+bool CSmartPlaylist::Save(const CStdString &path) const
 {
   CXBMCTinyXML doc;
   TiXmlDeclaration decl("1.0", "UTF-8", "yes");
@@ -955,7 +1115,7 @@ bool CSmartPlaylist::Save(const CStdString &path)
   pRoot->InsertEndChild(nodeMatch);
 
   // add <rule> tags
-  for (vector<CSmartPlaylistRule>::iterator it = m_playlistRules.begin(); it != m_playlistRules.end(); ++it)
+  for (vector<CSmartPlaylistRule>::const_iterator it = m_playlistRules.begin(); it != m_playlistRules.end(); ++it)
     it->Save(pRoot);
 
   // add <limit> tag
@@ -981,6 +1141,49 @@ bool CSmartPlaylist::Save(const CStdString &path)
   return doc.SaveFile(path);
 }
 
+bool CSmartPlaylist::Save(CVariant &obj, bool full /* = true */) const
+{
+  if (obj.type() == CVariant::VariantTypeConstNull)
+    return false;
+
+  obj.clear();
+  // add "type", "name" and "match"
+  obj["type"] = m_playlistType;
+  obj["match"] = m_matchAllRules ? "all" : "one";
+
+  if (full)
+    obj["name"] = m_playlistName;
+
+  // add "rules"
+  obj["rules"] = CVariant(CVariant::VariantTypeArray);
+  for (vector<CSmartPlaylistRule>::const_iterator it = m_playlistRules.begin(); it != m_playlistRules.end(); ++it)
+    it->Save(obj["rules"]);
+
+  // add "limit"
+  if (full && m_limit)
+    obj["limit"] = m_limit;
+
+  // add "order"
+  if (full && m_orderField != SortByNone)
+  {
+    obj["order"] = CVariant(CVariant::VariantTypeObject);
+    obj["order"]["method"] = CSmartPlaylistRule::TranslateOrder(m_orderField);
+    obj["order"]["direction"] = m_orderAscending ? "ascending" : "descending";
+  }
+
+  return true;
+}
+
+bool CSmartPlaylist::SaveAsJson(CStdString &json, bool full /* = true */) const
+{
+  CVariant xsp(CVariant::VariantTypeObject);
+  if (!Save(xsp, full))
+    return false;
+
+  json = CJSONVariantWriter::Write(xsp, true);
+  return json.size() > 0;
+}
+
 void CSmartPlaylist::SetName(const CStdString &name)
 {
   m_playlistName = name;
@@ -996,7 +1199,7 @@ void CSmartPlaylist::AddRule(const CSmartPlaylistRule &rule)
   m_playlistRules.push_back(rule);
 }
 
-CStdString CSmartPlaylist::GetWhereClause(CDatabase &db, set<CStdString> &referencedPlaylists) const
+CStdString CSmartPlaylist::GetWhereClause(const CDatabase &db, set<CStdString> &referencedPlaylists) const
 {
   CStdString rule, currentRule;
   for (vector<CSmartPlaylistRule>::const_iterator it = m_playlistRules.begin(); it != m_playlistRules.end(); ++it)

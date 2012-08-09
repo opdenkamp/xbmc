@@ -32,7 +32,10 @@
 #include "filesystem/File.h"
 #include "osx/DarwinUtils.h"
 #endif
-
+#if defined(TARGET_ANDROID)
+#include "URL.h"
+#include "filesystem/AndroidAppFile.h"
+#endif
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
@@ -90,6 +93,16 @@ void CBaseTexture::Allocate(unsigned int width, unsigned int height, unsigned in
   { // DXT textures must be a multiple of 4 in width and height
     m_textureWidth = ((m_textureWidth + 3) / 4) * 4;
     m_textureHeight = ((m_textureHeight + 3) / 4) * 4;
+  }
+  else
+  {
+    // align all textures so that they have an even width
+    // in some circumstances when we downsize a thumbnail
+    // which has an uneven number of pixels in width
+    // we crash in CPicture::ScaleImage in ffmpegs swscale
+    // because it tries to access beyond the source memory
+    // (happens on osx and ios)
+    m_textureWidth = ((m_textureWidth + 1) / 2) * 2;
   }
 
   // check for max texture size
@@ -173,6 +186,31 @@ void CBaseTexture::ClampToEdge()
 
 CBaseTexture *CBaseTexture::LoadFromFile(const CStdString& texturePath, unsigned int idealWidth, unsigned int idealHeight, bool autoRotate)
 {
+#if defined(TARGET_ANDROID)
+  CURL url(texturePath);
+  if (url.GetProtocol() == "androidapp")
+  {
+    XFILE::CFileAndroidApp file;
+    if (file.Open(url))
+    {
+      unsigned int imgsize = (unsigned int)file.GetLength();
+      unsigned char* inputBuff = new unsigned char[imgsize];
+      unsigned int inputBuffSize = file.Read(inputBuff, imgsize);
+      file.Close();
+      if (inputBuffSize != imgsize)
+      {
+        delete [] inputBuff;
+        return NULL;
+      }
+      CTexture *texture = new CTexture();
+      unsigned int width = file.GetIconWidth();
+      unsigned int height = file.GetIconHeight();
+      texture->LoadFromMemory(width, height, width*4, XB_FMT_RGBA8, true, inputBuff);
+      delete [] inputBuff;
+      return texture;
+    }
+  }
+#endif
   CTexture *texture = new CTexture();
   if (texture->LoadFromFile(texturePath, idealWidth, idealHeight, autoRotate, NULL, NULL))
     return texture;

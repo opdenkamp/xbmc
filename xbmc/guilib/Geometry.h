@@ -27,6 +27,8 @@
 #else
 #define XBMC_FORCE_INLINE
 #endif
+
+#include <vector>
 #include <algorithm>
 
 class CPoint
@@ -153,6 +155,65 @@ public:
   {
     return Width() * Height();
   };
+
+  std::vector<CRect> SubtractRect(CRect splitterRect)
+  {
+    std::vector<CRect> newRectaglesList;
+    CRect intersection = splitterRect.Intersect(*this);
+
+    if (!intersection.IsEmpty())
+    {
+      CRect add;
+
+      // add rect above intersection if not empty
+      add = CRect(x1, y1, x2, intersection.y1);
+      if (!add.IsEmpty())
+        newRectaglesList.push_back(add);
+
+      // add rect below intersection if not empty
+      add = CRect(x1, intersection.y2, x2, y2);
+      if (!add.IsEmpty())
+        newRectaglesList.push_back(add);
+
+      // add rect left intersection if not empty
+      add = CRect(x1, intersection.y1, intersection.x1, intersection.y2);
+      if (!add.IsEmpty())
+        newRectaglesList.push_back(add);
+
+      // add rect right intersection if not empty
+      add = CRect(intersection.x2, intersection.y1, x2, intersection.y2);
+      if (!add.IsEmpty())
+        newRectaglesList.push_back(add);
+    }
+    else
+    {
+      newRectaglesList.push_back(*this);
+    }
+
+    return newRectaglesList;
+  }
+
+  std::vector<CRect> SubtractRects(std::vector<CRect> intersectionList)
+  {
+    std::vector<CRect> fragmentsList;
+    fragmentsList.push_back(*this);
+
+    for (std::vector<CRect>::iterator splitter = intersectionList.begin(); splitter != intersectionList.end(); ++splitter)
+    {
+      std::vector<CRect> toAddList;
+
+      for (std::vector<CRect>::iterator fragment = fragmentsList.begin(); fragment != fragmentsList.end(); ++fragment)
+      {
+        std::vector<CRect> newFragmentsList = fragment->SubtractRect(*splitter);
+        toAddList.insert(toAddList.end(), newFragmentsList.begin(), newFragmentsList.end());
+      }
+
+      fragmentsList.clear();
+      fragmentsList.insert(fragmentsList.end(), toAddList.begin(), toAddList.end());
+    }
+
+    return fragmentsList;
+  }
 
   bool operator !=(const CRect &rect) const
   {

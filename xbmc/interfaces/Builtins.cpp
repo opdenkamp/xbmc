@@ -29,7 +29,7 @@
 #include "FileItem.h"
 #include "addons/GUIDialogAddonSettings.h"
 #include "dialogs/GUIDialogFileBrowser.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "music/dialogs/GUIDialogMusicScan.h"
 #include "dialogs/GUIDialogNumeric.h"
@@ -54,6 +54,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "Util.h"
+#include "URL.h"
 
 #include "filesystem/PluginDirectory.h"
 #ifdef HAS_FILESYSTEM_RAR
@@ -87,6 +88,7 @@
 #endif
 
 #include <vector>
+#include "xbmc/settings/AdvancedSettings.h"
 
 using namespace std;
 using namespace XFILE;
@@ -105,9 +107,9 @@ typedef struct
 
 const BUILT_IN commands[] = {
   { "Help",                       false,  "This help message" },
-  { "Reboot",                     false,  "Reboot the xbox (power cycle)" },
-  { "Restart",                    false,  "Restart the xbox (power cycle)" },
-  { "ShutDown",                   false,  "Shutdown the xbox" },
+  { "Reboot",                     false,  "Reboot the system" },
+  { "Restart",                    false,  "Restart the system (same as reboot)" },
+  { "ShutDown",                   false,  "Shutdown the system" },
   { "Powerdown",                  false,  "Powerdown system" },
   { "Quit",                       false,  "Quit XBMC" },
   { "Hibernate",                  false,  "Hibernates the system" },
@@ -116,13 +118,14 @@ const BUILT_IN commands[] = {
   { "AllowIdleShutdown",          false,  "Allow idle shutdown" },
   { "RestartApp",                 false,  "Restart XBMC" },
   { "Minimize",                   false,  "Minimize XBMC" },
-  { "Reset",                      false,  "Reset the xbox (warm reboot)" },
+  { "Reset",                      false,  "Reset the system (same as reboot)" },
   { "Mastermode",                 false,  "Control master mode" },
   { "ActivateWindow",             true,   "Activate the specified window" },
   { "ActivateWindowAndFocus",     true,   "Activate the specified window and sets focus to the specified id" },
   { "ReplaceWindow",              true,   "Replaces the current window with the new one" },
   { "TakeScreenshot",             false,  "Takes a Screenshot" },
   { "RunScript",                  true,   "Run the specified script" },
+  { "StopScript",                 true,   "Stop the script by ID or path, if running" },
 #if defined(TARGET_DARWIN)
   { "RunAppleScript",             true,   "Run the specified AppleScript command" },
 #endif
@@ -210,6 +213,7 @@ const BUILT_IN commands[] = {
   { "LCD.Resume",                 false,  "Resumes LCDproc" },
 #endif
   { "VideoLibrary.Search",        false,  "Brings up a search dialog which will search the library" },
+  { "toggledebug",                false,  "Enables/disables debug mode" },
 };
 
 bool CBuiltins::HasCommand(const CStdString& execString)
@@ -247,7 +251,7 @@ int CBuiltins::Execute(const CStdString& execString)
   CStdString parameter = params.size() ? params[0] : "";
   CStdString strParameterCaseIntact = parameter;
 
-  if (execute.Equals("reboot") || execute.Equals("restart"))  //Will reboot the xbox, aka cold reboot
+  if (execute.Equals("reboot") || execute.Equals("restart") || execute.Equals("reset"))  //Will reboot the system
   {
     CApplicationMessenger::Get().Restart();
   }
@@ -319,10 +323,6 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("takescreenshot"))
   {
     CUtil::TakeScreenshot();
-  }
-  else if (execute.Equals("reset")) //Will reset the xbox, aka soft reset
-  {
-    CApplicationMessenger::Get().Reset();
   }
   else if (execute.Equals("activatewindow") || execute.Equals("replacewindow"))
   {
@@ -428,6 +428,19 @@ int CBuiltins::Execute(const CStdString& execString)
     Cocoa_DoAppleScript(strParameterCaseIntact.c_str());
   }
 #endif
+  else if (execute.Equals("stopscript"))
+  {
+#ifdef HAS_PYTHON
+    CStdString scriptpath(params[0]);
+
+    // Test to see if the param is an addon ID
+    AddonPtr script;
+    if (CAddonMgr::Get().GetAddon(params[0], script))
+      scriptpath = script->LibPath();
+
+    g_pythonParser.StopScript(scriptpath);
+#endif
+  }
   else if (execute.Equals("system.exec"))
   {
     CApplicationMessenger::Get().Minimize();
@@ -1097,7 +1110,7 @@ int CBuiltins::Execute(const CStdString& execString)
     g_mediaManager.GetLocalDrives(localShares);
     if (execute.Equals("skin.setstring"))
     {
-      if (CGUIDialogKeyboard::ShowAndGetInput(value, g_localizeStrings.Get(1029), true))
+      if (CGUIKeyboardFactory::ShowAndGetInput(value, g_localizeStrings.Get(1029), true))
         g_settings.SetSkinString(string, value);
     }
     else if (execute.Equals("skin.setnumeric"))
@@ -1595,8 +1608,13 @@ int CBuiltins::Execute(const CStdString& execString)
     CGUIMessage msg(GUI_MSG_SEARCH, 0, 0, 0);
     g_windowManager.SendMessage(msg, WINDOW_VIDEO_NAV);
   }
+  else if (execute.Equals("toggledebug"))
+  {
+    bool debug = g_guiSettings.GetBool("debug.showloginfo");
+    g_guiSettings.SetBool("debug.showloginfo", !debug);
+    g_advancedSettings.SetDebugMode(!debug);
+  }
   else
     return -1;
   return 0;
 }
-

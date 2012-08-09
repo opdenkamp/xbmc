@@ -55,14 +55,11 @@ CEpgContainer::CEpgContainer(void) :
   m_updateEvent.Reset();
   m_bLoaded = false;
   m_bHasPendingUpdates = false;
-
-  m_database.Open();
 }
 
 CEpgContainer::~CEpgContainer(void)
 {
   Unload();
-  m_database.Close();
 }
 
 CEpgContainer &CEpgContainer::Get(void)
@@ -109,6 +106,9 @@ void CEpgContainer::Clear(bool bClearDb /* = false */)
   /* clear the database entries */
   if (bClearDb && !m_bIgnoreDbForClient)
   {
+    if (!m_database.IsOpen())
+      m_database.Open();
+
     if (m_database.IsOpen())
       m_database.DeleteEpg();
   }
@@ -123,6 +123,9 @@ void CEpgContainer::Clear(bool bClearDb /* = false */)
 void CEpgContainer::Start(void)
 {
   CSingleLock lock(m_critSection);
+
+  if (!m_database.IsOpen())
+    m_database.Open();
 
   m_bIsInitialising = true;
   m_bStop = false;
@@ -140,6 +143,10 @@ void CEpgContainer::Start(void)
 bool CEpgContainer::Stop(void)
 {
   StopThread();
+
+  if (m_database.IsOpen())
+    m_database.Close();
+
   return true;
 }
 
@@ -276,51 +283,46 @@ CEpg *CEpgContainer::GetByChannel(const CPVRChannel &channel) const
   return NULL;
 }
 
-bool CEpgContainer::UpdateEntry(const CEpg &entry, bool bUpdateDatabase /* = false */)
+void CEpgContainer::InsertFromDatabase(int iEpgID, const CStdString &strName, const CStdString &strScraperName)
 {
-  CEpg *epg(NULL);
-  bool bReturn(false);
-  WaitForUpdateFinish(true);
+  CEpg *epg = new CEpg(iEpgID, strName, strScraperName, true);
+  if (epg)
+  {
+    m_epgs.insert(make_pair(iEpgID, epg));
+    SetChanged();
+    epg->RegisterObserver(this);
+  }
+}
 
+CEpg *CEpgContainer::CreateChannelEpg(CPVRChannelPtr channel)
+{
+  if (!channel)
+    return NULL;
+
+  WaitForUpdateFinish(true);
   CSingleLock lock(m_critSection);
-  epg = entry.EpgID() > 0 ? GetById(entry.EpgID()) : NULL;
+
+  CEpg *epg(NULL);
+  if (channel->EpgID() > 0)
+    epg = GetById(channel->EpgID());
+
   if (!epg)
   {
-    /* table does not exist yet, create a new one */
-    unsigned int iEpgId = m_bIgnoreDbForClient || entry.EpgID() <= 0 ? NextEpgId() : entry.EpgID();
-    if (m_iNextEpgId < iEpgId)
-      m_iNextEpgId = iEpgId + 1;
-    epg = CreateEpg(iEpgId);
-    if (epg)
-    {
-      bReturn = epg->UpdateMetadata(entry, bUpdateDatabase);
-      m_epgs.insert(make_pair((unsigned int)epg->EpgID(), epg));
-      SetChanged();
-      epg->RegisterObserver(this);
-    }
-  }
-  else
-  {
-    bReturn = epg->UpdateMetadata(entry, bUpdateDatabase);
+    epg = CreateEpg(NextEpgId());
+    m_epgs.insert(make_pair((unsigned int)epg->EpgID(), epg));
+    SetChanged();
+    epg->RegisterObserver(this);
   }
 
-  if (g_PVRManager.IsStarted())
-  {
-    CPVRChannel *channel = g_PVRChannelGroups->GetChannelByEpgId(epg->EpgID());
-    if (epg->EpgID() > 0 && !channel)
-    {
-      DeleteEpg(*epg);
-      bReturn = false;
-      SetChanged();
-    }
-  }
+  if (epg)
+    epg->SetChannel(channel);
 
   m_bPreventUpdates = false;
   CDateTime::GetCurrentDateTime().GetAsUTCDateTime().GetAsTime(m_iNextEpgUpdate);
 
   NotifyObservers("epg");
 
-  return bReturn;
+  return epg;
 }
 
 bool CEpgContainer::LoadSettings(void)
@@ -359,7 +361,7 @@ CEpg *CEpgContainer::CreateEpg(int iEpgId)
 {
   if (g_PVRManager.IsStarted())
   {
-    CPVRChannel *channel = g_PVRChannelGroups->GetChannelByEpgId(iEpgId);
+    CPVRChannelPtr channel = g_PVRChannelGroups->GetChannelByEpgId(iEpgId);
     if (channel)
     {
       CEpg *epg = new CEpg(channel, true);
@@ -477,10 +479,17 @@ bool CEpgContainer::UpdateEPG(bool bOnlyPending /* = false */)
   if (bShowProgress && !bOnlyPending)
     ShowProgressDialog();
 
-  /* open the database */
   if (!m_bIgnoreDbForClient && !m_database.IsOpen())
   {
     CLog::Log(LOGERROR, "EpgContainer - %s - could not open the database", __FUNCTION__);
+
+    CSingleLock lock(m_critSection);
+    m_bIsUpdating = false;
+    m_updateEvent.Set();
+
+    if (bShowProgress && !bOnlyPending)
+      CloseProgressDialog();
+
     return false;
   }
 
@@ -646,11 +655,4 @@ void CEpgContainer::SetHasPendingUpdates(bool bHasPendingUpdates /* = true */)
 {
   CSingleLock lock(m_critSection);
   m_bHasPendingUpdates = bHasPendingUpdates;
-}
-
-void CEpgContainer::ClearTimerTag(int iEpgId, const CDateTime &startTime)
-{
-  CEpg *table = GetById(iEpgId);
-  if (table)
-    table->ClearTimerTag(startTime);
 }

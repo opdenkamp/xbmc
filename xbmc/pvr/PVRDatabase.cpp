@@ -348,7 +348,7 @@ int CPVRDatabase::Get(CPVRChannelGroupInternal &results)
     {
       while (!m_pDS->eof())
       {
-        CPVRChannel *channel = new CPVRChannel();
+        CPVRChannelPtr channel = CPVRChannelPtr(new CPVRChannel());
 
         channel->m_iChannelId              = m_pDS->fv("idChannel").get_asInt();
         channel->m_iUniqueId               = m_pDS->fv("iUniqueId").get_asInt();
@@ -707,7 +707,7 @@ int CPVRDatabase::Get(CPVRChannelGroup &group)
       {
         int iChannelId = m_pDS->fv("idChannel").get_asInt();
         int iChannelNumber = m_pDS->fv("iChannelNumber").get_asInt();
-        CPVRChannel *channel = g_PVRChannelGroups->GetGroupAll(group.IsRadio())->GetByChannelID(iChannelId);
+        CPVRChannelPtr channel = g_PVRChannelGroups->GetGroupAll(group.IsRadio())->GetByChannelID(iChannelId);
 
         if (channel && group.AddToGroup(*channel, iChannelNumber))
           ++iReturn;
@@ -740,7 +740,7 @@ bool CPVRDatabase::PersistChannels(CPVRChannelGroup &group)
     if (member.channel->IsChanged() || member.channel->IsNew())
     {
       if (m_sqlite && member.channel->IsNew())
-        member.channel->SetChannelID(++iLastChannel, false);
+        member.channel->SetChannelID(++iLastChannel);
       bReturn &= Persist(*member.channel, m_sqlite || !member.channel->IsNew());
     }
   }
@@ -875,7 +875,14 @@ int CPVRDatabase::Persist(const AddonPtr client)
         client->Name().c_str(), client->ID().c_str());
 
     if (ExecuteQuery(strQuery))
+    {
       iReturn = (int) m_pDS->lastinsertid();
+
+      CAddonDatabase database;
+      database.Open();
+      database.DisableAddon(client->ID());
+      database.Close();
+    }
   }
 
   return iReturn;

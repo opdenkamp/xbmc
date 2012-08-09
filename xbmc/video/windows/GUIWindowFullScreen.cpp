@@ -830,7 +830,7 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
         if (g_PVRManager.GetCurrentChannel(playingChannel))
         {
           CPVRChannelGroupPtr selectedGroup = g_PVRChannelGroups->Get(playingChannel.IsRadio())->GetByName(strLabel);
-          if (selectedGroup->IsValid())
+          if (selectedGroup)
           {
             g_PVRManager.SetPlayingGroup(selectedGroup);
             CLog::Log(LOGDEBUG, "%s - switched to group '%s'", __FUNCTION__, selectedGroup->GroupName().c_str());
@@ -1107,7 +1107,11 @@ void CGUIWindowFullScreen::Render()
 
 void CGUIWindowFullScreen::RenderTTFSubtitles()
 {
-  if ((g_application.GetCurrentPlayer() == EPC_MPLAYER || g_application.GetCurrentPlayer() == EPC_DVDPLAYER) &&
+  if ((g_application.GetCurrentPlayer() == EPC_MPLAYER ||
+#if defined(HAS_AMLPLAYER)
+       g_application.GetCurrentPlayer() == EPC_AMLPLAYER ||
+#endif
+       g_application.GetCurrentPlayer() == EPC_DVDPLAYER) &&
       CUtil::IsUsingTTFSubtitles() && (g_application.m_pPlayer->GetSubtitleVisible()))
   {
     CSingleLock lock (m_fontLock);

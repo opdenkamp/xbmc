@@ -53,12 +53,6 @@ namespace PVR
     int GetNumHiddenChannels() const { return m_iHiddenChannels; }
 
     /*!
-     * @brief Update all channel numbers on timers.
-     * @return True if the channel number were updated, false otherwise.
-     */
-    bool UpdateTimers(void);
-
-    /*!
      * @brief Add or update a channel in this table.
      * @param channel The channel to update.
      * @return True if the channel was updated and persisted.
@@ -77,7 +71,7 @@ namespace PVR
      * @param channel The updated channel.
      * @return True if the channel has been updated succesfully, false otherwise.
      */
-    bool UpdateFromClient(const CPVRChannel &channel);
+    void UpdateFromClient(const CPVRChannel &channel, unsigned int iChannelNumber = 0);
 
     /*!
      * @see CPVRChannelGroup::IsGroupMember
@@ -115,6 +109,8 @@ namespace PVR
      * @return True if all tables were created successfully, false otherwise.
      */
     bool CreateChannelEpgs(bool bForce = false);
+
+    bool AddNewChannel(const CPVRChannel &channel, unsigned int iChannelNumber = 0) { UpdateFromClient(channel, iChannelNumber); return true; }
 
   protected:
     /*!
@@ -174,10 +170,7 @@ namespace PVR
      */
     void UpdateChannelPaths(void);
 
-    /*!
-     * @brief Clear this channel list and destroy all channel instances in it.
-     */
-    void Unload(void);
+    void CreateChannelEpg(CPVRChannelPtr channel, bool bForce = false);
 
     int m_iHiddenChannels; /*!< the amount of hidden channels in this container */
   };

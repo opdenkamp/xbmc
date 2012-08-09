@@ -20,6 +20,7 @@
  */
 
 #include "CPUInfo.h"
+#include "Temperature.h"
 #include <string>
 #include <string.h>
 
@@ -29,6 +30,18 @@
 #ifdef __ppc__
 #include <mach-o/arch.h>
 #endif
+#endif
+
+#if defined(TARGET_LINUX) && defined(__ARM_NEON__) && !defined(TARGET_ANDROID)
+#include <fcntl.h>
+#include <unistd.h>
+#include <elf.h>
+#include <linux/auxvec.h>
+#include <asm/hwcap.h>
+#endif
+
+#if defined(TARGET_ANDROID)
+#include "android/activity/AndroidFeatures.h"
 #endif
 
 #ifdef _WIN32
@@ -248,6 +261,9 @@ CCPUInfo::CCPUInfo(void)
   if (m_cpuFeatures & CPU_FEATURE_SSE)
     m_cpuFeatures |= CPU_FEATURE_MMX2;
 
+  if (HasNeon())
+    m_cpuFeatures |= CPU_FEATURE_NEON;
+
 }
 
 CCPUInfo::~CCPUInfo()
@@ -343,7 +359,7 @@ float CCPUInfo::getCPUFrequency()
 #endif
 }
 
-CTemperature CCPUInfo::getTemperature()
+bool CCPUInfo::getTemperature(CTemperature& temperature)
 {
   int         value = 0,
               ret   = 0;
@@ -351,8 +367,10 @@ CTemperature CCPUInfo::getTemperature()
   FILE        *p    = NULL;
   CStdString  cmd   = g_advancedSettings.m_cpuTempCmd;
 
+  temperature.SetState(CTemperature::invalid);
+
   if (cmd.IsEmpty() && m_fProcTemperature == NULL)
-    return CTemperature();
+    return false;
 
   if (!cmd.IsEmpty())
   {
@@ -384,13 +402,16 @@ CTemperature CCPUInfo::getTemperature()
   }
 
   if (ret != 2)
-    return CTemperature();
+    return false; 
 
   if (scale == 'C' || scale == 'c')
-    return CTemperature::CreateFromCelsius(value);
-  if (scale == 'F' || scale == 'f')
-    return CTemperature::CreateFromFahrenheit(value);
-  return CTemperature();
+    temperature = CTemperature::CreateFromCelsius(value);
+  else if (scale == 'F' || scale == 'f')
+    temperature = CTemperature::CreateFromFahrenheit(value);
+  else
+    return false;
+  
+  return true;
 }
 
 bool CCPUInfo::HasCoreId(int nCoreId) const
@@ -599,4 +620,50 @@ void CCPUInfo::ReadCPUFeatures()
 #endif
 }
 
+bool CCPUInfo::HasNeon()
+{
+  static int has_neon = -1;
+#if defined (TARGET_ANDROID)
+  if (has_neon == -1)
+    has_neon = (CAndroidFeatures::HasNeon()) ? 1 : 0;
+
+#elif defined(TARGET_DARWIN_IOS)
+  has_neon = 1;
+
+#elif defined(TARGET_LINUX) && defined(__ARM_NEON__)
+  if (has_neon == -1)
+  {
+    has_neon = 0;
+    // why are we not looking at the Features in
+    // /proc/cpuinfo for neon ?
+    int fd = open("/proc/self/auxv", O_RDONLY);
+    if (fd >= 0)
+    {
+      Elf32_auxv_t auxv;
+      while (read(fd, &auxv, sizeof(Elf32_auxv_t)) == sizeof(Elf32_auxv_t))
+      {
+        if (auxv.a_type == AT_HWCAP)
+        {
+          has_neon = (auxv.a_un.a_val & HWCAP_NEON) ? 1 : 0;
+          break;
+        }
+      }
+      close(fd);
+    }
+  }
+
+#endif
+
+  return has_neon == 1;
+}
+
 CCPUInfo g_cpuInfo;
+/*
+int main()
+{
+  CCPUInfo c;
+  usleep(...);
+  int r = c.getUsedPercentage();
+  printf("%d\n", r);
+}
+*/

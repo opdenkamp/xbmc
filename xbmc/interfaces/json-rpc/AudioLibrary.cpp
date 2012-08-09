@@ -44,21 +44,34 @@ JSONRPC_STATUS CAudioLibrary::GetArtists(const CStdString &method, ITransportLay
   if (!musicdatabase.Open())
     return InternalError;
 
-  int genreID = (int)parameterObject["genreid"].asInteger();
-
-  // Add "artist" to "properties" array by default
-  CVariant param = parameterObject;
-  if (!param.isMember("properties"))
-    param["properties"] = CVariant(CVariant::VariantTypeArray);
-  param["properties"].append("artist");
+  CMusicDbUrl musicUrl;
+  musicUrl.FromString("musicdb://2/");
+  int genreID = -1, albumID = -1, songID = -1;
+  const CVariant &filter = parameterObject["filter"];
+  if (filter.isMember("genreid"))
+    genreID = (int)filter["genreid"].asInteger();
+  if (filter.isMember("genre"))
+    musicUrl.AddOption("genre", filter["genre"].asString());
+  if (filter.isMember("albumid"))
+    albumID = (int)filter["albumid"].asInteger();
+  if (filter.isMember("album"))
+    musicUrl.AddOption("album", filter["album"].asString());
+  if (filter.isMember("songid"))
+    songID = (int)filter["songid"].asInteger();
 
   bool albumArtistsOnly = !g_guiSettings.GetBool("musiclibrary.showcompilationartists");
   if (parameterObject["albumartistsonly"].isBoolean())
     albumArtistsOnly = parameterObject["albumartistsonly"].asBoolean();
 
   CFileItemList items;
-  if (!musicdatabase.GetArtistsNav("musicdb://2/", items, genreID, albumArtistsOnly))
+  if (!musicdatabase.GetArtistsNav(musicUrl.ToString(), items, albumArtistsOnly, genreID, albumID, songID))
     return InternalError;
+
+  // Add "artist" to "properties" array by default
+  CVariant param = parameterObject;
+  if (!param.isMember("properties"))
+    param["properties"] = CVariant(CVariant::VariantTypeArray);
+  param["properties"].append("artist");
 
   HandleFileItemList("artistid", false, "artists", items, param, result);
   return OK;
@@ -68,17 +81,28 @@ JSONRPC_STATUS CAudioLibrary::GetArtistDetails(const CStdString &method, ITransp
 {
   int artistID = (int)parameterObject["artistid"].asInteger();
 
+  CMusicDbUrl musicUrl;
+  if (!musicUrl.FromString("musicdb://2/"))
+    return InternalError;
+
   CMusicDatabase musicdatabase;
   if (!musicdatabase.Open())
     return InternalError;
 
+  musicUrl.AddOption("artistid", artistID);
+
   CFileItemList items;
-  CStdString where;
-  where.Format("idArtist = %d", artistID);
-  if (!musicdatabase.GetArtistsByWhere("musicdb://2/", where, items) || items.Size() != 1)
+  CDatabase::Filter filter;
+  if (!musicdatabase.GetArtistsByWhere(musicUrl.ToString(), filter, items) || items.Size() != 1)
     return InvalidParams;
 
-  HandleFileItem("artistid", false, "artistdetails", items[0], parameterObject, parameterObject["properties"], result, false);
+  // Add "artist" to "properties" array by default
+  CVariant param = parameterObject;
+  if (!param.isMember("properties"))
+    param["properties"] = CVariant(CVariant::VariantTypeArray);
+  param["properties"].append("artist");
+
+  HandleFileItem("artistid", false, "artistdetails", items[0], parameterObject, param["properties"], result, false);
   return OK;
 }
 
@@ -88,8 +112,18 @@ JSONRPC_STATUS CAudioLibrary::GetAlbums(const CStdString &method, ITransportLaye
   if (!musicdatabase.Open())
     return InternalError;
 
-  int artistID  = (int)parameterObject["artistid"].asInteger();
-  int genreID   = (int)parameterObject["genreid"].asInteger();
+  CMusicDbUrl musicUrl;
+  musicUrl.FromString("musicdb://3/");
+  int artistID = -1, genreID = -1;
+  const CVariant &filter = parameterObject["filter"];
+  if (filter.isMember("artistid"))
+    artistID = (int)filter["artistid"].asInteger();
+  if (filter.isMember("artist"))
+    musicUrl.AddOption("artist", filter["artist"].asString());
+  if (filter.isMember("genreid"))
+    genreID = (int)filter["genreid"].asInteger();
+  if (filter.isMember("genre"))
+    musicUrl.AddOption("genre", filter["genre"].asString());
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -97,7 +131,7 @@ JSONRPC_STATUS CAudioLibrary::GetAlbums(const CStdString &method, ITransportLaye
     return InvalidParams;
 
   CFileItemList items;
-  if (!musicdatabase.GetAlbumsNav("musicdb://3/", items, genreID, artistID, -1, -1, sorting))
+  if (!musicdatabase.GetAlbumsNav(musicUrl.ToString(), items, genreID, artistID, sorting))
     return InternalError;
 
   int size = items.Size();
@@ -137,9 +171,22 @@ JSONRPC_STATUS CAudioLibrary::GetSongs(const CStdString &method, ITransportLayer
   if (!musicdatabase.Open())
     return InternalError;
 
-  int artistID = (int)parameterObject["artistid"].asInteger();
-  int albumID  = (int)parameterObject["albumid"].asInteger();
-  int genreID  = (int)parameterObject["genreid"].asInteger();
+  CMusicDbUrl musicUrl;
+  musicUrl.FromString("musicdb://4/");
+  int genreID = -1, albumID = -1, artistID = -1;
+  const CVariant &filter = parameterObject["filter"];
+  if (filter.isMember("artistid"))
+    artistID = (int)filter["artistid"].asInteger();
+  if (filter.isMember("artist"))
+    musicUrl.AddOption("artist", filter["artist"].asString());
+  if (filter.isMember("genreid"))
+    genreID = (int)filter["genreid"].asInteger();
+  if (filter.isMember("genre"))
+    musicUrl.AddOption("genre", filter["genre"].asString());
+  if (filter.isMember("albumid"))
+    albumID = (int)filter["albumid"].asInteger();
+  if (filter.isMember("album"))
+    musicUrl.AddOption("album", filter["album"].asString());
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -147,7 +194,7 @@ JSONRPC_STATUS CAudioLibrary::GetSongs(const CStdString &method, ITransportLayer
     return InvalidParams;
 
   CFileItemList items;
-  if (!musicdatabase.GetSongsNav("musicdb://4/", items, genreID, artistID, albumID, sorting))
+  if (!musicdatabase.GetSongsNav(musicUrl.ToString(), items, genreID, artistID, albumID, sorting))
     return InternalError;
 
   int size = items.Size();
@@ -231,7 +278,7 @@ JSONRPC_STATUS CAudioLibrary::GetRecentlyPlayedAlbums(const CStdString &method, 
   for (unsigned int index = 0; index < albums.size(); index++)
   {
     CStdString path;
-    path.Format("musicdb://8/%i/", albums[index].idAlbum);
+    path.Format("musicdb://7/%i/", albums[index].idAlbum);
 
     CFileItemPtr item;
     FillAlbumItem(albums[index], path, item);
@@ -486,7 +533,7 @@ bool CAudioLibrary::FillFileItemList(const CVariant &parameterObject, CFileItemL
   }
 
   if (artistID != -1 || albumID != -1 || genreID != -1)
-    success |= musicdatabase.GetSongsNav("", list, genreID, artistID, albumID);
+    success |= musicdatabase.GetSongsNav("musicdb://4/", list, genreID, artistID, albumID);
 
   int songID = (int)parameterObject["songid"].asInteger(-1);
   if (songID != -1)

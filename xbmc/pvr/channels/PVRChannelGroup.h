@@ -47,8 +47,8 @@ namespace PVR
 
   typedef struct
   {
-    CPVRChannel *channel;
-    unsigned int iChannelNumber;
+    CPVRChannelPtr channel;
+    unsigned int   iChannelNumber;
   } PVRChannelGroupMember;
 
   class CPVRChannelGroup;
@@ -92,11 +92,6 @@ namespace PVR
 
     bool operator ==(const CPVRChannelGroup &right) const;
     bool operator !=(const CPVRChannelGroup &right) const;
-
-    /*!
-     * @return True when this group has a valid id, false otherwise.
-     */
-    bool IsValid(void) const;
 
     /*!
      * @return The amount of group members
@@ -238,7 +233,7 @@ namespace PVR
      * @param iEpgID The channel EPG ID.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannel *GetByChannelEpgID(int iEpgID) const;
+    CPVRChannelPtr GetByChannelEpgID(int iEpgID) const;
 
     /*!
      * @brief The channel that was played last that has a valid client or NULL if there was none.
@@ -367,6 +362,16 @@ namespace PVR
 
     bool ToggleChannelLocked(const CFileItem &channel);
 
+    virtual bool AddNewChannel(const CPVRChannel &channel, unsigned int iChannelNumber = 0) { return false; }
+
+    /*!
+     * @brief Get a channel given the channel number on the client.
+     * @param iUniqueChannelId The unique channel id on the client.
+     * @param iClientID The ID of the client.
+     * @return The channel or NULL if it wasn't found.
+     */
+    CPVRChannelPtr GetByClient(int iUniqueChannelId, int iClientID) const;
+
   protected:
     /*!
      * @brief Load the channels stored in the database.
@@ -433,22 +438,14 @@ namespace PVR
      * @param iUniqueID The unique ID.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannel *GetByUniqueID(int iUniqueID) const;
+    CPVRChannelPtr GetByUniqueID(int iUniqueID) const;
 
     /*!
      * @brief Get a channel given it's channel ID.
      * @param iChannelID The channel ID.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannel *GetByChannelID(int iChannelID) const;
-
-    /*!
-     * @brief Get a channel given the channel number on the client.
-     * @param iUniqueChannelId The unique channel id on the client.
-     * @param iClientID The ID of the client.
-     * @return The channel or NULL if it wasn't found.
-     */
-    CPVRChannel *GetByClient(int iUniqueChannelId, int iClientID) const;
+    CPVRChannelPtr GetByChannelID(int iChannelID) const;
 
     bool             m_bRadio;                      /*!< true if this container holds radio channels, false if it holds TV channels */
     int              m_iGroupType;                  /*!< The type of this group */

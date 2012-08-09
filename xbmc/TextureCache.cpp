@@ -28,6 +28,7 @@
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "URL.h"
 
 using namespace XFILE;
 
@@ -64,6 +65,7 @@ bool CTextureCache::IsCachedImage(const CStdString &url) const
   if (url != "-" && !CURL::IsFullPath(url))
     return true;
   if (URIUtils::IsInPath(url, "special://skin/") ||
+      URIUtils::IsInPath(url, "androidapp://")   ||
       URIUtils::IsInPath(url, g_settings.GetThumbnailsFolder()))
     return true;
   return false;
@@ -72,7 +74,8 @@ bool CTextureCache::IsCachedImage(const CStdString &url) const
 bool CTextureCache::HasCachedImage(const CStdString &url)
 {
   CStdString cachedHash;
-  return !GetCachedImage(url, cachedHash).IsEmpty();
+  CStdString cachedImage(GetCachedImage(url, cachedHash));
+  return (!cachedImage.IsEmpty() && cachedImage != url);
 }
 
 CStdString CTextureCache::GetCachedImage(const CStdString &image, CStdString &cachedHash, bool trackUsage)

@@ -51,7 +51,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogYesNo.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "FileItem.h"
 #include "filesystem/File.h"
@@ -66,6 +66,7 @@
 #include "video/VideoInfoTag.h"
 #include "utils/StringUtils.h"
 #include "ThumbLoader.h"
+#include "URL.h"
 
 using namespace std;
 using namespace XFILE;
@@ -379,11 +380,11 @@ void CGUIWindowMusicBase::OnManualAlbumInfo()
 {
   CAlbum album;
   album.idAlbum = -1; // not in the db
-  if (!CGUIDialogKeyboard::ShowAndGetInput(album.strAlbum, g_localizeStrings.Get(16011), false))
+  if (!CGUIKeyboardFactory::ShowAndGetInput(album.strAlbum, g_localizeStrings.Get(16011), false))
     return;
 
   CStdString strArtist = StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator);
-  if (!CGUIDialogKeyboard::ShowAndGetInput(strArtist, g_localizeStrings.Get(16025), false))
+  if (!CGUIKeyboardFactory::ShowAndGetInput(strArtist, g_localizeStrings.Get(16025), false))
     return;
 
   ShowAlbumInfo(album,"",true);
@@ -790,10 +791,10 @@ bool CGUIWindowMusicBase::FindAlbumInfo(const CStdString& strAlbum, const CStdSt
         return false;
       if (m_dlgProgress && allowSelection != SELECTION_AUTO)
       {
-        if (!CGUIDialogKeyboard::ShowAndGetInput(strTempAlbum, g_localizeStrings.Get(16011), false))
+        if (!CGUIKeyboardFactory::ShowAndGetInput(strTempAlbum, g_localizeStrings.Get(16011), false))
           return false;
 
-        if (!CGUIDialogKeyboard::ShowAndGetInput(strTempArtist, g_localizeStrings.Get(16025), false))
+        if (!CGUIKeyboardFactory::ShowAndGetInput(strTempArtist, g_localizeStrings.Get(16025), false))
           return false;
       }
       else
@@ -840,7 +841,7 @@ bool CGUIWindowMusicBase::FindArtistInfo(const CStdString& strArtist, CMusicArti
         return false;
       if (m_dlgProgress && allowSelection != SELECTION_AUTO)
       {
-        if (!CGUIDialogKeyboard::ShowAndGetInput(strTempArtist, g_localizeStrings.Get(16025), false))
+        if (!CGUIKeyboardFactory::ShowAndGetInput(strTempArtist, g_localizeStrings.Get(16025), false))
           return false;
       }
       else

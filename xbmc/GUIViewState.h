@@ -23,7 +23,6 @@
 
 #include "utils/LabelFormatter.h"
 #include "SortFileItem.h"
-#include "guilib/GUIBaseContainer.h"
 #include "MediaSource.h"
 
 class CViewState; // forward
@@ -73,6 +72,9 @@ protected:
    \param thumb the skin image to use as the icon
    */
   void AddAddonsSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
+#if defined(TARGET_ANDROID)
+  void AddAndroidSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
+#endif
   void AddLiveTVSources();
 
   void AddSortMethod(SORT_METHOD sortMethod, int buttonLabel, LABEL_MASKS labelmasks);

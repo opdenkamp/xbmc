@@ -108,6 +108,18 @@ protected:
 class CApplication : public CXBApplicationEx, public IPlayerCallback, public IMsgTargetCallback
 {
 public:
+
+  enum ESERVERS
+  {
+    ES_WEBSERVER = 1,
+    ES_AIRPLAYSERVER,
+    ES_JSONRPCSERVER,
+    ES_UPNPRENDERER,
+    ES_UPNPSERVER,
+    ES_EVENTSERVER,
+    ES_ZEROCONF
+  };
+
   CApplication(void);
   virtual ~CApplication(void);
   virtual bool Initialize();
@@ -123,10 +135,13 @@ public:
   bool DestroyWindow();
   void StartServices();
   void StopServices();
+
+  bool StartServer(enum ESERVERS eServer, bool bStart, bool bWait = false);
+
   bool StartWebServer();
   void StopWebServer();
-  void StartAirplayServer();  
-  void StopAirplayServer(bool bWait);   
+  bool StartAirplayServer();
+  void StopAirplayServer(bool bWait);
   bool StartJSONRPCServer();
   void StopJSONRPCServer(bool bWait);
   void StartUPnP();
@@ -413,7 +428,7 @@ protected:
   bool m_bEnableLegacyRes;
   bool m_bTestMode;
   bool m_bSystemScreenSaverEnable;
-  
+
   int        m_frameCount;
   CCriticalSection m_frameMutex;
   XbmcThreads::ConditionVariable  m_frameCond;

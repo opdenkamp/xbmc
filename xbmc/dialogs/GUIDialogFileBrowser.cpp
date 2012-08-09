@@ -33,7 +33,7 @@
 #include "Application.h"
 #include "GUIDialogOK.h"
 #include "GUIDialogYesNo.h"
-#include "GUIDialogKeyboard.h"
+#include "guilib/GUIKeyboardFactory.h"
 #include "GUIUserMessages.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
@@ -44,6 +44,7 @@
 #include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/log.h"
+#include "URL.h"
 
 using namespace XFILE;
 
@@ -246,7 +247,7 @@ bool CGUIDialogFileBrowser::OnMessage(CGUIMessage& message)
       else if (message.GetSenderId() == CONTROL_NEWFOLDER)
       {
         CStdString strInput;
-        if (CGUIDialogKeyboard::ShowAndGetInput(strInput,g_localizeStrings.Get(119),false))
+        if (CGUIKeyboardFactory::ShowAndGetInput(strInput,g_localizeStrings.Get(119),false))
         {
           CStdString strPath;
           URIUtils::AddFileToFolder(m_vecItems->GetPath(),strInput,strPath);
