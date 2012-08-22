@@ -219,13 +219,13 @@ void CPVRClient::WriteClientTimerInfo(const CPVRTimerInfoTag &xbmcTimer, PVR_TIM
   addonTimer.startTime         = start - g_advancedSettings.m_iPVRTimeCorrection;
   addonTimer.endTime           = end - g_advancedSettings.m_iPVRTimeCorrection;
   addonTimer.firstDay          = firstDay - g_advancedSettings.m_iPVRTimeCorrection;
+  addonTimer.iEpgUid           = epgTag ? epgTag->UniqueBroadcastID():0;
   strncpy(addonTimer.strSummary, xbmcTimer.m_strSummary.c_str(), sizeof(addonTimer.strSummary) - 1);
   addonTimer.iMarginStart      = xbmcTimer.m_iMarginStart;
   addonTimer.iMarginEnd        = xbmcTimer.m_iMarginEnd;
   addonTimer.iGenreType        = xbmcTimer.m_iGenreType;
   addonTimer.iGenreSubType     = xbmcTimer.m_iGenreSubType;
-  addonTimer.SeriesRule       = xbmcTimer.m_SeriesRule;
-  addonTimer.iEpgUid           = epgTag ? epgTag->UniqueBroadcastID():0;
+  addonTimer.SeriesRule        = xbmcTimer.m_SeriesRule;
 
 }
 
