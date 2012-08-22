@@ -79,6 +79,15 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_bIsPlayingRecording   = false;
   memset(&m_addonCapabilities, 0, sizeof(m_addonCapabilities));
   ResetQualityData(m_qualityInfo);
+
+  m_addonCapabilities.SupportsRecordingRules.bAtThisTime        = false;
+  m_addonCapabilities.SupportsRecordingRules.bOncePerDay        = false;
+  m_addonCapabilities.SupportsRecordingRules.bOncePerWeek       = false;
+  m_addonCapabilities.SupportsRecordingRules.bOnThisChannelOnly = false;
+  m_addonCapabilities.SupportsRecordingRules.bOnThisWeekDay     = false;
+  m_addonCapabilities.SupportsRecordingRules.bRecord            = false;
+  m_addonCapabilities.SupportsRecordingRules.bSkipRepeat        = false;
+
 }
 
 bool CPVRClient::Create(int iClientId)
@@ -197,6 +206,7 @@ void CPVRClient::WriteClientTimerInfo(const CPVRTimerInfoTag &xbmcTimer, PVR_TIM
   memset(&addonTimer, 0, sizeof(addonTimer));
 
   addonTimer.iClientIndex      = xbmcTimer.m_iClientIndex;
+  addonTimer.iClientScheduleId = xbmcTimer.m_iClientScheduleId;
   addonTimer.state             = xbmcTimer.m_state;
   addonTimer.iClientIndex      = xbmcTimer.m_iClientIndex;
   addonTimer.iClientChannelUid = xbmcTimer.m_iClientChannelUid;
@@ -209,12 +219,14 @@ void CPVRClient::WriteClientTimerInfo(const CPVRTimerInfoTag &xbmcTimer, PVR_TIM
   addonTimer.startTime         = start - g_advancedSettings.m_iPVRTimeCorrection;
   addonTimer.endTime           = end - g_advancedSettings.m_iPVRTimeCorrection;
   addonTimer.firstDay          = firstDay - g_advancedSettings.m_iPVRTimeCorrection;
-  addonTimer.iEpgUid           = epgTag ? epgTag->UniqueBroadcastID() : -1;
   strncpy(addonTimer.strSummary, xbmcTimer.m_strSummary.c_str(), sizeof(addonTimer.strSummary) - 1);
   addonTimer.iMarginStart      = xbmcTimer.m_iMarginStart;
   addonTimer.iMarginEnd        = xbmcTimer.m_iMarginEnd;
   addonTimer.iGenreType        = xbmcTimer.m_iGenreType;
   addonTimer.iGenreSubType     = xbmcTimer.m_iGenreSubType;
+  addonTimer.SeriesRule       = xbmcTimer.m_SeriesRule;
+  addonTimer.iEpgUid           = epgTag ? epgTag->UniqueBroadcastID():0;
+
 }
 
 /*!
@@ -1126,6 +1138,11 @@ bool CPVRClient::HandlesDemuxing(void) const
 bool CPVRClient::HandlesInputStream(void) const
 {
   return m_addonCapabilities.bHandlesInputStream;
+}
+
+void CPVRClient::GetSupportedRules(CTimerSeries &supportedSeries) const
+{
+  supportedSeries = m_addonCapabilities.SupportsRecordingRules;
 }
 
 bool CPVRClient::IsPlayingLiveStream(void) const

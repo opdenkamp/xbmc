@@ -25,6 +25,7 @@
 #include "addons/DllPVRClient.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/recordings/PVRRecordings.h"
+#include "pvr/timers/PVRTimerInfoTag.h"
 
 namespace EPG
 {
@@ -425,6 +426,7 @@ namespace PVR
     bool SupportsRecordingPlayCount(void) const;
     bool SupportsTimers(void) const;
     bool SupportsTV(void) const;
+    void GetSupportedRules(CTimerSeries &supportedSeries) const;
     bool HandlesDemuxing(void) const;
     bool HandlesInputStream(void) const;
 

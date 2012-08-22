@@ -7108,6 +7108,33 @@ msgctxt "#19269"
 msgid "Do not show 'connection lost' warnings"
 msgstr ""
 
+msgctxt "#19270"
+msgid "Record the Series"
+msgstr ""
+
+msgctxt "#19271"
+msgid "On this channel only"
+msgstr ""
+
+msgctxt "#19272"
+msgid "Skip repeat"
+msgstr ""
+
+msgctxt "#19273"
+msgid "On this week day only"
+msgstr ""
+
+msgctxt "#19274"
+msgid "At this time only"
+msgstr ""
+
+msgctxt "#19275"
+msgid "Once a week"
+msgstr ""
+
+msgctxt "#19276"
+msgid "Once a day"
+msgstr ""
 msgctxt "#19499"
 msgid "Other/Unknown"
 msgstr ""

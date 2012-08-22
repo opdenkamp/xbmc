@@ -62,13 +62,45 @@ namespace PVR
 
   class CPVRTimerInfoTag;
   typedef boost::shared_ptr<PVR::CPVRTimerInfoTag> CPVRTimerInfoTagPtr;
+  class CTimerSeries: public PVR_TIMER_SERIES
+  {
+  public:
+    CTimerSeries()
+    {
+      Init();
+    };
+    void Init()
+    {
+      bAtThisTime        = false;
+      bOncePerDay        = false;
+      bOncePerWeek       = false;
+      bOnThisChannelOnly = false;
+      bOnThisWeekDay     = false;
+      bRecord            = false;
+      bSkipRepeat        = false;
+    }
+    const CTimerSeries& operator = (const PVR_TIMER_SERIES &pvr_Serie)
+    {
+      bAtThisTime        = pvr_Serie.bAtThisTime;
+      bOncePerDay        = pvr_Serie.bOncePerDay;
+      bOncePerWeek       = pvr_Serie.bOncePerWeek;
+      bOnThisChannelOnly = pvr_Serie.bOnThisChannelOnly;
+      bOnThisWeekDay     = pvr_Serie.bOnThisWeekDay;
+      bRecord            = pvr_Serie.bRecord;
+      bSkipRepeat        = pvr_Serie.bSkipRepeat;
+ 
+      return *this;
+    }
+  };
 
   class CPVRTimerInfoTag
   {
     friend class CPVRTimers;
     friend class CGUIDialogPVRTimerSettings;
-
+   
   public:
+    int                   m_iClientScheduleId;    /*!< the id of the epg table or -1 if none */
+    CTimerSeries          m_SeriesRule;         /*!< @brief rules for the serie recording */
     CPVRTimerInfoTag(void);
     CPVRTimerInfoTag(const PVR_TIMER &timer, CPVRChannelPtr channel, unsigned int iClientId);
     virtual ~CPVRTimerInfoTag(void);
@@ -102,6 +134,7 @@ namespace PVR
     bool IsActive(void) const { return m_state == PVR_TIMER_STATE_SCHEDULED || m_state == PVR_TIMER_STATE_RECORDING; }
     bool IsRecording(void) const { return m_state == PVR_TIMER_STATE_RECORDING; }
 
+    void SetSeriesRule(PVR_TIMER_SERIES SeriesRule) {m_SeriesRule=SeriesRule;}
     CDateTime StartAsUTC(void) const;
     CDateTime StartAsLocalTime(void) const;
     void SetStartFromUTC(CDateTime &start) { m_StartTime = start; }
