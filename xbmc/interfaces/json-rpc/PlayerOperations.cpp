@@ -749,10 +749,12 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const CStdString &method, ITran
 
 JSONRPC_STATUS CPlayerOperations::SetSubtitle(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  switch (GetPlayer(parameterObject["playerid"]))
+  PlayerType player = GetPlayer(parameterObject["playerid"]);
+  switch (player)
   {
     case Video:
-      if (g_application.m_pPlayer)
+    case LiveTV:
+      if (g_application.m_pPlayer && (player != LiveTV || g_PVRManager.IsPlayingTV()))
       {
         int index = -1;
         if (parameterObject["subtitle"].isString())
