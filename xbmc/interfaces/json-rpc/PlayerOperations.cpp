@@ -627,6 +627,11 @@ JSONRPC_STATUS CPlayerOperations::GoTo(const CStdString &method, ITransportLayer
       CApplicationMessenger::Get().PlayListPlayerPlay(position);
       break;
 
+    case LiveTV:
+      if (!g_PVRManager.ChannelSwitch(position))
+        return FailedToExecute;
+      break;
+
     case Picture:
     case None:
     default:
