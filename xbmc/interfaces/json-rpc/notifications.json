@@ -211,5 +211,20 @@
       { "name": "data", "type": "null", "required": true }
     ],
     "returns": null
+  },
+  "PVR.OnCurrentEpgItemChanged": {
+    "type": "notification",
+    "description": "The current epg item on the channel changed",
+    "params": [
+      { "name": "sender", "type": "string", "required": true },
+      { "name": "data", "type": "object", "required": true,
+        "properties": {
+          "channelid": { "type": "integer", "required": true },
+          "epgid": { "type": "integer", "required": true },
+          "starttime": { "type": "integer", "required": true }
+        }
+      }
+    ],
+    "returns": null
   }
 }
