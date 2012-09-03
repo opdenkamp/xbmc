@@ -51,10 +51,8 @@
 		C8B92A8515735D0300284190 /* EpgInfoTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A7B15735D0300284190 /* EpgInfoTag.cpp */; };
 		C8B92A8615735D0300284190 /* EpgSearchFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A7D15735D0300284190 /* EpgSearchFilter.cpp */; };
 		C8B92A8715735D0300284190 /* GUIEPGGridContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A7F15735D0300284190 /* GUIEPGGridContainer.cpp */; };
-		C8B92AD815735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A8C15735D2700284190 /* Makefile */; };
 		C8B92AD915735D2700284190 /* PVRClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A8D15735D2700284190 /* PVRClient.cpp */; };
 		C8B92ADA15735D2700284190 /* PVRClients.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A8F15735D2700284190 /* PVRClients.cpp */; };
-		C8B92ADB15735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A9215735D2700284190 /* Makefile */; };
 		C8B92ADC15735D2700284190 /* PVRChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A9315735D2700284190 /* PVRChannel.cpp */; };
 		C8B92ADD15735D2700284190 /* PVRChannelGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A9515735D2700284190 /* PVRChannelGroup.cpp */; };
 		C8B92ADE15735D2700284190 /* PVRChannelGroupInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92A9715735D2700284190 /* PVRChannelGroupInternal.cpp */; };
@@ -70,15 +68,11 @@
 		C8B92AE815735D2700284190 /* GUIDialogPVRGuideSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AAC15735D2700284190 /* GUIDialogPVRGuideSearch.cpp */; };
 		C8B92AE915735D2700284190 /* GUIDialogPVRRecordingInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AAE15735D2700284190 /* GUIDialogPVRRecordingInfo.cpp */; };
 		C8B92AEA15735D2700284190 /* GUIDialogPVRTimerSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB015735D2700284190 /* GUIDialogPVRTimerSettings.cpp */; };
-		C8B92AEB15735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB215735D2700284190 /* Makefile */; };
-		C8B92AEC15735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB315735D2700284190 /* Makefile */; };
 		C8B92AED15735D2700284190 /* PVRDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB415735D2700284190 /* PVRDatabase.cpp */; };
 		C8B92AEE15735D2700284190 /* PVRGUIInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB615735D2700284190 /* PVRGUIInfo.cpp */; };
 		C8B92AEF15735D2700284190 /* PVRManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AB815735D2700284190 /* PVRManager.cpp */; };
-		C8B92AF015735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92ABB15735D2700284190 /* Makefile */; };
 		C8B92AF115735D2700284190 /* PVRRecording.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92ABC15735D2700284190 /* PVRRecording.cpp */; };
 		C8B92AF215735D2700284190 /* PVRRecordings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92ABE15735D2700284190 /* PVRRecordings.cpp */; };
-		C8B92AF315735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AC115735D2700284190 /* Makefile */; };
 		C8B92AF415735D2700284190 /* PVRTimerInfoTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AC215735D2700284190 /* PVRTimerInfoTag.cpp */; };
 		C8B92AF515735D2700284190 /* PVRTimers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AC415735D2700284190 /* PVRTimers.cpp */; };
 		C8B92AF615735D2700284190 /* GUIViewStatePVR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AC715735D2700284190 /* GUIViewStatePVR.cpp */; };
@@ -89,7 +83,6 @@
 		C8B92AFB15735D2700284190 /* GUIWindowPVRRecordings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AD115735D2700284190 /* GUIWindowPVRRecordings.cpp */; };
 		C8B92AFC15735D2700284190 /* GUIWindowPVRSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AD315735D2700284190 /* GUIWindowPVRSearch.cpp */; };
 		C8B92AFD15735D2700284190 /* GUIWindowPVRTimers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AD515735D2700284190 /* GUIWindowPVRTimers.cpp */; };
-		C8B92AFE15735D2700284190 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AD715735D2700284190 /* Makefile */; };
 		C8B92B0715735D5D00284190 /* AddonCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92AFF15735D5D00284190 /* AddonCallbacks.cpp */; };
 		C8B92B0815735D5D00284190 /* AddonCallbacksAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B0115735D5D00284190 /* AddonCallbacksAddon.cpp */; };
 		C8B92B0915735D5D00284190 /* AddonCallbacksGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B0315735D5D00284190 /* AddonCallbacksGUI.cpp */; };
@@ -1135,12 +1128,10 @@
 		C8B92A7E15735D0300284190 /* EpgSearchFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EpgSearchFilter.h; sourceTree = "<group>"; };
 		C8B92A7F15735D0300284190 /* GUIEPGGridContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIEPGGridContainer.cpp; sourceTree = "<group>"; };
 		C8B92A8015735D0300284190 /* GUIEPGGridContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIEPGGridContainer.h; sourceTree = "<group>"; };
-		C8B92A8C15735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92A8D15735D2700284190 /* PVRClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRClient.cpp; sourceTree = "<group>"; };
 		C8B92A8E15735D2700284190 /* PVRClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRClient.h; sourceTree = "<group>"; };
 		C8B92A8F15735D2700284190 /* PVRClients.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRClients.cpp; sourceTree = "<group>"; };
 		C8B92A9015735D2700284190 /* PVRClients.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRClients.h; sourceTree = "<group>"; };
-		C8B92A9215735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92A9315735D2700284190 /* PVRChannel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRChannel.cpp; sourceTree = "<group>"; };
 		C8B92A9415735D2700284190 /* PVRChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRChannel.h; sourceTree = "<group>"; };
 		C8B92A9515735D2700284190 /* PVRChannelGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRChannelGroup.cpp; sourceTree = "<group>"; };
@@ -1171,20 +1162,16 @@
 		C8B92AAF15735D2700284190 /* GUIDialogPVRRecordingInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogPVRRecordingInfo.h; sourceTree = "<group>"; };
 		C8B92AB015735D2700284190 /* GUIDialogPVRTimerSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogPVRTimerSettings.cpp; sourceTree = "<group>"; };
 		C8B92AB115735D2700284190 /* GUIDialogPVRTimerSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogPVRTimerSettings.h; sourceTree = "<group>"; };
-		C8B92AB215735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		C8B92AB315735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92AB415735D2700284190 /* PVRDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRDatabase.cpp; sourceTree = "<group>"; };
 		C8B92AB515735D2700284190 /* PVRDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRDatabase.h; sourceTree = "<group>"; };
 		C8B92AB615735D2700284190 /* PVRGUIInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRGUIInfo.cpp; sourceTree = "<group>"; };
 		C8B92AB715735D2700284190 /* PVRGUIInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRGUIInfo.h; sourceTree = "<group>"; };
 		C8B92AB815735D2700284190 /* PVRManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRManager.cpp; sourceTree = "<group>"; };
 		C8B92AB915735D2700284190 /* PVRManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRManager.h; sourceTree = "<group>"; };
-		C8B92ABB15735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92ABC15735D2700284190 /* PVRRecording.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRRecording.cpp; sourceTree = "<group>"; };
 		C8B92ABD15735D2700284190 /* PVRRecording.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRRecording.h; sourceTree = "<group>"; };
 		C8B92ABE15735D2700284190 /* PVRRecordings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRRecordings.cpp; sourceTree = "<group>"; };
 		C8B92ABF15735D2700284190 /* PVRRecordings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRRecordings.h; sourceTree = "<group>"; };
-		C8B92AC115735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92AC215735D2700284190 /* PVRTimerInfoTag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTimerInfoTag.cpp; sourceTree = "<group>"; };
 		C8B92AC315735D2700284190 /* PVRTimerInfoTag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTimerInfoTag.h; sourceTree = "<group>"; };
 		C8B92AC415735D2700284190 /* PVRTimers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTimers.cpp; sourceTree = "<group>"; };
@@ -1205,7 +1192,6 @@
 		C8B92AD415735D2700284190 /* GUIWindowPVRSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIWindowPVRSearch.h; sourceTree = "<group>"; };
 		C8B92AD515735D2700284190 /* GUIWindowPVRTimers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIWindowPVRTimers.cpp; sourceTree = "<group>"; };
 		C8B92AD615735D2700284190 /* GUIWindowPVRTimers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIWindowPVRTimers.h; sourceTree = "<group>"; };
-		C8B92AD715735D2700284190 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		C8B92AFF15735D5D00284190 /* AddonCallbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddonCallbacks.cpp; sourceTree = "<group>"; };
 		C8B92B0015735D5D00284190 /* AddonCallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddonCallbacks.h; sourceTree = "<group>"; };
 		C8B92B0115735D5D00284190 /* AddonCallbacksAddon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddonCallbacksAddon.cpp; sourceTree = "<group>"; };
@@ -3335,16 +3321,15 @@
 				C8B92A8B15735D2700284190 /* addons */,
 				C8B92A9115735D2700284190 /* channels */,
 				C8B92A9D15735D2700284190 /* dialogs */,
-				C8B92AB315735D2700284190 /* Makefile */,
+				C8B92ABA15735D2700284190 /* recordings */,
+				C8B92AC015735D2700284190 /* timers */,
+				C8B92AC615735D2700284190 /* windows */,
 				C8B92AB415735D2700284190 /* PVRDatabase.cpp */,
 				C8B92AB515735D2700284190 /* PVRDatabase.h */,
 				C8B92AB615735D2700284190 /* PVRGUIInfo.cpp */,
 				C8B92AB715735D2700284190 /* PVRGUIInfo.h */,
 				C8B92AB815735D2700284190 /* PVRManager.cpp */,
 				C8B92AB915735D2700284190 /* PVRManager.h */,
-				C8B92ABA15735D2700284190 /* recordings */,
-				C8B92AC015735D2700284190 /* timers */,
-				C8B92AC615735D2700284190 /* windows */,
 			);
 			path = pvr;
 			sourceTree = "<group>";
@@ -3352,7 +3337,6 @@
 		C8B92A8B15735D2700284190 /* addons */ = {
 			isa = PBXGroup;
 			children = (
-				C8B92A8C15735D2700284190 /* Makefile */,
 				C8B92A8D15735D2700284190 /* PVRClient.cpp */,
 				C8B92A8E15735D2700284190 /* PVRClient.h */,
 				C8B92A8F15735D2700284190 /* PVRClients.cpp */,
@@ -3364,7 +3348,6 @@
 		C8B92A9115735D2700284190 /* channels */ = {
 			isa = PBXGroup;
 			children = (
-				C8B92A9215735D2700284190 /* Makefile */,
 				C8B92A9315735D2700284190 /* PVRChannel.cpp */,
 				C8B92A9415735D2700284190 /* PVRChannel.h */,
 				C8B92A9515735D2700284190 /* PVRChannelGroup.cpp */,
@@ -3402,7 +3385,6 @@
 				C8B92AAF15735D2700284190 /* GUIDialogPVRRecordingInfo.h */,
 				C8B92AB015735D2700284190 /* GUIDialogPVRTimerSettings.cpp */,
 				C8B92AB115735D2700284190 /* GUIDialogPVRTimerSettings.h */,
-				C8B92AB215735D2700284190 /* Makefile */,
 			);
 			path = dialogs;
 			sourceTree = "<group>";
@@ -3410,7 +3392,6 @@
 		C8B92ABA15735D2700284190 /* recordings */ = {
 			isa = PBXGroup;
 			children = (
-				C8B92ABB15735D2700284190 /* Makefile */,
 				C8B92ABC15735D2700284190 /* PVRRecording.cpp */,
 				C8B92ABD15735D2700284190 /* PVRRecording.h */,
 				C8B92ABE15735D2700284190 /* PVRRecordings.cpp */,
@@ -3422,7 +3403,6 @@
 		C8B92AC015735D2700284190 /* timers */ = {
 			isa = PBXGroup;
 			children = (
-				C8B92AC115735D2700284190 /* Makefile */,
 				C8B92AC215735D2700284190 /* PVRTimerInfoTag.cpp */,
 				C8B92AC315735D2700284190 /* PVRTimerInfoTag.h */,
 				C8B92AC415735D2700284190 /* PVRTimers.cpp */,
@@ -3450,7 +3430,6 @@
 				C8B92AD415735D2700284190 /* GUIWindowPVRSearch.h */,
 				C8B92AD515735D2700284190 /* GUIWindowPVRTimers.cpp */,
 				C8B92AD615735D2700284190 /* GUIWindowPVRTimers.h */,
-				C8B92AD715735D2700284190 /* Makefile */,
 			);
 			path = windows;
 			sourceTree = "<group>";
@@ -7579,10 +7558,8 @@
 				C8B92A8515735D0300284190 /* EpgInfoTag.cpp in Sources */,
 				C8B92A8615735D0300284190 /* EpgSearchFilter.cpp in Sources */,
 				C8B92A8715735D0300284190 /* GUIEPGGridContainer.cpp in Sources */,
-				C8B92AD815735D2700284190 /* Makefile in Sources */,
 				C8B92AD915735D2700284190 /* PVRClient.cpp in Sources */,
 				C8B92ADA15735D2700284190 /* PVRClients.cpp in Sources */,
-				C8B92ADB15735D2700284190 /* Makefile in Sources */,
 				C8B92ADC15735D2700284190 /* PVRChannel.cpp in Sources */,
 				C8B92ADD15735D2700284190 /* PVRChannelGroup.cpp in Sources */,
 				C8B92ADE15735D2700284190 /* PVRChannelGroupInternal.cpp in Sources */,
@@ -7598,15 +7575,11 @@
 				C8B92AE815735D2700284190 /* GUIDialogPVRGuideSearch.cpp in Sources */,
 				C8B92AE915735D2700284190 /* GUIDialogPVRRecordingInfo.cpp in Sources */,
 				C8B92AEA15735D2700284190 /* GUIDialogPVRTimerSettings.cpp in Sources */,
-				C8B92AEB15735D2700284190 /* Makefile in Sources */,
-				C8B92AEC15735D2700284190 /* Makefile in Sources */,
 				C8B92AED15735D2700284190 /* PVRDatabase.cpp in Sources */,
 				C8B92AEE15735D2700284190 /* PVRGUIInfo.cpp in Sources */,
 				C8B92AEF15735D2700284190 /* PVRManager.cpp in Sources */,
-				C8B92AF015735D2700284190 /* Makefile in Sources */,
 				C8B92AF115735D2700284190 /* PVRRecording.cpp in Sources */,
 				C8B92AF215735D2700284190 /* PVRRecordings.cpp in Sources */,
-				C8B92AF315735D2700284190 /* Makefile in Sources */,
 				C8B92AF415735D2700284190 /* PVRTimerInfoTag.cpp in Sources */,
 				C8B92AF515735D2700284190 /* PVRTimers.cpp in Sources */,
 				C8B92AF615735D2700284190 /* GUIViewStatePVR.cpp in Sources */,
@@ -7617,7 +7590,6 @@
 				C8B92AFB15735D2700284190 /* GUIWindowPVRRecordings.cpp in Sources */,
 				C8B92AFC15735D2700284190 /* GUIWindowPVRSearch.cpp in Sources */,
 				C8B92AFD15735D2700284190 /* GUIWindowPVRTimers.cpp in Sources */,
-				C8B92AFE15735D2700284190 /* Makefile in Sources */,
 				C8B92B0715735D5D00284190 /* AddonCallbacks.cpp in Sources */,
 				C8B92B0815735D5D00284190 /* AddonCallbacksAddon.cpp in Sources */,
 				C8B92B0915735D5D00284190 /* AddonCallbacksGUI.cpp in Sources */,
