@@ -92,7 +92,6 @@
 		C8B92B1515735DFB00284190 /* PVRDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1115735DFB00284190 /* PVRDirectory.cpp */; };
 		C8B92B1615735DFB00284190 /* PVRFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1315735DFB00284190 /* PVRFile.cpp */; };
 		C8B92B1915735E1E00284190 /* GUIDialogExtendedProgressBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1715735E1E00284190 /* GUIDialogExtendedProgressBar.cpp */; };
-		C8B92B1C15735E6300284190 /* PVROperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1A15735E6300284190 /* PVROperations.cpp */; };
 		C8B92B2115735EBF00284190 /* Observer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1D15735EBF00284190 /* Observer.cpp */; };
 		C8B92B2215735EBF00284190 /* TextSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8B92B1F15735EBF00284190 /* TextSearch.cpp */; };
 		C8EC5D51136954E400CCC10D /* XBMC_keytable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8EC5D4F136954E400CCC10D /* XBMC_keytable.cpp */; };
@@ -1210,8 +1209,6 @@
 		C8B92B1415735DFB00284190 /* PVRFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRFile.h; sourceTree = "<group>"; };
 		C8B92B1715735E1E00284190 /* GUIDialogExtendedProgressBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogExtendedProgressBar.cpp; sourceTree = "<group>"; };
 		C8B92B1815735E1E00284190 /* GUIDialogExtendedProgressBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogExtendedProgressBar.h; sourceTree = "<group>"; };
-		C8B92B1A15735E6300284190 /* PVROperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVROperations.cpp; sourceTree = "<group>"; };
-		C8B92B1B15735E6300284190 /* PVROperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVROperations.h; sourceTree = "<group>"; };
 		C8B92B1D15735EBF00284190 /* Observer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Observer.cpp; sourceTree = "<group>"; };
 		C8B92B1E15735EBF00284190 /* Observer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Observer.h; sourceTree = "<group>"; };
 		C8B92B1F15735EBF00284190 /* TextSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextSearch.cpp; sourceTree = "<group>"; };
@@ -6404,8 +6401,6 @@
 				F5AE40FE1341751E0004BD79 /* PlayerOperations.cpp */,
 				F5AE40FF1341751E0004BD79 /* PlayerOperations.h */,
 				F5AE41001341751E0004BD79 /* PlaylistOperations.cpp */,
-				C8B92B1A15735E6300284190 /* PVROperations.cpp */,
-				C8B92B1B15735E6300284190 /* PVROperations.h */,
 				F5AE41011341751E0004BD79 /* PlaylistOperations.h */,
 				F5AE41021341751E0004BD79 /* SystemOperations.cpp */,
 				F5AE41031341751E0004BD79 /* SystemOperations.h */,
@@ -7599,7 +7594,6 @@
 				C8B92B1515735DFB00284190 /* PVRDirectory.cpp in Sources */,
 				C8B92B1615735DFB00284190 /* PVRFile.cpp in Sources */,
 				C8B92B1915735E1E00284190 /* GUIDialogExtendedProgressBar.cpp in Sources */,
-				C8B92B1C15735E6300284190 /* PVROperations.cpp in Sources */,
 				C8B92B2115735EBF00284190 /* Observer.cpp in Sources */,
 				C8B92B2215735EBF00284190 /* TextSearch.cpp in Sources */,
 				18E7CAD11578C671001D4554 /* CDDARipJob.cpp in Sources */,
