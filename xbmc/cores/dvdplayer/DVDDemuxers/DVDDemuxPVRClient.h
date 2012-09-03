@@ -53,7 +53,9 @@ public:
   CDemuxStreamVideoPVRClient(CDVDDemuxPVRClient *parent)
     : m_parent(parent)
   {}
+  virtual ~CDemuxStreamVideoPVRClient();
   virtual void GetStreamInfo(std::string& strInfo);
+  AVCodecParserContext* m_pParser;
 };
 
 class CDemuxStreamAudioPVRClient : public CDemuxStreamAudio
@@ -63,7 +65,9 @@ public:
   CDemuxStreamAudioPVRClient(CDVDDemuxPVRClient *parent)
     : m_parent(parent)
   {}
+  virtual ~CDemuxStreamAudioPVRClient();
   virtual void GetStreamInfo(std::string& strInfo);
+  AVCodecParserContext* m_pParser;
 };
 
 class CDemuxStreamSubtitlePVRClient : public CDemuxStreamSubtitle
@@ -79,6 +83,9 @@ public:
 
 class CDVDDemuxPVRClient : public CDVDDemux
 {
+  friend class CDemuxStreamVideoPVRClient;
+  friend class CDemuxStreamAudioPVRClient;
+
 public:
 
   CDVDDemuxPVRClient();
@@ -104,15 +111,14 @@ protected:
   #define MAX_STREAMS 100
 #endif
   CDemuxStream* m_streams[MAX_STREAMS]; // maximum number of streams that ffmpeg can handle
+  CDemuxStream* m_streamsToParse[MAX_STREAMS];
   boost::shared_ptr<PVR::CPVRClient> m_pvrClient;
 
   DllAvCodec  m_dllAvCodec;
-  AVCodecParserContext* m_pParser;
-  bool m_bNeedExtraData;
 
 private:
   void RequestStreams();
   void UpdateStreams(PVR_STREAM_PROPERTIES *props);
-  bool ParseVideoPacket(DemuxPacket* pPacket);
+  bool ParsePacket(DemuxPacket* pPacket);
 };
 
