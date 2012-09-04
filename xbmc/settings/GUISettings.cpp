@@ -911,8 +911,8 @@ void CGUISettings::Initialize()
   AddPath(NULL,"system.playlistspath",20006,"set default",BUTTON_CONTROL_PATH_INPUT,false);
 
   // tv settings (access over TV menu from home window)
-  AddGroup(8, 19180);
-  CSettingsCategory* pvr = AddCategory(8, "pvrmanager", 128);
+  AddGroup(9, 19180);
+  CSettingsCategory* pvr = AddCategory(9, "pvrmanager", 128);
   AddBool(pvr, "pvrmanager.enabled", 449, false);
   AddSeparator(pvr, "pvrmanager.sep1");
   AddBool(pvr, "pvrmanager.syncchannelgroups", 19221, true);
@@ -925,7 +925,7 @@ void CGUISettings::Initialize()
   AddSeparator(pvr, "pvrmanager.sep3");
   AddBool(pvr, "pvrmanager.hideconnectionlostwarning", 19269, false);
 
-  CSettingsCategory* pvrm = AddCategory(8, "pvrmenu", 19181);
+  CSettingsCategory* pvrm = AddCategory(9, "pvrmenu", 19181);
   AddBool(pvrm, "pvrmenu.infoswitch", 19178, true);
   AddBool(pvrm, "pvrmenu.infotimeout", 19179, true);
   AddBool(pvrm, "pvrmenu.closechannelosdonswitch", 19229, false);
@@ -935,7 +935,7 @@ void CGUISettings::Initialize()
   AddString(pvrm, "pvrmenu.iconpath", 19018, "", BUTTON_CONTROL_PATH_INPUT, false, 657);
   AddString(pvrm, "pvrmenu.searchicons", 19167, "", BUTTON_CONTROL_STANDARD);
 
-  CSettingsCategory* pvre = AddCategory(8, "epg", 19069);
+  CSettingsCategory* pvre = AddCategory(9, "epg", 19069);
   AddInt(pvre, "epg.defaultguideview", 19065, GUIDE_VIEW_NOW, GUIDE_VIEW_CHANNEL, 1, GUIDE_VIEW_TIMELINE, SPIN_CONTROL_TEXT);
   AddInt(pvre, "epg.daystodisplay", 19182, 2, 1, 1, 14, SPIN_CONTROL_INT_PLUS, MASK_DAYS);
   AddSeparator(pvre, "epg.sep1");
@@ -945,7 +945,7 @@ void CGUISettings::Initialize()
   AddBool(pvre, "epg.hidenoinfoavailable", 19268, true);
   AddString(pvre, "epg.resetepg", 19187, "", BUTTON_CONTROL_STANDARD);
 
-  CSettingsCategory* pvrp = AddCategory(8, "pvrplayback", 19177);
+  CSettingsCategory* pvrp = AddCategory(9, "pvrplayback", 19177);
   AddBool(pvrp, "pvrplayback.playminimized", 19171, true);
   AddInt(pvrp, "pvrplayback.startlast", 19189, START_LAST_CHANNEL_OFF, START_LAST_CHANNEL_OFF, 1, START_LAST_CHANNEL_ON, SPIN_CONTROL_TEXT);
   AddBool(pvrp, "pvrplayback.switchautoclose", 19168, true);
@@ -954,7 +954,7 @@ void CGUISettings::Initialize()
   AddInt(pvrp, "pvrplayback.scantime", 19170, 15, 1, 1, 60, SPIN_CONTROL_INT_PLUS, MASK_SECS);
   AddInt(pvrp, "pvrplayback.channelentrytimeout", 19073, 0, 0, 250, 2000, SPIN_CONTROL_INT_PLUS, MASK_MS);
 
-  CSettingsCategory* pvrr = AddCategory(8, "pvrrecord", 19043);
+  CSettingsCategory* pvrr = AddCategory(9, "pvrrecord", 19043);
   AddInt(pvrr, "pvrrecord.instantrecordtime", 19172, 180, 1, 1, 720, SPIN_CONTROL_INT_PLUS, MASK_MINS);
   AddInt(pvrr, "pvrrecord.defaultpriority", 19173, 50, 1, 1, 100, SPIN_CONTROL_INT_PLUS);
   AddInt(pvrr, "pvrrecord.defaultlifetime", 19174, 99, 1, 1, 365, SPIN_CONTROL_INT_PLUS, MASK_DAYS);
@@ -963,7 +963,7 @@ void CGUISettings::Initialize()
   AddSeparator(pvrr, "pvrrecord.sep1");
   AddBool(pvrr, "pvrrecord.timernotifications", 19233, true);
 
-  CSettingsCategory* pvrpwr = AddCategory(8, "pvrpowermanagement", 14095);
+  CSettingsCategory* pvrpwr = AddCategory(9, "pvrpowermanagement", 14095);
   AddBool(pvrpwr, "pvrpowermanagement.enabled", 305, false);
   AddSeparator(pvrpwr, "pvrpowermanagement.sep1");
   AddInt(pvrpwr, "pvrpowermanagement.backendidletime", 19244, 15, 0, 5, 360, SPIN_CONTROL_INT_PLUS, MASK_MINS, TEXT_OFF);
@@ -973,7 +973,7 @@ void CGUISettings::Initialize()
   AddBool(pvrpwr, "pvrpowermanagement.dailywakeup", 19247, false);
   AddString(pvrpwr, "pvrpowermanagement.dailywakeuptime", 19248, "00:00:00", EDIT_CONTROL_INPUT);
 
-  CSettingsCategory* pvrpa = AddCategory(8, "pvrparental", 19259);
+  CSettingsCategory* pvrpa = AddCategory(9, "pvrparental", 19259);
   AddBool(pvrpa, "pvrparental.enabled", 449  , false);
   AddSeparator(pvrpa, "pvrparental.sep1");
   AddString(pvrpa, "pvrparental.pin", 19261, "", EDIT_CONTROL_HIDDEN_NUMBER_VERIFY_NEW, true);

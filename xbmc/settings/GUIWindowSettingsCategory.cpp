@@ -150,7 +150,7 @@ CGUIWindowSettingsCategory::CGUIWindowSettingsCategory(void)
   m_pOriginalImage = NULL;
   m_pOriginalEdit = NULL;
   // set the correct ID range...
-  m_idRange = 9;
+  m_idRange = 10;
   m_iScreen = 0;
   m_strOldTrackFormat = "";
   m_strOldTrackFormatRight = "";
