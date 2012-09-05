@@ -29,6 +29,8 @@
 #include "music/tags/MusicInfoTag.h"
 #include "music/MusicDatabase.h"
 #include "video/VideoDatabase.h"
+#include "pvr/channels/PVRChannel.h"
+#include "PlayListPlayer.h"
 
 #define LOOKUP_PROPERTY "database-lookup"
 
@@ -183,6 +185,14 @@ void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, c
       if (!item->GetMusicInfoTag()->GetArtist().empty())
         object["artist"] = item->GetMusicInfoTag()->GetArtist();
     }
+  }
+  else if(item->HasPVRChannelInfoTag())
+  {
+    PVR::CPVRChannel *channel = item->GetPVRChannelInfoTag();
+    id = channel->ChannelID();
+    type = channel->IsRadio() ? "radio" : "tv";
+    if(data.isMember("player") && data["player"].isMember("playerid"))
+      object["player"]["playerid"] = channel->IsRadio() ? PLAYLIST_MUSIC : PLAYLIST_VIDEO;
   }
   else
     type = "unknown";

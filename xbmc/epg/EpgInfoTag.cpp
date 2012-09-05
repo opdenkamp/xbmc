@@ -31,6 +31,8 @@
 #include "settings/GUISettings.h"
 #include "utils/log.h"
 #include "addons/include/xbmc_pvr_types.h"
+#include "utils/Variant.h"
+#include "interfaces/json-rpc/JSONUtils.h"
 
 using namespace std;
 using namespace EPG;
@@ -199,6 +201,22 @@ CEpgInfoTag &CEpgInfoTag::operator =(const CEpgInfoTag &other)
   m_pvrChannel         = other.m_pvrChannel;
 
   return *this;
+}
+
+void CEpgInfoTag::Serialize(CVariant& value)
+{
+  value["title"] = m_strTitle;
+  value["genre"] = m_genre;
+  value["plot"] = m_strPlot;
+  value["plotoutline"] = m_strPlotOutline;
+  value["duration"] = GetDuration();
+  JSONRPC::CJSONUtils::DateTimeToDateTimeObject(m_startTime, value["starttime"]);
+  JSONRPC::CJSONUtils::DateTimeToDateTimeObject(m_endTime, value["endtime"]);
+  CVariant channel = CVariant(CVariant::VariantTypeObject);
+  channel["id"] = m_pvrChannel->ChannelID();
+  channel["name"] = m_pvrChannel->ChannelName();
+  channel["type"] = m_pvrChannel->IsRadio() ? "radio" : "tv";
+  value["channel"] = channel;
 }
 
 bool CEpgInfoTag::Changed(void) const

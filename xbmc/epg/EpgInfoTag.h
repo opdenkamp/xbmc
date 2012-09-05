@@ -37,7 +37,7 @@ namespace EPG
   class CEpgInfoTag;
   typedef boost::shared_ptr<EPG::CEpgInfoTag> CEpgInfoTagPtr;
 
-  class CEpgInfoTag
+  class CEpgInfoTag : public ISerializable
   {
     friend class CEpg;
     friend class CEpgDatabase;
@@ -67,6 +67,8 @@ namespace EPG
     bool operator ==(const CEpgInfoTag& right) const;
     bool operator !=(const CEpgInfoTag& right) const;
     CEpgInfoTag &operator =(const CEpgInfoTag &other);
+
+    virtual void Serialize(CVariant& value);
 
     /*!
      * @brief Check whether this tag has changed and unsaved values.
