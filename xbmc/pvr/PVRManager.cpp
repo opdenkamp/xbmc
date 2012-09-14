@@ -39,6 +39,7 @@
 #include "utils/StringUtils.h"
 #include "threads/Atomics.h"
 #include "windows/GUIWindowPVRCommon.h"
+#include "interfaces/AnnouncementManager.h"
 
 #include "PVRManager.h"
 #include "PVRDatabase.h"
@@ -55,6 +56,7 @@ using namespace std;
 using namespace MUSIC_INFO;
 using namespace PVR;
 using namespace EPG;
+using namespace ANNOUNCEMENT;
 
 CPVRManager::CPVRManager(void) :
     CThread("PVR manager"),
@@ -970,6 +972,12 @@ bool CPVRManager::PerformChannelSwitch(const CPVRChannel &channel, bool bPreview
     SaveCurrentChannelSettings();
   }
 
+  if (!bPreview && m_currentFile)
+  {
+    CVariant data(CVariant::VariantTypeObject);
+    CAnnouncementManager::Announce(Player, "xbmc", "OnStop", CFileItemPtr(new CFileItem(m_currentFile)), data);
+  }
+
   SAFE_DELETE(m_currentFile);
 
   lock.Leave();
@@ -1002,6 +1010,14 @@ bool CPVRManager::PerformChannelSwitch(const CPVRChannel &channel, bool bPreview
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error,
         g_localizeStrings.Get(19166), // PVR information
         g_localizeStrings.Get(19035)); // This channel cannot be played. Check the log for details.
+  }
+
+  if (!bPreview && bSwitched)
+  {
+    CVariant param;
+    param["player"]["speed"] = 1;
+    param["player"]["playerid"] = g_playlistPlayer.GetCurrentPlaylist();
+    CAnnouncementManager::Announce(Player, "xbmc", "OnPlay", CFileItemPtr(new CFileItem(channel)), param);
   }
 
   return bSwitched;

@@ -31,6 +31,7 @@
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "utils/StringUtils.h"
+#include "interfaces/AnnouncementManager.h"
 
 #include "../addons/include/xbmc_pvr_types.h" // TODO extract the epg specific stuff
 
@@ -258,6 +259,15 @@ bool CEpg::CheckPlayingEvent(void)
   if (!bGotPreviousTag || (bGotCurrentTag && previousTag != newTag))
   {
     NotifyObservers(ObservableMessageEpgActiveItem);
+
+    time_t starttime;
+    newTag.StartAsUTC().GetAsUTCDateTime().GetAsTime(starttime);
+    CVariant data;
+    data["channelid"] = ChannelID();
+    data["epgid"] = EpgID();
+    data["starttime"] = starttime;
+    ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::PVR, "xbmc", "OnCurrentEpgItemChanged", data);
+
     bReturn = true;
   }
 

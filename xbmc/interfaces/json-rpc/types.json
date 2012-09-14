@@ -173,7 +173,7 @@
               "totaltime", "playlistid", "position", "repeat", "shuffled",
               "canseek", "canchangespeed", "canmove", "canzoom", "canrotate",
               "canshuffle", "canrepeat", "currentaudiostream", "audiostreams",
-              "subtitleenabled", "currentsubtitle", "subtitles" ]
+              "subtitleenabled", "currentsubtitle", "subtitles", "islive" ]
   },
   "Player.Property.Value": {
     "type": "object",
@@ -199,7 +199,8 @@
       "audiostreams": { "type": "array", "items": { "$ref": "Player.Audio.Stream" } },
       "subtitleenabled": { "type": "boolean" },
       "currentsubtitle": { "$ref": "Player.Subtitle" },
-      "subtitles": { "type": "array", "items": { "$ref": "Player.Subtitle" } }
+      "subtitles": { "type": "array", "items": { "$ref": "Player.Subtitle" } },
+      "islive": { "type": "boolean" }
     }
   },
   "Player.Notifications.Item.Type": {
@@ -897,14 +898,14 @@
                 "runtime", "set", "showlink", "streamdetails", "top250", "votes",
                 "firstaired", "season", "episode", "showtitle", "thumbnail", "file",
                 "resume", "artistid", "albumid", "tvshowid", "setid", "watchedepisodes",
-                "disc", "tag" ]
+                "disc", "tag", "isradio", "number", "epgid", "currentepgstarttime" ]
     }
   },
   "List.Item.All": {
     "extends": [ "Video.Details.File", "Audio.Details.Media" ],
     "properties": {
       "id": { "$ref": "Library.Id" },
-      "type": { "type": "string", "enum": [ "unknown", "movie", "episode", "musicvideo", "song", "picture" ] },
+      "type": { "type": "string", "enum": [ "unknown", "movie", "episode", "musicvideo", "song", "picture", "channel" ] },
       "albumartist": { "$ref": "Array.String" },
       "album": { "type": "string" },
       "track": { "type": "integer" },
@@ -938,7 +939,11 @@
       "tvshowid": { "$ref": "Library.Id" },
       "watchedepisodes": { "type": "integer" },
       "disc": { "type": "integer" },
-      "tag": { "$ref": "Array.String" }
+      "tag": { "$ref": "Array.String" },
+      "isradio": { "type": "boolean" },
+      "number": { "type": "integer" },
+      "epgid": { "type": "integer" },
+      "currentepgstarttime": { "type": "integer" }
     }
   },
   "List.Fields.Files": {

@@ -36,6 +36,8 @@
 #include "TextureCache.h"
 #include "ThumbLoader.h"
 #include "Util.h"
+#include "epg/EpgInfoTag.h"
+#include "pvr/channels/PVRChannel.h"
 
 using namespace MUSIC_INFO;
 using namespace JSONRPC;
@@ -241,6 +243,8 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
         object[ID] = (int)item->GetMusicInfoTag()->GetDatabaseId();
       else if (item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_iDbId > 0)
         object[ID] = item->GetVideoInfoTag()->m_iDbId;
+      else if (item->HasPVRChannelInfoTag() && item->GetPVRChannelInfoTag()->ChannelID() > 0)
+        object[ID] = item->GetPVRChannelInfoTag()->ChannelID();
 
       if (stricmp(ID, "id") == 0)
       {
@@ -277,6 +281,8 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
         }
         else if (item->HasPictureInfoTag())
           object["type"] = "picture";
+        else if (item->HasPVRChannelInfoTag())
+          object["type"] = "channel";
 
         if (!object.isMember("type"))
           object["type"] = "unknown";
@@ -291,6 +297,8 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
       FillDetails(item->GetMusicInfoTag(), item, validFields, object);
     if (item->HasPictureInfoTag())
       FillDetails(item->GetPictureInfoTag(), item, validFields, object);
+    if (item->HasPVRChannelInfoTag())
+        FillDetails(item->GetPVRChannelInfoTag(), item, validFields, object);
 
     object["label"] = item->GetLabel().c_str();
   }

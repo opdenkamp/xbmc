@@ -42,7 +42,7 @@ namespace PVR
   typedef boost::shared_ptr<PVR::CPVRChannel> CPVRChannelPtr;
 
   /** PVR Channel class */
-  class CPVRChannel : public Observable
+  class CPVRChannel : public Observable, public ISerializable
   {
     friend class CPVRDatabase;
     friend class CPVRChannelGroupInternal;
@@ -52,6 +52,8 @@ namespace PVR
     CPVRChannel(bool bRadio = false);
     CPVRChannel(const PVR_CHANNEL &channel, unsigned int iClientId);
     CPVRChannel(const CPVRChannel &channel);
+    
+    virtual void Serialize(CVariant& value);
 
     bool operator ==(const CPVRChannel &right) const;
     bool operator !=(const CPVRChannel &right) const;
