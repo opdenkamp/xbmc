@@ -2,6 +2,7 @@
 #include "DVDClock.h"
 #include "utils/log.h"
 #include "threads/Atomics.h"
+#include "../VideoRenderers/LinuxRendererA10.h"
 //check for eden
 #include "../VideoRenderers/RenderFlags.h"
 #ifdef CONF_FLAGS_FORMAT_A10BUF
@@ -14,7 +15,6 @@
 
 extern "C" {
 #include "os_adapter.h"
-#include "drv_display_sun4i.h"
 };
 
 static long g_cedaropen = 0;
@@ -40,7 +40,7 @@ static long g_cedaropen = 0;
 //#define A10ENABLE_MPEG4V3     //ok for divx3
 //#define A10ENABLE_DIVX4
 //#define A10ENABLE_DIVX5
-#define A10ENABLE_XVID          //mostly ok
+//#define A10ENABLE_XVID          //mostly ok
 
 /*
 TODO:- Finish adding MPEG4 codecs tags 
@@ -53,26 +53,22 @@ Note: AllWinner doc says to add FLV container type to VP6 and FLV1, but if i do 
 
 #define _4CC(c1,c2,c3,c4) (((u32)(c4)<<24)|((u32)(c3)<<16)|((u32)(c2)<<8)|(u32)(c1))
 
+static void freecallback(void *callbackpriv, void *pictpriv, cedarv_picture_t &pict)
+{
+  ((CDVDVideoCodecA10*)callbackpriv)->FreePicture(pictpriv, pict);
+}
+
 CDVDVideoCodecA10::CDVDVideoCodecA10()
 {
   m_hcedarv  = NULL;
-  m_hdisp    = -1;
-  m_scrid    = 0;
-  m_hscaler  = 0;
   m_yuvdata  = NULL;
   m_hwrender = false;
-  m_hlayer   = 0;
-  m_prevnr   = -1;
-  m_lastnr   = -1;
   memset(&m_picture, 0, sizeof(m_picture));
-  memset(&m_dispq, 0, sizeof(m_dispq));
-  pthread_mutex_init(&m_dispq_mutex, NULL);
 }
 
 CDVDVideoCodecA10::~CDVDVideoCodecA10()
 {
   Dispose();
-  pthread_mutex_destroy(&m_dispq_mutex);
 }
 
 /*
@@ -93,7 +89,11 @@ bool CDVDVideoCodecA10::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   }
   else
   {
+#ifdef TARGET_ANDROID
+    m_hwrender = false;
+#else
     m_hwrender = getenv("A10HWR") != NULL;
+#endif
   }
 
   CLog::Log(LOGNOTICE, "A10: using %s rendering.\n", m_hwrender ? "hardware" : "software");
@@ -320,21 +320,6 @@ bool CDVDVideoCodecA10::DoOpen()
     goto Error;
   }
 
-  if (!disp_open())
-  {
-    CLog::Log(LOGERROR, "A10: disp_open failed.\n");
-    goto Error;
-  }
-
-#ifndef A10DEBUG
-  //*open scaler once
-  if (!scaler_open)
-  {
-    CLog::Log(LOGERROR, "A10: scaler_open failed.\n");
-    return false;
-  }
-#endif
-
   CLog::Log(LOGDEBUG, "A10: cedar open.");
   return true;
 
@@ -349,13 +334,12 @@ Error:
  */
 void CDVDVideoCodecA10::Dispose()
 {
+  A10VLFreeQueue();
   if (m_yuvdata)
   {
     mem_pfree(m_yuvdata);
     m_yuvdata = NULL;
   }
-  scaler_close();
-  disp_close();
   if (m_hcedarv)
   {
     m_hcedarv->ioctrl(m_hcedarv, CEDARV_COMMAND_STOP, 0);
@@ -419,27 +403,15 @@ int CDVDVideoCodecA10::Decode(BYTE* pData, int iSize, double dts, double pts)
 
   if (ret == 4)
   {
-    pthread_mutex_lock(&m_dispq_mutex);
-
     CLog::Log(LOGNOTICE, "A10: Out of decoder frame buffers. Freeing the queue.\n");
 
     // DvdPlayer is dropping/queueing more frames then libcedarv has
     // frame buffers. Free the decoder frame queue.
-    // The next few frames in the display queue will get overwritten,
+    // The next few frames in the display queue will get invalidated,
     // but better than stopping the flow.
+    A10VLFreeQueue();
 
-    for (int i = 0; i < DISPQS; i++)
-    {
-      if ((int)m_dispq[i].picture.id != -1)
-      {
-        m_hcedarv->display_release(m_hcedarv, m_dispq[i].picture.id);
-        m_dispq[i].picture.id = -1;
-      }
-    }
-
-    pthread_mutex_unlock(&m_dispq_mutex);
-
-    return VC_ERROR;
+    m_hcedarv->decode(m_hcedarv);
   }
 
   ret = m_hcedarv->display_request(m_hcedarv, &picture);
@@ -476,28 +448,15 @@ int CDVDVideoCodecA10::Decode(BYTE* pData, int iSize, double dts, double pts)
     if (m_hwrender)
     {
 
-      pthread_mutex_lock(&m_dispq_mutex);
-
-      A10VideoBuffer *buffer = &m_dispq[m_wridx];
-
-      buffer->codec   = this;
-      buffer->decnr   = m_decnr++;
-      buffer->picture = picture;
-
       m_picture.format     = RENDER_FMT_A10BUF;
-      m_picture.a10buffer  = buffer;
+      m_picture.a10buffer  = A10VLPutQueue(freecallback, (void*)this, NULL, picture);
       m_picture.iFlags    |= DVP_FLAG_ALLOCATED;
 
-      m_wridx++;
-      if (m_wridx >= DISPQS)
-        m_wridx = 0;
-
-      pthread_mutex_unlock(&m_dispq_mutex);
       //CLog::Log(LOGDEBUG, "A10: decode %d\n", buffer->picture.id);
     }
     else
     {
-      ScalerParameter cdx_scaler_para;
+      A10VLScalerParameter cdx_scaler_para;
       u32 width32;
       u32 height32;
       u32 height64;
@@ -552,7 +511,7 @@ int CDVDVideoCodecA10::Decode(BYTE* pData, int iSize, double dts, double pts)
 #endif
       }
 
-      if (!HardwarePictureScaler(&cdx_scaler_para))
+      if (!A10VLPictureScaler(&cdx_scaler_para))
       {
         CLog::Log(LOGERROR, "A10: hardware scaler failed.\n");
         m_hcedarv->display_release(m_hcedarv, picture.id);
@@ -575,8 +534,7 @@ int CDVDVideoCodecA10::Decode(BYTE* pData, int iSize, double dts, double pts)
 void CDVDVideoCodecA10::Reset()
 {
   CLog::Log(LOGDEBUG, "A10: reset requested");
-  Dispose();
-  DoOpen();
+  m_hcedarv->ioctrl(m_hcedarv, CEDARV_COMMAND_RESET, 0);
 }
 
 /*
@@ -602,402 +560,7 @@ const char* CDVDVideoCodecA10::GetName()
   return "A10";
 }
 
-bool CDVDVideoCodecA10::HardwarePictureScaler(ScalerParameter *cdx_scaler_para)
+void CDVDVideoCodecA10::FreePicture(void *pictpriv, cedarv_picture_t &pict)
 {
-  unsigned long        arg[4] = {0,0,0,0};
-  __disp_scaler_para_t scaler_para;
-  bool                 is_open;
-
-  memset(&scaler_para, 0, sizeof(__disp_scaler_para_t));
-  scaler_para.input_fb.addr[0] = cdx_scaler_para->addr_y_in;//
-  scaler_para.input_fb.addr[1] = cdx_scaler_para->addr_c_in;//
-  scaler_para.input_fb.size.width = cdx_scaler_para->width_in;//
-  scaler_para.input_fb.size.height = cdx_scaler_para->height_in;//
-  scaler_para.input_fb.format =  DISP_FORMAT_YUV420;
-  scaler_para.input_fb.seq = DISP_SEQ_UVUV;
-  scaler_para.input_fb.mode = DISP_MOD_MB_UV_COMBINED;
-  scaler_para.input_fb.br_swap = 0;
-  scaler_para.input_fb.cs_mode = DISP_BT601;
-  scaler_para.source_regn.x = 0;
-  scaler_para.source_regn.y = 0;
-  scaler_para.source_regn.width = cdx_scaler_para->width_in;//
-  scaler_para.source_regn.height = cdx_scaler_para->height_in;//
-
-  scaler_para.output_fb.addr[0] = (unsigned int)cdx_scaler_para->addr_y_out;//
-  scaler_para.output_fb.addr[1] = cdx_scaler_para->addr_u_out;//
-  scaler_para.output_fb.addr[2] = cdx_scaler_para->addr_v_out;//
-  scaler_para.output_fb.size.width = cdx_scaler_para->width_out;//
-  scaler_para.output_fb.size.height = cdx_scaler_para->height_out;//
-  scaler_para.output_fb.format = DISP_FORMAT_YUV420;
-  scaler_para.output_fb.seq  = DISP_SEQ_P3210;
-  scaler_para.output_fb.mode = DISP_MOD_NON_MB_PLANAR;
-  scaler_para.output_fb.br_swap = 0;
-  scaler_para.output_fb.cs_mode = DISP_YCC;
-
-  is_open = m_hscaler;
-
-  if (!is_open && !scaler_open())
-  {
-    CLog::Log(LOGERROR, "A10: scaler_open failed.\n");
-    return false;
-  }
-
-  arg[1] = m_hscaler;
-  arg[2] = (unsigned long) &scaler_para;
-  ioctl(m_hdisp, DISP_CMD_SCALER_EXECUTE, (unsigned long) arg);
-
-  if (!is_open)
-    scaler_close();
-
-  return true;
-}
-
-bool CDVDVideoCodecA10::disp_open()
-{
-  unsigned long args[4];
-  unsigned int  i;
-
-  m_hdisp = open("/dev/disp", O_RDWR);
-  if (m_hdisp == -1)
-  {
-    CLog::Log(LOGERROR, "A10: open /dev/disp failed. (%d)", errno);
-    return false;
-  }
-
-  for (i = 0x65; i <= 0x67; i++)
-  {
-    //release possibly lost allocated layers
-    args[0] = m_scrid;
-    args[1] = i;
-    args[2] = 0;
-    args[3] = 0;
-    ioctl(m_hdisp, DISP_CMD_LAYER_RELEASE, args);
-  }
-
-  args[0] = m_scrid;
-  args[1] = DISP_LAYER_WORK_MODE_SCALER;
-  args[2] = 0;
-  args[3] = 0;
-  m_hlayer = ioctl(m_hdisp, DISP_CMD_LAYER_REQUEST, args);
-  if (m_hlayer <= 0)
-  {
-    CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_REQUEST failed.\n");
-    return false;
-  }
-
-  m_firstframe = true;
-  m_prevnr     = -1;
-
-  m_decnr      = 0;
-  m_lastnr     = -1;
-  m_rdidx      = 0;
-  m_wridx      = 0;
-
-  memset(&m_dispq, 0, sizeof(m_dispq));
-
-  return true;
-}
-
-void CDVDVideoCodecA10::disp_close()
-{
-  unsigned long args[4];
-
-  if (m_hlayer)
-  {
-    //stop video
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    ioctl(m_hdisp, DISP_CMD_VIDEO_STOP, args);
-
-    //close layer
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    ioctl(m_hdisp, DISP_CMD_LAYER_CLOSE, args);
-
-    //release layer
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    ioctl(m_hdisp, DISP_CMD_LAYER_RELEASE, args);
-    m_hlayer = 0;
-  }
-  if (m_hdisp != -1)
-  {
-    close(m_hdisp);
-    m_hdisp = -1;
-  }
-}
-
-bool CDVDVideoCodecA10::scaler_open()
-{
-  unsigned long args[4];
-
-  args[0] = m_scrid;
-  args[1] = 0;
-  args[2] = 0;
-  args[3] = 0;
-  m_hscaler = ioctl(m_hdisp, DISP_CMD_SCALER_REQUEST, args);
-  if (!m_hscaler)
-  {
-    CLog::Log(LOGERROR, "A10: DISP_CMD_SCALER_REQUEST failed. (%d)", errno);
-    return false;
-  }
-
-  return true;
-}
-
-void CDVDVideoCodecA10::scaler_close()
-{
-  unsigned long args[4];
-
-  if (m_hscaler)
-  {
-    args[0] = m_scrid;
-    args[1] = m_hscaler;
-    args[2] = 0;
-    args[3] = 0;
-    ioctl(m_hdisp, DISP_CMD_SCALER_RELEASE, args);
-    m_hscaler = 0;
-  }
-}
-
-void CDVDVideoCodecA10::RenderBuffer(A10VideoBuffer *buffer, CRect &srcRect, CRect &dstRect)
-{
-  unsigned long       args[4];
-  __disp_layer_info_t layera;
-  __disp_video_fb_t   frmbuf;
-  __disp_colorkey_t   colorkey;
-  int                 curnr;
-
-  if (buffer->decnr == m_prevnr)
-    return;
-
-  memset(&frmbuf, 0, sizeof(__disp_video_fb_t ));
-  frmbuf.interlace       = buffer->picture.is_progressive? 0 : 1;
-  frmbuf.top_field_first = buffer->picture.top_field_first;
-  //frmbuf.frame_rate      = buffer->picture.frame_rate;
-  frmbuf.addr[0]         = mem_get_phy_addr((u32)buffer->picture.y);
-  frmbuf.addr[1]         = mem_get_phy_addr((u32)buffer->picture.u);
-
-  frmbuf.id = buffer->decnr;
-
-  if (m_firstframe)
-  {
-    int screen_width, screen_height;
-
-    //query screen dimensions
-    args[0] = m_scrid;
-    args[1] = 0;
-    args[2] = 0;
-    args[3] = 0;
-    screen_width = ioctl(m_hdisp, DISP_CMD_SCN_GET_WIDTH, args);
-
-    args[0] = m_scrid;
-    args[1] = 0;
-    args[2] = 0;
-    args[3] = 0;
-    screen_height = ioctl(m_hdisp, DISP_CMD_SCN_GET_HEIGHT, args);
-
-    memset(&layera, 0, sizeof(layera));
-    //set video layer attribute
-    layera.mode          = DISP_LAYER_WORK_MODE_SCALER;
-    layera.b_from_screen = 0; //what is this? if enabled all is black
-    layera.pipe          = 1;
-    //use alpha blend
-    layera.alpha_en      = 0;
-    layera.alpha_val     = 0xff;
-    layera.ck_enable     = 0;
-    layera.b_trd_out     = 0;
-    layera.out_trd_mode  = (__disp_3d_out_mode_t)0;
-    //frame buffer pst and size information
-    if (buffer->picture.display_height < 720)
-    {
-      layera.fb.cs_mode = DISP_BT601;
-    }
-    else
-    {
-      layera.fb.cs_mode = DISP_BT709;
-    }
-    layera.fb.mode        = DISP_MOD_MB_UV_COMBINED;
-    layera.fb.format      = buffer->picture.pixel_format == CEDARV_PIXEL_FORMAT_AW_YUV422 ? DISP_FORMAT_YUV422 : DISP_FORMAT_YUV420;
-    layera.fb.br_swap     = 0;
-    layera.fb.seq         = DISP_SEQ_UVUV;
-    layera.fb.addr[0]     = frmbuf.addr[0];
-    layera.fb.addr[1]     = frmbuf.addr[1];
-    layera.fb.b_trd_src   = 0;
-    layera.fb.trd_mode    = (__disp_3d_src_mode_t)0;
-    layera.fb.size.width  = buffer->picture.display_width;
-    layera.fb.size.height = buffer->picture.display_height;
-    //source window information
-    layera.src_win.x      = lrint(srcRect.x1);
-    layera.src_win.y      = lrint(srcRect.y1);
-    layera.src_win.width  = lrint(srcRect.x2-srcRect.x1);
-    layera.src_win.height = lrint(srcRect.y2-srcRect.y1);
-    //screen window information
-    layera.scn_win.x      = lrint(dstRect.x1);
-    layera.scn_win.y      = lrint(dstRect.y1);
-    layera.scn_win.width  = lrint(dstRect.x2-dstRect.x1);
-    layera.scn_win.height = lrint(dstRect.y2-dstRect.y1);
-
-    CLog::Log(LOGDEBUG, "A10: srcRect=(%lf,%lf)-(%lf,%lf)\n", srcRect.x1, srcRect.y1, srcRect.x2, srcRect.y2);
-    CLog::Log(LOGDEBUG, "A10: dstRect=(%lf,%lf)-(%lf,%lf)\n", srcRect.x1, srcRect.y1, srcRect.x2, srcRect.y2);
-
-    if ((layera.scn_win.x < 0) || (layera.scn_win.y < 0))
-    {
-
-      CLog::Log(LOGERROR, "A10: oops, bad dimensions\n");
-
-      //TODO:
-      //dvdplayer is giving negative values in the destination rect.
-      //we can not do that, so we have to adjust the source rect.
-      //header file says that only width and height can be used
-      //in scaler mode.
-    }
-
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = (unsigned long)&layera;
-    args[3] = 0;
-    if(ioctl(m_hdisp, DISP_CMD_LAYER_SET_PARA, args))
-      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_SET_PARA failed.\n");
-
-    //open layer
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    if (ioctl(m_hdisp, DISP_CMD_LAYER_OPEN, args))
-      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_OPEN failed.\n");
-
-    //put behind system layer
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    if (ioctl(m_hdisp, DISP_CMD_LAYER_BOTTOM, args))
-      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_BOTTOM failed.\n");
-
-    //turn off colorkey (system layer)
-    args[0] = m_scrid;
-    args[1] = 0x64;
-    args[2] = 0;
-    args[3] = 0;
-    if (ioctl(m_hdisp, DISP_CMD_LAYER_CK_OFF, args))
-      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_CK_OFF failed.\n");
-
-    if ((screen_height > 720) && (getenv("A10AB") == NULL))
-    {
-      //no tearing at the cost off alpha blending...
-
-      //set colorkey
-      colorkey.ck_min.alpha = 0;
-      colorkey.ck_min.red   = 1;
-      colorkey.ck_min.green = 2;
-      colorkey.ck_min.blue  = 3;
-      colorkey.ck_max = colorkey.ck_min;
-      colorkey.ck_max.alpha = 255;
-      colorkey.red_match_rule   = 2;
-      colorkey.green_match_rule = 2;
-      colorkey.blue_match_rule  = 2;
-
-      args[0] = m_scrid;
-      args[1] = (unsigned long)&colorkey;
-      args[2] = 0;
-      args[3] = 0;
-      if (ioctl(m_hdisp, DISP_CMD_SET_COLORKEY, args))
-        CLog::Log(LOGERROR, "A10: DISP_CMD_SET_COLORKEY failed.\n");
-
-      //turn on colorkey
-      args[0] = m_scrid;
-      args[1] = m_hlayer;
-      args[2] = 0;
-      args[3] = 0;
-      if (ioctl(m_hdisp, DISP_CMD_LAYER_CK_ON, args))
-        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_CK_ON failed.\n");
-
-      //turn on global alpha (system layer)
-      args[0] = m_scrid;
-      args[1] = 0x64;
-      args[2] = 0;
-      args[3] = 0;
-      if (ioctl(m_hdisp, DISP_CMD_LAYER_ALPHA_ON, args))
-        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_ALPHA_ON failed.\n");
-    }
-    else
-    {
-      //turn off global alpha (system layer)
-      args[0] = m_scrid;
-      args[1] = 0x64;
-      args[2] = 0;
-      args[3] = 0;
-      if (ioctl(m_hdisp, DISP_CMD_LAYER_ALPHA_OFF, args))
-        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_ALPHA_OFF failed.\n");
-    }
-
-    //start video
-    args[0] = m_scrid;
-    args[1] = m_hlayer;
-    args[2] = 0;
-    args[3] = 0;
-    if (ioctl(m_hdisp, DISP_CMD_VIDEO_START, args))
-      CLog::Log(LOGERROR, "A10: DISP_CMD_VIDEO_START failed.\n");
-  }
-
-  args[0] = m_scrid;
-  args[1] = m_hlayer;
-  args[2] = (unsigned long)&frmbuf;
-  args[3] = 0;
-  if (ioctl(m_hdisp, DISP_CMD_VIDEO_SET_FB, args))
-    CLog::Log(LOGERROR, "A10: DISP_CMD_VIDEO_SET_FB failed.\n");
-
-  //CLog::Log(LOGDEBUG, "A10: render %d\n", buffer->picture.id);
-
-  args[0] = m_scrid;
-  args[1] = m_hlayer;
-  args[2] = 0;
-  args[3] = 0;
-  curnr = ioctl(m_hdisp, DISP_CMD_VIDEO_GET_FRAME_ID, args);
-
-  if (curnr != m_lastnr)
-  {
-
-    //free older frames, displayed or not
-
-    pthread_mutex_lock(&m_dispq_mutex);
-
-    for (int i = 0; i < DISPQS; i++)
-    {
-      if(m_dispq[m_rdidx].decnr < curnr)
-      {
-        int id = m_dispq[m_rdidx].picture.id;
-
-        if (id != -1)
-        {
-          //CLog::Log(LOGDEBUG, "A10: release %d\n", id);
-          m_hcedarv->display_release(m_hcedarv, id);
-          m_dispq[m_rdidx].picture.id = -1;
-        }
-
-        m_rdidx++;
-        if (m_rdidx >= DISPQS)
-          m_rdidx = 0;
-      } else break;
-    }
-
-    pthread_mutex_unlock(&m_dispq_mutex);
-  }
-
-  m_lastnr     = curnr;
-  m_prevnr     = buffer->decnr;
-  m_firstframe = false;
-}
-
-void A10Render(A10VideoBuffer *buffer, CRect &srcRect, CRect &dstRect)
-{
-  buffer->codec->RenderBuffer(buffer, srcRect, dstRect);
+  m_hcedarv->display_release(m_hcedarv, pict.id);
 }

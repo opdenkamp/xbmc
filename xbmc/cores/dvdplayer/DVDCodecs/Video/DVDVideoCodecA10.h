@@ -26,17 +26,7 @@
 #include "DVDStreamInfo.h"
 
 extern "C" {
-#include "libcedarv.h"
-};
-
-#define DISPQS 10
-
-class CDVDVideoCodecA10;
-
-struct A10VideoBuffer {
-  CDVDVideoCodecA10 *codec;
-  int                decnr;
-  cedarv_picture_t   picture;
+#include <libcedarv.h>
 };
 
 class CDVDVideoCodecA10 : public CDVDVideoCodec
@@ -135,33 +125,14 @@ public:
   virtual unsigned GetConvergeCount();
   */
 
-  void RenderBuffer(A10VideoBuffer *buffer, CRect &srcRect, CRect &dstRect);
+  void FreePicture(void *pictpriv, cedarv_picture_t &pict);
 
 private:
 
   bool DoOpen();
 
-  typedef struct ScalerParameter {
-    int width_in;
-    int height_in;
-    int width_out;
-    int height_out;
-    u32 addr_y_in;
-    u32 addr_c_in;
-    u32 addr_y_out;
-    u32 addr_u_out;
-    u32 addr_v_out;
-  } ScalerParameter;
-
-  bool HardwarePictureScaler(ScalerParameter *cdx_scaler_para);
-  bool disp_open();
-  void disp_close();
-  bool scaler_open();
-  void scaler_close();
-
-  //disp
-  int                   m_hdisp;
-  int                   m_scrid;
+  //rendering
+  bool m_hwrender;
 
   //decoding
   cedarv_stream_info_t  m_info;
@@ -171,20 +142,4 @@ private:
   int                   m_hscaler;
   u8                   *m_yuvdata;
   DVDVideoPicture       m_picture;
-
-  //rendering
-  bool                  m_hwrender;
-  int                   m_hlayer;
-  int                   m_prevnr; //last dvdplayer render
-  bool                  m_firstframe;
-
-  int                   m_decnr;
-  int                   m_lastnr; //last display nr
-  int                   m_wridx;
-  int                   m_rdidx;
-  A10VideoBuffer        m_dispq[DISPQS];
-  pthread_mutex_t       m_dispq_mutex;
 };
-
-extern void A10Render(A10VideoBuffer *buffer,CRect &srcRect, CRect &dstRect);
-

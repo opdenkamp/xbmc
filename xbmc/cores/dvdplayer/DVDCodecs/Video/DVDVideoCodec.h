@@ -42,7 +42,7 @@ struct OpenMaxVideoBuffer;
   class CDVDVideoCodecVideoToolBox;
   struct __CVBuffer;
 #endif
-struct A10VideoBuffer;
+struct A10VLQueueItem;
 // should be entirely filled by all codecs
 struct DVDVideoPicture
 {
@@ -77,7 +77,7 @@ struct DVDVideoPicture
 #endif
 
     struct {
-      A10VideoBuffer *a10buffer;
+      A10VLQueueItem *a10buffer;
     };
   };
 
