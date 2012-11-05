@@ -12,6 +12,7 @@ CONFIGURE=./configure \
 	--disable-vdpau \
 	--disable-vaapi \
 	--disable-openmax \
+	--disable-pulse \
 	--enable-neon \
 	--enable-gles \
 
