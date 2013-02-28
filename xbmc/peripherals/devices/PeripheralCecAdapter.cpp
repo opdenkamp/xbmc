@@ -44,7 +44,7 @@ using namespace ANNOUNCEMENT;
 using namespace CEC;
 using namespace std;
 
-#define CEC_LIB_SUPPORTED_VERSION 0x2000
+#define CEC_LIB_SUPPORTED_VERSION 0x2100
 
 /* time in seconds to ignore standby commands from devices after the screensaver has been activated */
 #define SCREENSAVER_TIMEOUT       10
@@ -80,8 +80,8 @@ class DllLibCEC : public DllDynamic, DllLibCECInterface
   END_METHOD_RESOLVE()
 };
 
-CPeripheralCecAdapter::CPeripheralCecAdapter(const PeripheralType type, const PeripheralBusType busType, const CStdString &strLocation, const CStdString &strDeviceName, int iVendorId, int iProductId) :
-  CPeripheralHID(type, busType, strLocation, strDeviceName, iVendorId, iProductId),
+CPeripheralCecAdapter::CPeripheralCecAdapter(const PeripheralScanResult& scanResult) :
+  CPeripheralHID(scanResult),
   CThread("CEC Adapter"),
   m_dll(NULL),
   m_cecAdapter(NULL)
@@ -98,6 +98,7 @@ CPeripheralCecAdapter::~CPeripheralCecAdapter(void)
     m_bStop = true;
   }
 
+  SAFE_DELETE(m_queryThread);
   StopThread(true);
 
   if (m_dll && m_cecAdapter)
@@ -381,13 +382,6 @@ bool CPeripheralCecAdapter::OpenConnection(void)
     libcec_configuration config;
     if (m_cecAdapter->GetCurrentConfiguration(&config))
     {
-      // wake devices
-      for (uint8_t iDevice = CECDEVICE_TV; iDevice < CECDEVICE_BROADCAST; iDevice++)
-      {
-        if ((config.bActivateSource == 0 || iDevice != CECDEVICE_TV) && config.wakeDevices.IsSet((cec_logical_address)iDevice))
-          m_cecAdapter->PowerOnDevices((cec_logical_address)iDevice);
-      }
-
       // update the local configuration
       CSingleLock lock(m_critSection);
       SetConfigurationFromLibCEC(config);
@@ -430,8 +424,7 @@ void CPeripheralCecAdapter::Process(void)
       Sleep(5);
   }
 
-  delete m_queryThread;
-  m_queryThread = NULL;
+  SAFE_DELETE(m_queryThread);
 
   bool bSendStandbyCommands(false);
   {
@@ -1255,8 +1248,7 @@ int CPeripheralCecAdapter::CecLogMessage(void *cbParam, const cec_log_message me
 
 bool CPeripheralCecAdapter::TranslateComPort(CStdString &strLocation)
 {
-  if ((strLocation.Left(18).Equals("peripherals://usb/") ||
-         strLocation.Left(18).Equals("peripherals://rpi/")) &&
+  if ((strLocation.Left(18).Equals("peripherals://cec/")) &&
        strLocation.Right(4).Equals(".dev"))
   {
     strLocation = strLocation.Right(strLocation.length() - 18);
@@ -1341,8 +1333,8 @@ void CPeripheralCecAdapter::SetConfigurationFromLibCEC(const CEC::libcec_configu
 
 void CPeripheralCecAdapter::SetConfigurationFromSettings(void)
 {
-  // client version 2.0.0
-  m_configuration.clientVersion = CEC_CLIENT_VERSION_2_0_0;
+  // use the same client version as libCEC version
+  m_configuration.clientVersion = CEC_CLIENT_VERSION_CURRENT;
 
   // device name 'XBMC'
   snprintf(m_configuration.strDeviceName, 13, "%s", GetSettingString("device_name").c_str());
@@ -1594,13 +1586,15 @@ CStdString CPeripheralCecAdapterUpdateThread::UpdateAudioSystemStatus(void)
 
 bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
 {
-  // devices to wake are set
-  if (!m_configuration.wakeDevices.IsEmpty())
-    m_adapter->m_cecAdapter->PowerOnDevices(CECDEVICE_BROADCAST);
-
   // the option to make XBMC the active source is set
   if (m_configuration.bActivateSource == 1)
     m_adapter->m_cecAdapter->SetActiveSource();
+
+  // devices to wake are set
+  cec_logical_addresses tvOnly;
+  tvOnly.Clear(); tvOnly.Set(CECDEVICE_TV);
+  if (!m_configuration.wakeDevices.IsEmpty() && (m_configuration.wakeDevices != tvOnly || m_configuration.bActivateSource == 0))
+    m_adapter->m_cecAdapter->PowerOnDevices(CECDEVICE_BROADCAST);
 
   // wait until devices are powered up
   if (!WaitReady())

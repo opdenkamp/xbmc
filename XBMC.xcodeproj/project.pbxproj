@@ -25,6 +25,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		041998BC16EA2958000B326D /* PeripheralBusCEC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 041998BB16EA2958000B326D /* PeripheralBusCEC.cpp */; };
 		183FDF8A11AF0B0500B81E9C /* PluginSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183FDF8811AF0B0500B81E9C /* PluginSource.cpp */; };
 		18404DA61396C31B00863BBA /* SlingboxLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18404DA51396C31B00863BBA /* SlingboxLib.a */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
@@ -1065,6 +1066,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		041998BB16EA2958000B326D /* PeripheralBusCEC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PeripheralBusCEC.cpp; sourceTree = "<group>"; };
+		041998BD16EA2964000B326D /* PeripheralBusCEC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeripheralBusCEC.h; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
 		183FDF8811AF0B0500B81E9C /* PluginSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PluginSource.cpp; sourceTree = "<group>"; };
@@ -3731,6 +3734,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1DAFDB7916DFDCA7007F8C68 /* virtual */ = {
+			isa = PBXGroup;
+			children = (
+				041998BD16EA2964000B326D /* PeripheralBusCEC.h */,
+				041998BB16EA2958000B326D /* PeripheralBusCEC.cpp */,
+			);
+			path = virtual;
+			sourceTree = "<group>";
+		};
 		38F4E56013CCCB3B00664821 /* platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -6371,6 +6383,7 @@
 		F5E1050D140AA38000175026 /* bus */ = {
 			isa = PBXGroup;
 			children = (
+				1DAFDB7916DFDCA7007F8C68 /* virtual */,
 				F5E10512140AA38000175026 /* osx */,
 				F5E10515140AA38000175026 /* PeripheralBus.cpp */,
 				F5E10516140AA38000175026 /* PeripheralBus.h */,
@@ -7724,6 +7737,7 @@
 				DFB02DEA16629DBA00F37752 /* PyContext.cpp in Sources */,
 				DF07252E168734D7008DCAAD /* karaokevideobackground.cpp in Sources */,
 				DF072534168734ED008DCAAD /* FFmpegVideoDecoder.cpp in Sources */,
+				041998BC16EA2958000B326D /* PeripheralBusCEC.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
