@@ -35,7 +35,7 @@ public:
    */
   CB_CODECLib *GetCallbacks() { return m_callbacks; }
 
-  static xbmc_codec_t GetCodecId(const void* addonData, const char* strCodecName);
+  static xbmc_codec_t GetCodecByName(const void* addonData, const char* strCodecName);
 
 private:
   CB_CODECLib*                           m_callbacks; /*!< callback addresses */

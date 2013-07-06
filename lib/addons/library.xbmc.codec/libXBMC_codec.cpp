@@ -58,14 +58,14 @@ DLLEXPORT void CODEC_unregister_me(void *hdl, void* cb)
     ((AddonCB*)hdl)->CODECLib_UnRegisterMe(((AddonCB*)hdl)->addonData, (CB_CODECLib*)cb);
 }
 
-DLLEXPORT xbmc_codec_t CODEC_get_codec_id(void *hdl, void* cb, const char* strCodecName)
+DLLEXPORT xbmc_codec_t CODEC_get_codec_by_name(void *hdl, void* cb, const char* strCodecName)
 {
   xbmc_codec_t retVal;
   retVal.codec_id   = XBMC_INVALID_CODEC_ID;
   retVal.codec_type = XBMC_CODEC_TYPE_UNKNOWN;
 
   if (cb != NULL)
-    retVal = ((CB_CODECLib*)cb)->GetCodecId(((AddonCB*)hdl)->addonData, strCodecName);
+    retVal = ((CB_CODECLib*)cb)->GetCodecByName(((AddonCB*)hdl)->addonData, strCodecName);
 
   return retVal;
 }

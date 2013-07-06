@@ -86,23 +86,11 @@ typedef struct CB_AddOn
   AddOnRemoveDirectory    RemoveDirectory;
 } CB_AddOnLib;
 
-typedef xbmc_codec_t (*CODECGetCodecId)(const void* addonData, const char* strCodecName);
-typedef bool (*CODECCodecIsVideo)(const void* addonData, xbmc_codec_type_t type);
-typedef bool (*CODECCodecIsAudio)(const void* addonData, xbmc_codec_type_t type);
-typedef bool (*CODECCodecIsData)(const void* addonData, xbmc_codec_type_t type);
-typedef bool (*CODECCodecIsSubtitle)(const void* addonData, xbmc_codec_type_t type);
-typedef bool (*CODECCodecIsAttachment)(const void* addonData, xbmc_codec_type_t type);
-typedef bool (*CODECCodecIsUnknown)(const void* addonData, xbmc_codec_type_t type);
+typedef xbmc_codec_t (*CODECGetCodecByName)(const void* addonData, const char* strCodecName);
 
 typedef struct CB_CODEC
 {
-  CODECGetCodecId         GetCodecId;
-  CODECCodecIsVideo       CodecIsVideo;
-  CODECCodecIsAudio       CodecIsAudio;
-  CODECCodecIsData        CodecIsData;
-  CODECCodecIsSubtitle    CodecIsSubtitle;
-  CODECCodecIsAttachment  CodecIsAttachment;
-  CODECCodecIsUnknown     CodecIsUnknown;
+  CODECGetCodecByName   GetCodecByName;
 } CB_CODECLib;
 
 typedef void (*GUILock)();

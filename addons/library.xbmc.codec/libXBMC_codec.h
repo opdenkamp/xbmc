@@ -89,9 +89,9 @@ public:
       dlsym(m_libXBMC_codec, "CODEC_unregister_me");
     if (CODEC_unregister_me == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
 
-    CODEC_get_codec_id = (xbmc_codec_t (*)(void* HANDLE, void* CB, const char* strCodecName))
-        dlsym(m_libXBMC_codec, "CODEC_get_codec_id");
-    if (CODEC_get_codec_id == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+    CODEC_get_codec_by_name = (xbmc_codec_t (*)(void* HANDLE, void* CB, const char* strCodecName))
+        dlsym(m_libXBMC_codec, "CODEC_get_codec_by_name");
+    if (CODEC_get_codec_by_name == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
 
     m_Callbacks = CODEC_register_me(m_Handle);
     return m_Callbacks != NULL;
@@ -99,18 +99,18 @@ public:
 
   /*!
    * @brief Get the codec id used by XBMC
-   * @param strCodecName The name of the codec, in uppercase
+   * @param strCodecName The name of the codec
    * @return The codec_id, or a codec_id with 0 values when not supported
    */
-  xbmc_codec_t GetCodecId(const char* strCodecName)
+  xbmc_codec_t GetCodecByName(const char* strCodecName)
   {
-    return CODEC_get_codec_id(m_Handle, m_Callbacks, strCodecName);
+    return CODEC_get_codec_by_name(m_Handle, m_Callbacks, strCodecName);
   }
 
 protected:
   void* (*CODEC_register_me)(void*);
   void (*CODEC_unregister_me)(void*, void*);
-  xbmc_codec_t (*CODEC_get_codec_id)(void *HANDLE, void* CB, const char* strCodecName);
+  xbmc_codec_t (*CODEC_get_codec_by_name)(void *HANDLE, void* CB, const char* strCodecName);
 
 private:
   void* m_libXBMC_codec;
