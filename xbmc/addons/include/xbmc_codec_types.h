@@ -25,19 +25,18 @@
 extern "C" {
 #endif
 
-typedef int xbmc_codec_type_t;
-typedef int xbmc_codec_id_t;
+typedef int          xbmc_codec_type_t;
+typedef unsigned int xbmc_codec_id_t;
 
 typedef struct
 {
   xbmc_codec_type_t codec_type;
   xbmc_codec_id_t   codec_id;
-  const char*       name;
 } xbmc_codec_t;
 
-#define XBMC_INVALID_CODEC      { -1, 0, NULL }
-#define XBMC_INVALID_CODEC_ID   0
 #define XBMC_INVALID_CODEC_TYPE (-1)
+#define XBMC_INVALID_CODEC_ID   0
+#define XBMC_INVALID_CODEC      { XBMC_INVALID_CODEC_TYPE, XBMC_INVALID_CODEC_ID }
 
 #ifdef __cplusplus
 };

@@ -21,10 +21,56 @@
 #include "Application.h"
 #include "Addon.h"
 #include "AddonCallbacksCodec.h"
-#include "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
+#include "DllAvCodec.h"
 
 namespace ADDON
 {
+class CCodecIds
+{
+public:
+  virtual ~CCodecIds(void) {}
+
+  static CCodecIds& Get(void)
+  {
+    static CCodecIds _instance;
+    return _instance;
+  }
+
+  xbmc_codec_t GetCodecId(const char* strCodecName)
+  {
+    xbmc_codec_t retVal = XBMC_INVALID_CODEC;
+
+    std::map<std::string, xbmc_codec_t>::const_iterator it = m_lookup.find(std::string(strCodecName));
+    if (it != m_lookup.end())
+    {
+      retVal = it->second;
+    }
+    else
+    {
+      AVCodec* codec = NULL;
+      while ((codec = m_dllAvCodec.av_codec_next(codec)))
+      {
+        if (!strcmp(codec->name, strCodecName))
+        {
+          retVal.codec_type = codec->type;
+          retVal.codec_id   = codec->id;
+          m_lookup.insert(std::make_pair(std::string(strCodecName), retVal));
+        }
+      }
+    }
+
+    return retVal;
+  }
+
+private:
+  CCodecIds(void)
+  {
+    m_dllAvCodec.Load();
+  }
+
+  DllAvCodec                          m_dllAvCodec;
+  std::map<std::string, xbmc_codec_t> m_lookup;
+};
 
 CAddonCallbacksCodec::CAddonCallbacksCodec(CAddon* addon)
 {
@@ -50,116 +96,7 @@ CAddonCallbacksCodec::~CAddonCallbacksCodec()
 xbmc_codec_t CAddonCallbacksCodec::GetCodecId(const void* addonData, const char* strCodecName)
 {
   (void)addonData;
-  xbmc_codec_t retVal = XBMC_INVALID_CODEC;
-
-  static const char* strCodecNameAC3        = "AC3";
-  static const char* strCodecNameEAC3       = "EAC3";
-  static const char* strCodecNameMPEG2AUDIO = "MPEG2AUDIO";
-  static const char* strCodecNameAAC        = "AAC";
-  static const char* strCodecNameAACLATM    = "AACLATM";
-  static const char* strCodecNameVORBIS     = "VORBIS";
-  static const char* strCodecNameDTS        = "DTS";
-
-  static const char* strCodecNameMPEG2VIDEO = "MPEG2VIDEO";
-  static const char* strCodecNameH264       = "H264";
-  static const char* strCodecNameVP8        = "VP8";
-  static const char* strCodecNameMPEG4VIDEO = "MPEG4VIDEO";
-
-  static const char* strCodecNameDVDSUB     = "DVBSUB";
-  static const char* strCodecNameTEXTSUB    = "TEXTSUB";
-  static const char* strCodecNameTELETEXT   = "TELETEXT";
-
-  // audio types
-  if(!strcmp(strCodecName, strCodecNameAC3))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_AC3;
-    retVal.name       = strCodecNameAC3;
-  }
-  else if(!strcmp(strCodecName, strCodecNameEAC3))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_EAC3;
-    retVal.name       = strCodecNameEAC3;
-  }
-  else if(!strcmp(strCodecName, strCodecNameMPEG2AUDIO))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_MP2;
-    retVal.name       = strCodecNameMPEG2AUDIO;
-  }
-  else if(!strcmp(strCodecName, strCodecNameAAC))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_AAC;
-    retVal.name       = strCodecNameAAC;
-  }
-  else if(!strcmp(strCodecName, strCodecNameAACLATM))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_AAC_LATM;
-    retVal.name       = strCodecNameAACLATM;
-  }
-  else if(!strcmp(strCodecName, strCodecNameVORBIS))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_VORBIS;
-    retVal.name       = strCodecNameVORBIS;
-  }
-  else if(!strcmp(strCodecName, strCodecNameDTS))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_AUDIO;
-    retVal.codec_id   = CODEC_ID_DTS;
-    retVal.name       = strCodecNameDTS;
-  }
-
-  // video types
-  else if(!strcmp(strCodecName, strCodecNameMPEG2VIDEO))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_VIDEO;
-    retVal.codec_id   = CODEC_ID_MPEG2VIDEO;
-    retVal.name       = strCodecNameMPEG2VIDEO;
-  }
-  else if(!strcmp(strCodecName, strCodecNameH264))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_VIDEO;
-    retVal.codec_id   = CODEC_ID_H264;
-    retVal.name       = strCodecNameH264;
-  }
-  else if(!strcmp(strCodecName, strCodecNameVP8))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_VIDEO;
-    retVal.codec_id   = CODEC_ID_VP8;
-    retVal.name       = strCodecNameVP8;
-  }
-  else if(!strcmp(strCodecName, strCodecNameMPEG4VIDEO))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_VIDEO;
-    retVal.codec_id   = CODEC_ID_MPEG4;
-    retVal.name       = strCodecNameMPEG4VIDEO;
-  }
-
-  // subtitle types
-  else if(!strcmp(strCodecName, strCodecNameDVDSUB))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_SUBTITLE;
-    retVal.codec_id   = CODEC_ID_DVB_SUBTITLE;
-    retVal.name       = strCodecNameDVDSUB;
-  }
-  else if(!strcmp(strCodecName, strCodecNameTEXTSUB))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_SUBTITLE;
-    retVal.codec_id   = CODEC_ID_TEXT;
-    retVal.name       = strCodecNameTEXTSUB;
-  }
-  else if(!strcmp(strCodecName, strCodecNameTELETEXT))
-  {
-    retVal.codec_type = AVMEDIA_TYPE_SUBTITLE;
-    retVal.codec_id   = CODEC_ID_DVB_TELETEXT;
-    retVal.name       = strCodecNameTELETEXT;
-  }
-
-  return retVal;
+  return CCodecIds::Get().GetCodecId(strCodecName);
 }
 
 bool CAddonCallbacksCodec::CodecIsVideo(const void* addonData, xbmc_codec_type_t type)

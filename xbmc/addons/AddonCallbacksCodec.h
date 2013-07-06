@@ -44,8 +44,8 @@ public:
   static bool         CodecIsUnknown(const void* addonData, xbmc_codec_type_t type);
 
 private:
-  CB_CODECLib  *m_callbacks; /*!< callback addresses */
-  CAddon       *m_addon;     /*!< the add-on */
+  CB_CODECLib*                           m_callbacks; /*!< callback addresses */
+  CAddon*                                m_addon;     /*!< the add-on */
 };
 
 }; /* namespace ADDON */
