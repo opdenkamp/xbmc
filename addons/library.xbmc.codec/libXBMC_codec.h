@@ -93,30 +93,6 @@ public:
         dlsym(m_libXBMC_codec, "CODEC_get_codec_id");
     if (CODEC_get_codec_id == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
 
-    CODEC_codec_is_video = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_video");
-    if (CODEC_codec_is_video == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
-    CODEC_codec_is_audio = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_audio");
-    if (CODEC_codec_is_audio == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
-    CODEC_codec_is_data = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_data");
-    if (CODEC_codec_is_data == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
-    CODEC_codec_is_subtitle = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_subtitle");
-    if (CODEC_codec_is_subtitle == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
-    CODEC_codec_is_attachment = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_attachment");
-    if (CODEC_codec_is_attachment == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
-    CODEC_codec_is_unknown = (bool (*)(void *HANDLE, void* CB, xbmc_codec_type_t type))
-        dlsym(m_libXBMC_codec, "CODEC_codec_is_unknown");
-    if (CODEC_codec_is_unknown == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
-
     m_Callbacks = CODEC_register_me(m_Handle);
     return m_Callbacks != NULL;
   }
@@ -131,46 +107,10 @@ public:
     return CODEC_get_codec_id(m_Handle, m_Callbacks, strCodecName);
   }
 
-  bool CodecIsVideo(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_video(m_Handle, m_Callbacks, type);
-  }
-
-  bool CodecIsAudio(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_audio(m_Handle, m_Callbacks, type);
-  }
-
-  bool CodecIsData(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_data(m_Handle, m_Callbacks, type);
-  }
-
-  bool CodecIsSubtitle(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_subtitle(m_Handle, m_Callbacks, type);
-  }
-
-  bool CodecIsAttachment(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_attachment(m_Handle, m_Callbacks, type);
-  }
-
-  bool CodecIsUnknown(xbmc_codec_type_t type)
-  {
-    return CODEC_codec_is_unknown(m_Handle, m_Callbacks, type);
-  }
-
 protected:
   void* (*CODEC_register_me)(void*);
   void (*CODEC_unregister_me)(void*, void*);
   xbmc_codec_t (*CODEC_get_codec_id)(void *HANDLE, void* CB, const char* strCodecName);
-  bool (*CODEC_codec_is_video)(void *HANDLE, void* CB, xbmc_codec_type_t type);
-  bool (*CODEC_codec_is_audio)(void *HANDLE, void* CB, xbmc_codec_type_t type);
-  bool (*CODEC_codec_is_data)(void *HANDLE, void* CB, xbmc_codec_type_t type);
-  bool (*CODEC_codec_is_subtitle)(void *HANDLE, void* CB, xbmc_codec_type_t type);
-  bool (*CODEC_codec_is_attachment)(void *HANDLE, void* CB, xbmc_codec_type_t type);
-  bool (*CODEC_codec_is_unknown)(void *HANDLE, void* CB, xbmc_codec_type_t type);
 
 private:
   void* m_libXBMC_codec;

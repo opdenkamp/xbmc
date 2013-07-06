@@ -62,54 +62,12 @@ DLLEXPORT xbmc_codec_t CODEC_get_codec_id(void *hdl, void* cb, const char* strCo
 {
   xbmc_codec_t retVal;
   retVal.codec_id   = XBMC_INVALID_CODEC_ID;
-  retVal.codec_type = XBMC_INVALID_CODEC_TYPE;
+  retVal.codec_type = XBMC_CODEC_TYPE_UNKNOWN;
 
   if (cb != NULL)
     retVal = ((CB_CODECLib*)cb)->GetCodecId(((AddonCB*)hdl)->addonData, strCodecName);
 
   return retVal;
-}
-
-DLLEXPORT bool CODEC_codec_is_video(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsVideo(((AddonCB*)hdl)->addonData, type);
-  return false;
-}
-
-DLLEXPORT bool CODEC_codec_is_audio(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsAudio(((AddonCB*)hdl)->addonData, type);
-  return false;
-}
-
-DLLEXPORT bool CODEC_codec_is_data(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsData(((AddonCB*)hdl)->addonData, type);
-  return false;
-}
-
-DLLEXPORT bool CODEC_codec_is_subtitle(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsSubtitle(((AddonCB*)hdl)->addonData, type);
-  return false;
-}
-
-DLLEXPORT bool CODEC_codec_is_attachment(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsAttachment(((AddonCB*)hdl)->addonData, type);
-  return false;
-}
-
-DLLEXPORT bool CODEC_codec_is_unknown(void *hdl, void* cb, xbmc_codec_type_t type)
-{
-  if (cb != NULL)
-    return ((CB_CODECLib*)cb)->CodecIsUnknown(((AddonCB*)hdl)->addonData, type);
-  return false;
 }
 
 };

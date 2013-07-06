@@ -52,7 +52,7 @@ public:
       {
         if (!strcmp(codec->name, strCodecName))
         {
-          retVal.codec_type = codec->type;
+          retVal.codec_type = (xbmc_codec_type_t)codec->type;
           retVal.codec_id   = codec->id;
           m_lookup.insert(std::make_pair(std::string(strCodecName), retVal));
         }
@@ -79,12 +79,6 @@ CAddonCallbacksCodec::CAddonCallbacksCodec(CAddon* addon)
 
   /* write XBMC addon-on specific add-on function addresses to the callback table */
   m_callbacks->GetCodecId         = GetCodecId;
-  m_callbacks->CodecIsVideo       = CodecIsVideo;
-  m_callbacks->CodecIsAudio       = CodecIsAudio;
-  m_callbacks->CodecIsData        = CodecIsData;
-  m_callbacks->CodecIsSubtitle    = CodecIsSubtitle;
-  m_callbacks->CodecIsAttachment  = CodecIsAttachment;
-  m_callbacks->CodecIsUnknown     = CodecIsUnknown;
 }
 
 CAddonCallbacksCodec::~CAddonCallbacksCodec()
@@ -97,42 +91,6 @@ xbmc_codec_t CAddonCallbacksCodec::GetCodecId(const void* addonData, const char*
 {
   (void)addonData;
   return CCodecIds::Get().GetCodecId(strCodecName);
-}
-
-bool CAddonCallbacksCodec::CodecIsVideo(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_VIDEO;
-}
-
-bool CAddonCallbacksCodec::CodecIsAudio(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_AUDIO;
-}
-
-bool CAddonCallbacksCodec::CodecIsData(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_DATA;
-}
-
-bool CAddonCallbacksCodec::CodecIsSubtitle(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_SUBTITLE;
-}
-
-bool CAddonCallbacksCodec::CodecIsAttachment(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_ATTACHMENT;
-}
-
-bool CAddonCallbacksCodec::CodecIsUnknown(const void* addonData, xbmc_codec_type_t type)
-{
-  (void)addonData;
-  return type == AVMEDIA_TYPE_UNKNOWN;
 }
 
 }; /* namespace ADDON */

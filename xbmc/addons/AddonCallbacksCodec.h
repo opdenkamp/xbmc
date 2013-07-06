@@ -36,12 +36,6 @@ public:
   CB_CODECLib *GetCallbacks() { return m_callbacks; }
 
   static xbmc_codec_t GetCodecId(const void* addonData, const char* strCodecName);
-  static bool         CodecIsVideo(const void* addonData, xbmc_codec_type_t type);
-  static bool         CodecIsAudio(const void* addonData, xbmc_codec_type_t type);
-  static bool         CodecIsData(const void* addonData, xbmc_codec_type_t type);
-  static bool         CodecIsSubtitle(const void* addonData, xbmc_codec_type_t type);
-  static bool         CodecIsAttachment(const void* addonData, xbmc_codec_type_t type);
-  static bool         CodecIsUnknown(const void* addonData, xbmc_codec_type_t type);
 
 private:
   CB_CODECLib*                           m_callbacks; /*!< callback addresses */

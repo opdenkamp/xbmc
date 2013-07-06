@@ -99,7 +99,7 @@ namespace ADDON
     {
       memset(&m_streams, 0, sizeof(PVR_STREAM_PROPERTIES));
       for (unsigned int i = 0; i < PVR_STREAM_MAX_STREAMS; i++)
-        m_streams.stream[i].iCodecType = XBMC_INVALID_CODEC_TYPE;
+        m_streams.stream[i].iCodecType = XBMC_CODEC_TYPE_UNKNOWN;
     }
 
     unsigned int NextFreeIndex(void)
@@ -107,7 +107,7 @@ namespace ADDON
       unsigned int i;
       for (i = 0; i < PVR_STREAM_MAX_STREAMS; i++)
       {
-        if (m_streams.stream[i].iCodecType == XBMC_INVALID_CODEC_TYPE)
+        if (m_streams.stream[i].iCodecType == XBMC_CODEC_TYPE_UNKNOWN)
           break;
       }
       return i;
@@ -132,7 +132,7 @@ namespace ADDON
     static void ClearStream(PVR_STREAM_PROPERTIES::PVR_STREAM* stream)
     {
       memset(stream, 0, sizeof(PVR_STREAM_PROPERTIES::PVR_STREAM));
-      stream->iCodecType = XBMC_INVALID_CODEC_TYPE;
+      stream->iCodecType = XBMC_CODEC_TYPE_UNKNOWN;
       stream->iCodecId   = XBMC_INVALID_CODEC_ID;
     }
 
@@ -149,7 +149,7 @@ namespace ADDON
         if (itn == newIndex.end())
         {
           memset(&m_streams.stream[ito->second], 0, sizeof(PVR_STREAM_PROPERTIES::PVR_STREAM));
-          m_streams.stream[ito->second].iCodecType = XBMC_INVALID_CODEC_TYPE;
+          m_streams.stream[ito->second].iCodecType = XBMC_CODEC_TYPE_UNKNOWN;
           m_streams.stream[ito->second].iCodecId   = XBMC_INVALID_CODEC_ID;
           m_streamIndex.erase(ito);
           ito = m_streamIndex.begin();
@@ -169,7 +169,7 @@ namespace ADDON
       // place video stream at pos 0
       for (itn = newIndex.begin(); itn != newIndex.end(); ++itn)
       {
-        if (CODEC->CodecIsVideo(newStreams.at(itn->second).iCodecType))
+        if (newStreams.at(itn->second).iCodecType == XBMC_CODEC_TYPE_VIDEO)
         {
           m_streamIndex[itn->first] = 0;
           memcpy(&m_streams.stream[0], &newStreams.at(itn->second), sizeof(PVR_STREAM_PROPERTIES::PVR_STREAM));
