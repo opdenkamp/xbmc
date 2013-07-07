@@ -53,20 +53,23 @@ public:
 private:
   CCodecIds(void)
   {
+    DllAvCodec  dllAvCodec;
+    DllAvFormat dllAvFormat;
+
     // load ffmpeg and register formats
-    if (!m_dllAvCodec.Load() || !m_dllAvFormat.Load())
+    if (!dllAvCodec.Load() || !dllAvFormat.Load())
     {
       CLog::Log(LOGWARNING, "failed to load ffmpeg");
       return;
     }
-    m_dllAvFormat.av_register_all();
+    dllAvFormat.av_register_all();
 
     // get ids and names
     AVCodec* codec = NULL;
     xbmc_codec_t tmp;
-    while ((codec = m_dllAvCodec.av_codec_next(codec)))
+    while ((codec = dllAvCodec.av_codec_next(codec)))
     {
-      if (m_dllAvCodec.av_codec_is_decoder(codec))
+      if (dllAvCodec.av_codec_is_decoder(codec))
       {
         tmp.codec_type = (xbmc_codec_type_t)codec->type;
         tmp.codec_id   = codec->id;
@@ -80,8 +83,6 @@ private:
     m_lookup.insert(std::make_pair("TELETEXT", tmp));
   }
 
-  DllAvCodec                          m_dllAvCodec;
-  DllAvFormat                         m_dllAvFormat;
   std::map<std::string, xbmc_codec_t> m_lookup;
 };
 
