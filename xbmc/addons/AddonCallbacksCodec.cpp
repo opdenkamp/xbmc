@@ -78,7 +78,7 @@ private:
     }
 
     // teletext is not returned by av_codec_next. we got our own decoder
-    tmp.codec_type = XBMC_CODEC_TYPE_DATA;
+    tmp.codec_type = XBMC_CODEC_TYPE_SUBTITLE;
     tmp.codec_id   = AV_CODEC_ID_DVB_TELETEXT;
     m_lookup.insert(std::make_pair("TELETEXT", tmp));
   }
