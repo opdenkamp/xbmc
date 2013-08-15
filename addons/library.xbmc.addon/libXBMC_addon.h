@@ -59,7 +59,11 @@
 #endif
 #include <dlfcn.h>              // linux+osx
 #define ADDON_HELPER_EXT        ".so"
+#ifdef __arm__
+#define ADDON_DLL "/library.xbmc.addon/libXBMC_addon-" ADDON_HELPER_ARCH ADDON_HELPER_EXT
+#else
 #define ADDON_DLL "/library.xbmc.addon/libXBMC_addon-" ADDON_HELPER_ARCH "-" ADDON_HELPER_PLATFORM ADDON_HELPER_EXT
+#endif
 #endif
 
 #ifdef LOG_DEBUG

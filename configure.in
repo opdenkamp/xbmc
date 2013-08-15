@@ -2258,6 +2258,8 @@ XB_CONFIG_MODULE([lib/cpluff], [
     #LDFLAGS="$LDFLAGS -Wl,-read_only_relocs,suppress"    
 ], [0])
 
+LIBS="$LIBS $CEDARLIBS"
+
 AC_OUTPUT
 
 final_message="$final_message\n  prefix:\t$prefix\n$dashes"

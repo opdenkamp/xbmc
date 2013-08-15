@@ -91,7 +91,8 @@ enum RenderMethod
   RENDER_POT    = 0x010,
   RENDER_OMXEGL = 0x040,
   RENDER_CVREF  = 0x080,
-  RENDER_BYPASS = 0x100
+  RENDER_A10BUF = 0x100,
+  RENDER_BYPASS = 0x400
 };
 
 enum RenderQuality
@@ -117,6 +118,7 @@ extern YUVCOEF yuv_coef_bt709;
 extern YUVCOEF yuv_coef_ebu;
 extern YUVCOEF yuv_coef_smtp240m;
 
+struct A10VLQueueItem;
 class DllSwScale;
 struct SwsContext;
 
@@ -160,6 +162,10 @@ public:
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   virtual void         AddProcessor(CDVDVideoCodecVideoToolBox* vtb, DVDVideoPicture *picture);
 #endif
+#ifdef ALLWINNERA10
+  virtual void         AddProcessor(struct A10VLQueueItem *pVidBuff);
+#endif
+
 protected:
   virtual void Render(DWORD flags, int index);
 
@@ -199,7 +205,6 @@ protected:
   CFrameBufferObject m_fbo;
 
   int m_iYV12RenderBuffer;
-  int m_NumYV12Buffers;
   int m_iLastRenderBuffer;
 
   bool m_bConfigured;
@@ -248,6 +253,9 @@ protected:
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   struct __CVBuffer *cvBufferRef;
 #endif
+#ifdef ALLWINNERA10
+  struct A10VLQueueItem *a10buffer;
+#endif
 
   };
 
@@ -291,5 +299,60 @@ inline int NP2( unsigned x )
     return ++x;
 }
 #endif
+
+/*
+ * Video layer functions
+ */
+
+extern "C" {
+#include <libcedarv.h>
+#include <drv_display_sun4i.h>
+#include <os_adapter.h>
+}
+
+#define DISPQS 10
+
+typedef void (*A10VLCALLBACK)(void *callbackpriv, void *pictpriv, cedarv_picture_t &pict); //cleanup function
+
+struct A10VLQueueItem
+{
+  int               decnr;
+  A10VLCALLBACK     callback;
+  void             *callbackpriv;
+  void             *pictpriv;
+  cedarv_picture_t  pict;
+};
+
+typedef struct
+{
+  int width_in;
+  int height_in;
+  int width_out;
+  int height_out;
+  u32 addr_y_in;
+  u32 addr_c_in;
+  u32 addr_y_out;
+  u32 addr_u_out;
+  u32 addr_v_out;
+} A10VLScalerParameter;
+
+bool A10VLInit(int &width, int &height);
+
+void A10VLExit();
+
+void A10VLHide();
+
+A10VLQueueItem *A10VLPutQueue(A10VLCALLBACK     callback,
+                              void             *callbackpriv,
+                              void             *pictpriv,
+                              cedarv_picture_t &pict);
+
+void A10VLFreeQueue();
+
+void A10VLDisplayQueueItem(A10VLQueueItem *pItem, CRect &srcRect, CRect &dstRect);
+
+int  A10VLDisplayPicture(cedarv_picture_t &pict, int refnr, CRect &srcRect, CRect &dstRect);
+
+bool A10VLPictureScaler(A10VLScalerParameter *para);
 
 #endif

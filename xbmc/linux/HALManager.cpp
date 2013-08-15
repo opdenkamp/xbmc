@@ -127,8 +127,12 @@ CHALManager::CHALManager()
   m_Notifications = false;
   m_Context = NULL;
   m_DBusSystemConnection = NULL;
+#ifdef HAS_SDL
   const SDL_version *sdl_version = SDL_Linked_Version();
   m_bMultipleJoysticksSupport = (sdl_version->major >= 1 && sdl_version->minor >= 3)?true:false;
+#else
+  m_bMultipleJoysticksSupport = false;
+#endif
 }
 
 void CHALManager::Stop()

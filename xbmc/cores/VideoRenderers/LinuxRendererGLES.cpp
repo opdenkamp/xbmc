@@ -55,6 +55,11 @@
 #include "osx/DarwinUtils.h"
 #endif
 
+#ifdef ALLWINNERA10
+#include <sys/ioctl.h>
+#include "DVDCodecs/Video/DVDVideoCodecA10.h"
+#endif
+
 using namespace Shaders;
 
 CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
@@ -74,13 +79,8 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   for (int i = 0; i < NUM_BUFFERS; i++)
   {
     m_eventTexturesDone[i] = new CEvent(false,true);
-#if defined(HAVE_LIBOPENMAX)
-    m_buffers[i].openMaxBuffer = 0;
-#endif
-#ifdef HAVE_VIDEOTOOLBOXDECODER
-    m_buffers[i].cvBufferRef = NULL;
-#endif
   }
+  memset(&m_buffers, 0, sizeof(m_buffers));
 
   m_renderMethod = RENDER_GLSL;
   m_renderQuality = RQ_SINGLEPASS;
@@ -130,7 +130,6 @@ CLinuxRendererGLES::~CLinuxRendererGLES()
 
 void CLinuxRendererGLES::ManageTextures()
 {
-  m_NumYV12Buffers = 2;
   //m_iYV12RenderBuffer = 0;
   return;
 }
@@ -144,7 +143,7 @@ bool CLinuxRendererGLES::ValidateRenderTarget()
      // create the yuv textures    
     LoadShaders();
 
-    for (int i = 0 ; i < m_NumYV12Buffers ; i++)
+    for (int i = 0 ; i < NUM_BUFFERS; i++)
       (this->*m_textureCreate)(i);
 
     m_bValidated = true;
@@ -175,7 +174,7 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
   // frame is loaded after every call to Configure().
   m_bValidated = false;
 
-  for (int i = 0 ; i<m_NumYV12Buffers ; i++)
+  for (int i = 0 ; i<NUM_BUFFERS ; i++)
     m_buffers[i].image.flags = 0;
 
   m_iLastRenderBuffer = -1;
@@ -184,7 +183,7 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
 
 int CLinuxRendererGLES::NextYV12Texture()
 {
-  return (m_iYV12RenderBuffer + 1) % m_NumYV12Buffers;
+  return (m_iYV12RenderBuffer + 1) % NUM_BUFFERS;
 }
 
 int CLinuxRendererGLES::GetImage(YV12Image *image, int source, bool readonly)
@@ -202,6 +201,12 @@ int CLinuxRendererGLES::GetImage(YV12Image *image, int source, bool readonly)
   }
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   if (m_renderMethod & RENDER_CVREF )
+  {
+    return source;
+  }
+#endif
+#ifdef ALLWINNERA10
+  if (m_renderMethod & RENDER_A10BUF )
   {
     return source;
   }
@@ -371,7 +376,7 @@ void CLinuxRendererGLES::LoadPlane( YUVPLANE& plane, int type, unsigned flipinde
 
 void CLinuxRendererGLES::Reset()
 {
-  for(int i=0; i<m_NumYV12Buffers; i++)
+  for(int i=0; i<NUM_BUFFERS; i++)
   {
     /* reset all image flags, this will cleanup textures later */
     m_buffers[i].image.flags = 0;
@@ -414,8 +419,25 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
     glClear(GL_COLOR_BUFFER_BIT);
 
     g_graphicsContext.EndPaint();
+#if !defined(ALLWINNERA10)
     glFinish();
+#endif
     return;
+  }
+  else if (m_renderMethod & RENDER_A10BUF)
+  {
+    ManageDisplay();
+    ManageTextures();
+
+    g_graphicsContext.BeginPaint();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(1.0/255, 2.0/255, 3.0/255, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0, 0, 0, 0);
+
+    g_graphicsContext.EndPaint();
   }
 
   // this needs to be checked after texture validation
@@ -430,6 +452,14 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   }
   if (buf.image.flags==0)
     return;
+
+  if (m_renderMethod & RENDER_A10BUF)
+  {
+    A10VLDisplayQueueItem(buf.a10buffer, m_sourceRect, m_destRect);
+    m_iLastRenderBuffer = index;
+    VerifyGLState();
+    return;
+  }
 
   ManageDisplay();
   ManageTextures();
@@ -480,14 +510,14 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   glEnable(GL_BLEND);
 
   g_graphicsContext.EndPaint();
-#if !defined(__APPLE__)
+#if !defined(__APPLE__) && !defined(ALLWINNERA10)
   glFinish();
 #endif
 }
 
 void CLinuxRendererGLES::FlipPage(int source)
 {
-  if( source >= 0 && source < m_NumYV12Buffers )
+  if( source >= 0 && source < NUM_BUFFERS )
     m_iYV12RenderBuffer = source;
   else
     m_iYV12RenderBuffer = NextYV12Texture();
@@ -508,7 +538,6 @@ unsigned int CLinuxRendererGLES::PreInit()
     m_resolution = RES_DESKTOP;
 
   m_iYV12RenderBuffer = 0;
-  m_NumYV12Buffers = 2;
 
   // setup the background colour
   m_clearColour = (float)(g_advancedSettings.m_videoBlackBarColour & 0xff) / 0xff;
@@ -620,6 +649,12 @@ void CLinuxRendererGLES::LoadShaders(int field)
         m_renderMethod = RENDER_CVREF;
         break;
       }
+      else if (CONF_FLAGS_FORMAT_MASK(m_iFlags) == CONF_FLAGS_FORMAT_A10BUF)
+      {
+        CLog::Log(LOGNOTICE, "using A10 render method");
+        m_renderMethod = RENDER_A10BUF;
+        break;
+      }
       #if defined(TARGET_DARWIN_IOS)
       else if (ios_version < 5.0 && CONF_FLAGS_FORMAT_MASK(m_iFlags) == CONF_FLAGS_FORMAT_YV12)
       {
@@ -695,6 +730,10 @@ void CLinuxRendererGLES::UnInit()
 {
   CLog::Log(LOGDEBUG, "LinuxRendererGL: Cleaning up GL resources");
   CSingleLock lock(g_graphicsContext);
+
+#ifdef ALLWINNERA10
+  A10VLHide();
+#endif
 
   if (m_rgbBuffer != NULL)
   {
@@ -1316,11 +1355,11 @@ void CLinuxRendererGLES::UploadYV12Texture(int source)
   YUVFIELDS& fields =  buf.fields;
 
 
+  if (   !(im->flags&IMAGE_FLAG_READY)
 #if defined(HAVE_LIBOPENMAX)
-  if (!(im->flags&IMAGE_FLAG_READY) || m_buffers[source].openMaxBuffer)
-#else
-  if (!(im->flags&IMAGE_FLAG_READY))
+      ||  m_buffers[source].openMaxBuffer)
 #endif
+     )
   {
     m_eventTexturesDone[source]->Set();
     return;
@@ -1745,7 +1784,7 @@ bool CLinuxRendererGLES::CreateBYPASSTexture(int index)
 
 void CLinuxRendererGLES::SetTextureFilter(GLenum method)
 {
-  for (int i = 0 ; i<m_NumYV12Buffers ; i++)
+  for (int i = 0 ; i<NUM_BUFFERS ; i++)
   {
     YUVFIELDS &fields = m_buffers[i].fields;
 
@@ -1883,6 +1922,534 @@ void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecVideoToolBox* vtb, DVDVideoP
   CVBufferRetain(buf.cvBufferRef);
 }
 #endif
+#ifdef ALLWINNERA10
+void CLinuxRendererGLES::AddProcessor(struct A10VLQueueItem *buffer)
+{
+  YUVBUFFER &buf = m_buffers[NextYV12Texture()];
 
+  buf.a10buffer = buffer;
+}
+/*
+ * Video layer functions
+ */
+
+static int             g_hdisp = -1;
+static int             g_screenid = 0;
+static int             g_syslayer = 0x64;
+static int             g_hlayer = 0;
+static int             g_width;
+static int             g_height;
+static CRect           g_srcRect;
+static CRect           g_dstRect;
+static int             g_lastnr;
+static int             g_decnr;
+static int             g_wridx;
+static int             g_rdidx;
+static A10VLQueueItem  g_dispq[DISPQS];
+static pthread_mutex_t g_dispq_mutex;
+
+bool A10VLInit(int &width, int &height)
+{
+  unsigned long       args[4];
+  __disp_layer_info_t layera;
+  unsigned int        i;
+
+  pthread_mutex_init(&g_dispq_mutex, NULL);
+
+  g_hdisp = open("/dev/disp", O_RDWR);
+  if (g_hdisp == -1)
+  {
+    CLog::Log(LOGERROR, "A10: open /dev/disp failed. (%d)", errno);
+    return false;
+  }
+
+  args[0] = g_screenid;
+  args[1] = 0;
+  args[2] = 0;
+  args[3] = 0;
+  width  = g_width  = ioctl(g_hdisp, DISP_CMD_SCN_GET_WIDTH , args);
+  height = g_height = ioctl(g_hdisp, DISP_CMD_SCN_GET_HEIGHT, args);
+
+  if ((g_height > 720) && (getenv("A10AB") == NULL))
+  {
+    //set workmode scaler (system layer)
+    args[0] = g_screenid;
+    args[1] = g_syslayer;
+    args[2] = (unsigned long) (&layera);
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_GET_PARA, args);
+    layera.mode = DISP_LAYER_WORK_MODE_SCALER;
+    args[0] = g_screenid;
+    args[1] = g_syslayer;
+    args[2] = (unsigned long) (&layera);
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_SET_PARA, args);
+  }
+  else
+  {
+    //set workmode normal (system layer)
+    args[0] = g_screenid;
+    args[1] = g_syslayer;
+    args[2] = (unsigned long) (&layera);
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_GET_PARA, args);
+    //source window information
+    layera.src_win.x      = 0;
+    layera.src_win.y      = 0;
+    layera.src_win.width  = g_width;
+    layera.src_win.height = g_height;
+    //screen window information
+    layera.scn_win.x      = 0;
+    layera.scn_win.y      = 0;
+    layera.scn_win.width  = g_width;
+    layera.scn_win.height = g_height;
+    layera.mode = DISP_LAYER_WORK_MODE_NORMAL;
+    args[0] = g_screenid;
+    args[1] = g_syslayer;
+    args[2] = (unsigned long) (&layera);
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_SET_PARA, args);
+
+  }
+
+  for (i = 0x65; i <= 0x67; i++)
+  {
+    //release possibly lost allocated layers
+    args[0] = g_screenid;
+    args[1] = i;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_RELEASE, args);
+  }
+
+  args[0] = g_screenid;
+  args[1] = DISP_LAYER_WORK_MODE_SCALER;
+  args[2] = 0;
+  args[3] = 0;
+  g_hlayer = ioctl(g_hdisp, DISP_CMD_LAYER_REQUEST, args);
+  if (g_hlayer <= 0)
+  {
+    g_hlayer = 0;
+    CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_REQUEST failed.\n");
+    return false;
+  }
+
+  memset(&g_srcRect, 0, sizeof(g_srcRect));
+  memset(&g_dstRect, 0, sizeof(g_dstRect));
+
+  g_lastnr = -1;
+  g_decnr  = 0;
+  g_rdidx  = 0;
+  g_wridx  = 0;
+
+  for (i = 0; i < DISPQS; i++)
+    g_dispq[i].pict.id = -1;
+
+  return true;
+}
+
+void A10VLExit()
+{
+  unsigned long args[4];
+
+  if (g_hlayer)
+  {
+    //stop video
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_VIDEO_STOP, args);
+
+    //close layer
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_CLOSE, args);
+
+    //release layer
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_RELEASE, args);
+    g_hlayer = 0;
+  }
+  if (g_hdisp != -1)
+  {
+    close(g_hdisp);
+    g_hdisp = -1;
+  }
+}
+
+void A10VLHide()
+{
+  unsigned long args[4];
+
+  if (g_hlayer)
+  {
+    //stop video
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_VIDEO_STOP, args);
+
+    //close layer
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    ioctl(g_hdisp, DISP_CMD_LAYER_CLOSE, args);
+  }
+
+  memset(&g_srcRect, 0, sizeof(g_srcRect));
+  memset(&g_dstRect, 0, sizeof(g_dstRect));
+}
+
+A10VLQueueItem *A10VLPutQueue(A10VLCALLBACK     callback,
+                              void             *callbackpriv,
+                              void             *pictpriv,
+                              cedarv_picture_t &pict)
+{
+  A10VLQueueItem *pRet;
+
+  pthread_mutex_lock(&g_dispq_mutex);
+
+  pRet = &g_dispq[g_wridx];
+
+  pRet->decnr        = g_decnr++;
+  pRet->callback     = callback;
+  pRet->callbackpriv = callbackpriv;
+  pRet->pictpriv     = pictpriv;
+  pRet->pict         = pict;
+
+  g_wridx++;
+  if (g_wridx >= DISPQS)
+    g_wridx = 0;
+
+  pthread_mutex_unlock(&g_dispq_mutex);
+
+  return pRet;
+}
+
+static void A10VLFreeQueueItem(A10VLQueueItem *pItem)
+{
+  if ((int)pItem->pict.id != -1)
+  {
+    if (pItem->callback)
+      pItem->callback(pItem->callbackpriv, pItem->pictpriv, pItem->pict);
+    pItem->pict.id = -1;
+  }
+}
+
+void A10VLFreeQueue()
+{
+  int i;
+
+  pthread_mutex_lock(&g_dispq_mutex);
+
+  for (i = 0; i < DISPQS; i++)
+    A10VLFreeQueueItem(&g_dispq[i]);
+
+  pthread_mutex_unlock(&g_dispq_mutex);
+}
+
+void A10VLDisplayQueueItem(A10VLQueueItem *pItem, CRect &srcRect, CRect &dstRect)
+{
+  int i;
+  int curnr;
+
+  pthread_mutex_lock(&g_dispq_mutex);
+
+  if (!pItem || (pItem->pict.id == -1) || (g_lastnr == pItem->decnr))
+  {
+    pthread_mutex_unlock(&g_dispq_mutex);
+    return;
+  }
+
+  curnr = A10VLDisplayPicture(pItem->pict, pItem->decnr, srcRect, dstRect);
+
+  if (curnr != g_lastnr)
+  {
+    //free older frames, displayed or not
+    for (i = 0; i < DISPQS; i++)
+    {
+      if(g_dispq[g_rdidx].decnr < curnr)
+      {
+        A10VLFreeQueueItem(&g_dispq[g_rdidx]);
+
+        g_rdidx++;
+        if (g_rdidx >= DISPQS)
+          g_rdidx = 0;
+
+      } else break;
+    }
+
+  }
+
+  g_lastnr = curnr;
+
+  pthread_mutex_unlock(&g_dispq_mutex);
+}
+
+int A10VLDisplayPicture(cedarv_picture_t &picture,
+                        int               refnr,
+                        CRect            &srcRect,
+                        CRect            &dstRect)
+{
+  unsigned long       args[4];
+  __disp_layer_info_t layera;
+  __disp_video_fb_t   frmbuf;
+  __disp_colorkey_t   colorkey;
+
+  memset(&frmbuf, 0, sizeof(__disp_video_fb_t));
+  frmbuf.id              = refnr;
+  frmbuf.interlace       = picture.is_progressive? 0 : 1;
+  frmbuf.top_field_first = picture.top_field_first;
+  //frmbuf.frame_rate      = picture.frame_rate;
+  frmbuf.addr[0]         = mem_get_phy_addr((u32)picture.y);
+  frmbuf.addr[1]         = mem_get_phy_addr((u32)picture.u);
+
+  if ((g_srcRect != srcRect) || (g_dstRect != dstRect))
+  {
+    int screen_width, screen_height;
+
+    //query screen dimensions
+    args[0] = g_screenid;
+    args[1] = 0;
+    args[2] = 0;
+    args[3] = 0;
+    screen_width = ioctl(g_hdisp, DISP_CMD_SCN_GET_WIDTH, args);
+
+    args[0] = g_screenid;
+    args[1] = 0;
+    args[2] = 0;
+    args[3] = 0;
+    screen_height = ioctl(g_hdisp, DISP_CMD_SCN_GET_HEIGHT, args);
+
+    memset(&layera, 0, sizeof(layera));
+    //set video layer attribute
+    layera.mode          = DISP_LAYER_WORK_MODE_SCALER;
+    layera.b_from_screen = 0; //what is this? if enabled all is black
+    layera.pipe          = 1;
+    //use alpha blend
+    layera.alpha_en      = 0;
+    layera.alpha_val     = 0xff;
+    layera.ck_enable     = 0;
+    layera.b_trd_out     = 0;
+    layera.out_trd_mode  = (__disp_3d_out_mode_t)0;
+    //frame buffer pst and size information
+    if (picture.display_height < 720)
+    {
+      layera.fb.cs_mode = DISP_BT601;
+    }
+    else
+    {
+      layera.fb.cs_mode = DISP_BT709;
+    }
+    layera.fb.mode        = DISP_MOD_MB_UV_COMBINED;
+    layera.fb.format      = picture.pixel_format == CEDARV_PIXEL_FORMAT_AW_YUV422 ? DISP_FORMAT_YUV422 : DISP_FORMAT_YUV420;
+    layera.fb.br_swap     = 0;
+    layera.fb.seq         = DISP_SEQ_UVUV;
+    layera.fb.addr[0]     = frmbuf.addr[0];
+    layera.fb.addr[1]     = frmbuf.addr[1];
+    layera.fb.b_trd_src   = 0;
+    layera.fb.trd_mode    = (__disp_3d_src_mode_t)0;
+    layera.fb.size.width  = picture.display_width;
+    layera.fb.size.height = picture.display_height;
+    //source window information
+    layera.src_win.x      = lrint(srcRect.x1);
+    layera.src_win.y      = lrint(srcRect.y1);
+    layera.src_win.width  = lrint(srcRect.x2-srcRect.x1);
+    layera.src_win.height = lrint(srcRect.y2-srcRect.y1);
+    //screen window information
+    layera.scn_win.x      = lrint(dstRect.x1);
+    layera.scn_win.y      = lrint(dstRect.y1);
+    layera.scn_win.width  = lrint(dstRect.x2-dstRect.x1);
+    layera.scn_win.height = lrint(dstRect.y2-dstRect.y1);
+
+    CLog::Log(LOGDEBUG, "A10: srcRect=(%lf,%lf)-(%lf,%lf)\n", srcRect.x1, srcRect.y1, srcRect.x2, srcRect.y2);
+    CLog::Log(LOGDEBUG, "A10: dstRect=(%lf,%lf)-(%lf,%lf)\n", srcRect.x1, srcRect.y1, srcRect.x2, srcRect.y2);
+
+    if ((layera.scn_win.x < 0) || (layera.scn_win.y < 0))
+    {
+
+      CLog::Log(LOGERROR, "A10: oops, bad dimensions\n");
+
+      //TODO:
+      //dvdplayer is giving negative values in the destination rect.
+      //we can not do that, so we have to adjust the source rect.
+      //header file says that only width and height can be used
+      //in scaler mode.
+    }
+
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = (unsigned long)&layera;
+    args[3] = 0;
+    if(ioctl(g_hdisp, DISP_CMD_LAYER_SET_PARA, args))
+      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_SET_PARA failed.\n");
+
+    //open layer
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    if (ioctl(g_hdisp, DISP_CMD_LAYER_OPEN, args))
+      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_OPEN failed.\n");
+
+    //put behind system layer
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    if (ioctl(g_hdisp, DISP_CMD_LAYER_BOTTOM, args))
+      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_BOTTOM failed.\n");
+
+    //turn off colorkey (system layer)
+    args[0] = g_screenid;
+    args[1] = g_syslayer;
+    args[2] = 0;
+    args[3] = 0;
+    if (ioctl(g_hdisp, DISP_CMD_LAYER_CK_OFF, args))
+      CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_CK_OFF failed.\n");
+
+    if ((screen_height > 720) && (getenv("A10AB") == NULL))
+    {
+      //no tearing at the cost off alpha blending...
+
+      //set colorkey
+      colorkey.ck_min.alpha = 0;
+      colorkey.ck_min.red   = 1;
+      colorkey.ck_min.green = 2;
+      colorkey.ck_min.blue  = 3;
+      colorkey.ck_max = colorkey.ck_min;
+      colorkey.ck_max.alpha = 255;
+      colorkey.red_match_rule   = 2;
+      colorkey.green_match_rule = 2;
+      colorkey.blue_match_rule  = 2;
+
+      args[0] = g_screenid;
+      args[1] = (unsigned long)&colorkey;
+      args[2] = 0;
+      args[3] = 0;
+      if (ioctl(g_hdisp, DISP_CMD_SET_COLORKEY, args))
+        CLog::Log(LOGERROR, "A10: DISP_CMD_SET_COLORKEY failed.\n");
+
+      //turn on colorkey
+      args[0] = g_screenid;
+      args[1] = g_hlayer;
+      args[2] = 0;
+      args[3] = 0;
+      if (ioctl(g_hdisp, DISP_CMD_LAYER_CK_ON, args))
+        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_CK_ON failed.\n");
+
+      //turn on global alpha (system layer)
+      args[0] = g_screenid;
+      args[1] = g_syslayer;
+      args[2] = 0;
+      args[3] = 0;
+      if (ioctl(g_hdisp, DISP_CMD_LAYER_ALPHA_ON, args))
+        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_ALPHA_ON failed.\n");
+    }
+    else
+    {
+      //turn off global alpha (system layer)
+      args[0] = g_screenid;
+      args[1] = g_syslayer;
+      args[2] = 0;
+      args[3] = 0;
+      if (ioctl(g_hdisp, DISP_CMD_LAYER_ALPHA_OFF, args))
+        CLog::Log(LOGERROR, "A10: DISP_CMD_LAYER_ALPHA_OFF failed.\n");
+    }
+
+    //start video
+    args[0] = g_screenid;
+    args[1] = g_hlayer;
+    args[2] = 0;
+    args[3] = 0;
+    if (ioctl(g_hdisp, DISP_CMD_VIDEO_START, args))
+      CLog::Log(LOGERROR, "A10: DISP_CMD_VIDEO_START failed.\n");
+
+    g_srcRect = srcRect;
+    g_dstRect = dstRect;
+  }
+
+  args[0] = g_screenid;
+  args[1] = g_hlayer;
+  args[2] = (unsigned long)&frmbuf;
+  args[3] = 0;
+  if (ioctl(g_hdisp, DISP_CMD_VIDEO_SET_FB, args))
+    CLog::Log(LOGERROR, "A10: DISP_CMD_VIDEO_SET_FB failed.\n");
+
+  //CLog::Log(LOGDEBUG, "A10: render %d\n", buffer->picture.id);
+
+  args[0] = g_screenid;
+  args[1] = g_hlayer;
+  args[2] = 0;
+  args[3] = 0;
+  return ioctl(g_hdisp, DISP_CMD_VIDEO_GET_FRAME_ID, args);
+}
+
+bool A10VLPictureScaler(A10VLScalerParameter *para)
+{
+  unsigned long        args[4] = {0,0,0,0};
+  __disp_scaler_para_t scaler_para;
+  int                  hscaler;
+
+  memset(&scaler_para, 0, sizeof(__disp_scaler_para_t));
+  scaler_para.input_fb.addr[0] = para->addr_y_in;//
+  scaler_para.input_fb.addr[1] = para->addr_c_in;//
+  scaler_para.input_fb.size.width = para->width_in;//
+  scaler_para.input_fb.size.height = para->height_in;//
+  scaler_para.input_fb.format =  DISP_FORMAT_YUV420;
+  scaler_para.input_fb.seq = DISP_SEQ_UVUV;
+  scaler_para.input_fb.mode = DISP_MOD_MB_UV_COMBINED;
+  scaler_para.input_fb.br_swap = 0;
+  scaler_para.input_fb.cs_mode = DISP_BT601;
+  scaler_para.source_regn.x = 0;
+  scaler_para.source_regn.y = 0;
+  scaler_para.source_regn.width = para->width_in;//
+  scaler_para.source_regn.height = para->height_in;//
+
+  scaler_para.output_fb.addr[0] = (unsigned int)para->addr_y_out;//
+  scaler_para.output_fb.addr[1] = para->addr_u_out;//
+  scaler_para.output_fb.addr[2] = para->addr_v_out;//
+  scaler_para.output_fb.size.width = para->width_out;//
+  scaler_para.output_fb.size.height = para->height_out;//
+  scaler_para.output_fb.format = DISP_FORMAT_YUV420;
+  scaler_para.output_fb.seq  = DISP_SEQ_P3210;
+  scaler_para.output_fb.mode = DISP_MOD_NON_MB_PLANAR;
+  scaler_para.output_fb.br_swap = 0;
+  scaler_para.output_fb.cs_mode = DISP_YCC;
+
+  args[0] = g_screenid;
+  args[1] = 0;
+  args[2] = 0;
+  args[3] = 0;
+  hscaler = ioctl(g_hdisp, DISP_CMD_SCALER_REQUEST, args);
+  if (hscaler <= 0)
+  {
+    CLog::Log(LOGERROR, "A10: DISP_CMD_SCALER_REQUEST failed. (%d)", errno);
+    return false;
+  }
+
+  args[0] = g_screenid;
+  args[1] = hscaler;
+  args[2] = (unsigned long) &scaler_para;
+  args[3] = 0;
+  ioctl(g_hdisp, DISP_CMD_SCALER_EXECUTE, (unsigned long) args);
+
+  args[0] = g_screenid;
+  args[1] = hscaler;
+  args[2] = 0;
+  args[3] = 0;
+  ioctl(g_hdisp, DISP_CMD_SCALER_RELEASE, args);
+
+  return true;
+}
+#endif
 
 #endif

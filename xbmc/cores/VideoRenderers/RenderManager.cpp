@@ -791,6 +791,10 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   else if(pic.format == DVDVideoPicture::FMT_VAAPI)
     m_pRenderer->AddProcessor(*pic.vaapi);
 #endif
+#ifdef ALLWINNERA10
+  else if (pic.format == DVDVideoPicture::FMT_A10BUF)
+    m_pRenderer->AddProcessor(pic.a10buffer);
+#endif
   m_pRenderer->ReleaseImage(index, false);
 
   return index;

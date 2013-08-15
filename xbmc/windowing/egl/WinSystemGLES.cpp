@@ -20,7 +20,7 @@
  */
 #include "system.h"
 
-#ifdef HAS_EGLGLES
+#if defined(HAS_EGLGLES) || defined(ALLWINNERA10)
 
 #include "WinSystemGLES.h"
 #include "filesystem/SpecialProtocol.h"
@@ -31,9 +31,18 @@
 
 #include <vector>
 
+#ifdef ALLWINNERA10
+#include "cores/VideoRenderers/LinuxRendererA10.h"
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 CWinSystemGLES::CWinSystemGLES() : CWinSystemBase()
 {
+#ifdef ALLWINNERA10
+  int width, height;
+
+  A10VLInit(width, height);
+#endif
   m_window = NULL;
   m_eglBinding = new CWinBindingEGL();
   m_eWindowSystem = WINDOW_SYSTEM_EGL;
@@ -43,6 +52,9 @@ CWinSystemGLES::~CWinSystemGLES()
 {
   DestroyWindowSystem();
   delete m_eglBinding;
+#ifdef ALLWINNERA10
+  A10VLExit();
+#endif
 }
 
 bool CWinSystemGLES::InitWindowSystem()
