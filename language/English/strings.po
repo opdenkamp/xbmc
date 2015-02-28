@@ -9378,7 +9378,12 @@ msgctxt "#19686"
 msgid "The PVR backend is busy. Shutdown anyway?"
 msgstr ""
 
-#empty strings from id 19687 to 19999
+#: xbmc/pvr/windows/GUIWindowPVRGuide.cpp
+msgctxt "#19687"
+msgid "Play recording"
+msgstr ""
+
+#empty strings from id 19688 to 19999
 
 #: system/settings/settings.xml
 msgctxt "#20000"
