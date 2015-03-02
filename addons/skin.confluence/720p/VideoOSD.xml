@@ -169,6 +169,20 @@
 				<onclick>ActivateWindow(Teletext)</onclick>
 				<visible>VideoPlayer.Content(LiveTV)</visible>
 			</control>
+			<control type="togglebutton" id="354">
+				<width>55</width>
+				<height>55</height>
+				<label>264</label>
+				<altlabel>13404</altlabel>
+				<font>-</font>
+				<texturefocus>OSDRecordOffFO.png</texturefocus>
+				<texturenofocus>OSDRecordOffNF.png</texturenofocus>
+				<onclick>PlayerControl(ResumeLiveTv)</onclick>
+				<usealttexture>!VideoPlayer.CanResumeLiveTv</usealttexture>
+				<alttexturefocus>OSDRecordOnFO.png</alttexturefocus>
+				<alttexturenofocus>OSDRecordOnNF.png</alttexturenofocus>
+				<visible>VideoPlayer.CanResumeLiveTv</visible>
+			</control>
 			<control type="image" id="2200">
 				<width>270</width>
 				<texture>-</texture>
