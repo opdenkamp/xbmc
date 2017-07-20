@@ -85,6 +85,14 @@ namespace PERIPHERALS
     VOLUME_CHANGE_MUTE
   } CecVolumeChange;
 
+  typedef enum
+  {
+    CEC_PLAY_CHANGE_NONE,
+    CEC_PLAY_CHANGE_PLAY,
+    CEC_PLAY_CHANGE_PAUSE,
+    CEC_PLAY_CHANGE_STOP,
+  } CecPlayChange;
+
   class CPeripheralCecAdapter : public CPeripheralHID, public ANNOUNCEMENT::IAnnouncer, private CThread
   {
     friend class CPeripheralCecAdapterUpdateThread;
@@ -153,6 +161,7 @@ namespace PERIPHERALS
     static void CecAlert(void *cbParam, const CEC::libcec_alert alert, const CEC::libcec_parameter data);
     static void CecSourceActivated(void *param, const CEC::cec_logical_address address, const uint8_t activated);
     static void CecKeyPress(void *cbParam, const CEC::cec_keypress* key);
+    static void CecChangePlayback(CecPlayChange change);
 
     DllLibCEC*                        m_dll;
     CEC::ICECAdapter*                 m_cecAdapter;

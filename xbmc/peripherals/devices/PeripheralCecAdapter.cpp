@@ -1177,6 +1177,42 @@ void CPeripheralCecAdapter::OnSettingChanged(const std::string &strChangedSettin
   }
 }
 
+void CPeripheralCecAdapter::CecChangePlayback(CecPlayChange change)
+{
+  CGUIWindowSlideShow* slideShow((g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW) ?
+      static_cast<CGUIWindowSlideShow*>(g_windowManager.GetWindow(WINDOW_SLIDESHOW)) :
+      NULL);
+  CApplicationPlayer* player(g_application.m_pPlayer);
+
+  switch (change)
+  {
+    case CEC_PLAY_CHANGE_PLAY:
+      CLog::Log(LOGDEBUG, "%s - resume playback", __FUNCTION__);
+      if (!!slideShow && slideShow->IsPaused())
+        slideShow->OnAction(CAction(ACTION_PAUSE));
+      else if (player->IsPausedPlayback())
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
+      break;
+    case CEC_PLAY_CHANGE_PAUSE:
+      CLog::Log(LOGDEBUG, "%s - pause playback", __FUNCTION__);
+      if (!!slideShow && slideShow->IsPlaying())
+        slideShow->OnAction(CAction(ACTION_PAUSE));
+      else if (player->IsPlaying() && !player->IsPausedPlayback())
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
+      break;
+    case CEC_PLAY_CHANGE_STOP:
+      CLog::Log(LOGDEBUG, "%s - stop playback", __FUNCTION__);
+      if (!!slideShow)
+        slideShow->OnAction(CAction(ACTION_STOP));
+      else
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_STOP);
+      break;
+    default:
+      assert(0);
+      break;
+  }
+}
+
 void CPeripheralCecAdapter::CecSourceActivated(void *cbParam, const CEC::cec_logical_address address, const uint8_t activated)
 {
   CPeripheralCecAdapter *adapter = static_cast<CPeripheralCecAdapter *>(cbParam);
@@ -1187,37 +1223,16 @@ void CPeripheralCecAdapter::CecSourceActivated(void *cbParam, const CEC::cec_log
   if (activated == 1)
     g_application.WakeUpScreenSaverAndDPMS();
 
-  if (adapter->GetSettingInt("pause_or_stop_playback_on_deactivate") != LOCALISED_ID_NONE)
+  switch (adapter->GetSettingInt("pause_or_stop_playback_on_deactivate"))
   {
-    bool bShowingSlideshow = (g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW);
-    CGUIWindowSlideShow *pSlideShow = bShowingSlideshow ? (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW) : NULL;
-    bool bPlayingAndDeactivated = activated == 0 && (
-        (pSlideShow && pSlideShow->IsPlaying()) || !g_application.m_pPlayer->IsPausedPlayback());
-    bool bPausedAndActivated = activated == 1 && adapter->m_bPlaybackPaused && (
-        (pSlideShow && pSlideShow->IsPaused()) || g_application.m_pPlayer->IsPausedPlayback());
-    if (bPlayingAndDeactivated)
-      adapter->m_bPlaybackPaused = true;
-    else if (bPausedAndActivated)
-      adapter->m_bPlaybackPaused = false;
-
-    if ((bPlayingAndDeactivated || bPausedAndActivated)
-      && adapter->GetSettingInt("pause_or_stop_playback_on_deactivate") == LOCALISED_ID_PAUSE)
-    {
-      if (pSlideShow)
-        // pause/resume slideshow
-        pSlideShow->OnAction(CAction(ACTION_PAUSE));
-      else
-        // pause/resume player
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
-    }
-    else if (bPlayingAndDeactivated
-      && adapter->GetSettingInt("pause_or_stop_playback_on_deactivate") == LOCALISED_ID_STOP)
-    {
-      if (pSlideShow)
-        pSlideShow->OnAction(CAction(ACTION_STOP));
-      else
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_STOP);
-    }
+    case LOCALISED_ID_PAUSE:
+      CecChangePlayback(activated == 1 ? CEC_PLAY_CHANGE_PLAY : CEC_PLAY_CHANGE_PAUSE);
+      break;
+    case LOCALISED_ID_STOP:
+      CecChangePlayback(activated == 1 ? CEC_PLAY_CHANGE_PLAY : CEC_PLAY_CHANGE_STOP);
+      break;
+    default:
+      break;
   }
 }
 
